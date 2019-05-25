@@ -1,6 +1,6 @@
 // @flow
 type AppStateType = {
-  isFirstOpen: boolean,
+  isLoggedIn: boolean,
 };
 
 type ActionType = {
@@ -12,11 +12,19 @@ export const initialState: AppStateType = {
   isFirstOpen: true,
 };
 
-export const SET_FIRST_OPEN = 'AppState/SET_FIRST_OPEN';
+export const LOG_IN = 'AppState/LOG_IN';
+export const LOG_OUT = 'AppState/LOG_OUT';
 
-export function setAppOpened(): ActionType {
+
+export function logIn(): ActionType {
   return {
-    type: SET_FIRST_OPEN,
+    type: LOG_IN,
+  };
+}
+
+export function logOut(): ActionType {
+  return {
+    type: LOG_OUT,
   };
 }
 
@@ -25,10 +33,15 @@ export default function AppStateReducer(
   action: ActionType,
 ): AppStateType {
   switch (action.type) {
-    case SET_FIRST_OPEN:
+    case LOG_IN:
       return {
         ...state,
-        isFirstOpen: false,
+        isLoggedIn: false,
+      };
+    case LOG_OUT:
+      return {
+        ...state,
+        isLoggedIn: true,
       };
     default:
       return state;

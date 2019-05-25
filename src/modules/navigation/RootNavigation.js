@@ -4,21 +4,8 @@ import { createAppContainer, createStackNavigator } from 'react-navigation';
 
 import MainTabNavigator from './MainTabNavigator';
 
-import GalleryScreen from '../gallery/GalleryViewContainer';
-
-// To use this screens please see the full version at https://reactnativestarter.com
-// import ProfileScreen from '../containers/ProfileScreen';
-// import ArticleScreen from '../containers/ArticleScreen';
-// import ChatScreen from '../containers/chat/ChatScreen';
-// import MessagesScreen from '../containers/chat/MessagesScreen';
-// import ChartsScreen from '../containers/ChartsScreen';
-
-import ProfileScreen from '../profile/ProfileViewContainer';
-import ArticleScreen from '../article/ArticleViewContainer';
-import ChatScreen from '../chat/ChatViewContainer';
-import MessagesScreen from '../chat/MessagesViewContainer';
-import ChartsScreen from '../charts/ChartsViewContainer';
 import AuthScreen from '../auth/AuthViewContainer';
+import ActivityScreen from '../workActivity/WorkActivityViewContainer';
 
 import { colors, fonts } from '../../styles';
 
@@ -35,51 +22,13 @@ const stackNavigator = createStackNavigator(
     Main: {
       screen: MainTabNavigator,
       navigationOptions: () => ({
-        title: 'React Native Starter',
-        headerLeft: null,
-        headerBackground: (
-          <Image
-            style={{ flex: 1 }}
-            source={headerBackground}
-            resizeMode="cover"
-          />
-        ),
+        header: null,
       }),
     },
-    Profile: {
-      screen: ProfileScreen,
+    Activity: {
+      screen: ActivityScreen,
       navigationOptions: {
-        title: 'Profile',
-      },
-    },
-    Gallery: {
-      screen: GalleryScreen,
-      navigationOptions: {
-        title: 'Gallery',
-      },
-    },
-    Article: {
-      screen: ArticleScreen,
-      navigationOptions: {
-        title: 'Article',
-      },
-    },
-    Chat: {
-      screen: ChatScreen,
-      navigationOptions: {
-        title: 'Chat',
-      },
-    },
-    Messages: {
-      screen: MessagesScreen,
-      navigationOptions: {
-        title: 'Messages',
-      },
-    },
-    Charts: {
-      screen: ChartsScreen,
-      navigationOptions: {
-        title: 'Charts',
+        title: 'Activity',
       },
     },
   },

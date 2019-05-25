@@ -1,12 +1,14 @@
 import React from 'react';
-import { StyleSheet, View, Text, ImageBackground } from 'react-native';
+import {
+  StyleSheet, View, ImageBackground,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import LinearGradient from 'react-native-linear-gradient';
 
-import { Button } from '../../components';
+import { Button, Text } from '../../components';
 import { fonts, colors } from '../../styles';
 
-export default function ProfileScreen() {
+export default function ProfileScreen(props) {
   const renderImageOverlay = () => (
     <LinearGradient
       start={{ x: 0, y: 1 }}
@@ -46,7 +48,10 @@ export default function ProfileScreen() {
             rounded
             small
             caption="Contact"
-            onPress={() => {}}
+            onPress={() => {
+              props.logOut();
+              props.navigation.navigate({ routeName: 'Auth' });
+            }}
           />
 
           <Button

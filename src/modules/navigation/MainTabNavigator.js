@@ -1,20 +1,17 @@
 /* eslint-disable import/no-unresolved */
 import React from 'react';
 import {
-  Image, View, StyleSheet, Text,
+  Image, View, StyleSheet, Text, Alert,
 } from 'react-native';
 import { createBottomTabNavigator } from 'react-navigation';
 
 import { colors, fonts } from '../../styles';
 
-import HomeScreen from '../home/HomeViewContainer';
-import CalendarScreen from '../calendar/CalendarViewContainer';
-import GridsScreen from '../grids/GridsViewContainer';
-import PagesScreen from '../pages/PagesViewContainer';
-import ComponentsScreen from '../components/ComponentsViewContainer';
+import WorkOrderScreen from '../workOrder/WorkOrderViewContainer';
+import SearchScreen from '../search/SearchViewContainer';
+import ProfileScreen from '../profile/ProfileViewContainer';
 
 const iconHome = require('../../../assets/images/tabbar/home.png');
-const iconCalendar = require('../../../assets/images/tabbar/calendar.png');
 const iconGrids = require('../../../assets/images/tabbar/grids.png');
 const iconPages = require('../../../assets/images/tabbar/pages.png');
 const iconComponents = require('../../../assets/images/tabbar/components.png');
@@ -60,25 +57,21 @@ const styles = StyleSheet.create({
 
 export default createBottomTabNavigator(
   {
-    Home: {
-      screen: HomeScreen,
+    'Work Order': {
+      screen: WorkOrderScreen,
       navigationOptions: {
         header: null,
-      },
-    },
-    Calendar: {
-      screen: CalendarScreen,
-      navigationOptions: {
-        header: (
-          <View style={styles.headerContainer}>
-            <Image style={styles.headerImage} source={hederBackground} />
-            <Text style={styles.headerCaption}>Calendar</Text>
-          </View>
+        headerBackground: (
+          <Image
+            style={{ flex: 1 }}
+            source={hederBackground}
+            resizeMode="cover"
+          />
         ),
       },
     },
-    Grids: {
-      screen: GridsScreen,
+    Search: {
+      screen: SearchScreen,
       navigationOptions: {
         header: (
           <View style={styles.headerContainer}>
@@ -88,24 +81,45 @@ export default createBottomTabNavigator(
         ),
       },
     },
-    Pages: {
-      screen: PagesScreen,
+    Profile: {
+      screen: ProfileScreen,
       navigationOptions: {
         header: (
           <View style={styles.headerContainer}>
             <Image style={styles.headerImage} source={hederBackground} />
-            <Text style={styles.headerCaption}>Pages</Text>
+            <Text style={styles.headerCaption}>Work Order</Text>
           </View>
         ),
       },
     },
-    Components: {
-      screen: ComponentsScreen,
+    Logout: {
+      screen: WorkOrderScreen,
       navigationOptions: {
+        tabBarOnPress: (props) => {
+          Alert.alert(
+            'Are you sure?',
+            'This will log you out of the app and any unsaved data will be lost.',
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+              {
+                text: 'OK',
+                onPress: () => {
+                  props.navigation.navigate('Auth', {
+                    logOut: true,
+                  });
+                },
+              },
+            ],
+            { cancelable: true },
+          );
+        },
         header: (
           <View style={styles.headerContainer}>
             <Image style={styles.headerImage} source={hederBackground} />
-            <Text style={styles.headerCaption}>Components</Text>
+            <Text style={styles.headerCaption}>Logout</Text>
           </View>
         ),
       },
@@ -118,19 +132,16 @@ export default createBottomTabNavigator(
         const { routeName } = navigation.state;
         let iconSource;
         switch (routeName) {
-          case 'Home':
+          case 'Work Order':
             iconSource = iconHome;
             break;
-          case 'Calendar':
-            iconSource = iconCalendar;
-            break;
-          case 'Grids':
+          case 'Search':
             iconSource = iconGrids;
             break;
-          case 'Pages':
+          case 'Profile':
             iconSource = iconPages;
             break;
-          case 'Components':
+          case 'Logout':
             iconSource = iconComponents;
             break;
           default:

@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 const blueVersion = {
   primary: '#555CC4',
   primaryLight: '#829BF8',
@@ -12,7 +11,7 @@ const blueVersion = {
   grey: '#acacac',
   gray: '#5f5f5f',
   darkGray: '#4d4d4d',
-  lightGray: '#9b9b9b',
+  lightGray: '#dfdfdf',
   white: '#ffffff',
   blue: '#5A81F7',
   bluish: '#F1F1F7',
@@ -21,6 +20,7 @@ const blueVersion = {
   yellow: '#ffc247',
 };
 
+// eslint-disable-next-line no-unused-vars
 const redVersion = {
   primary: '#fc2335',
   primaryLight: '#fc5d4f',
@@ -34,7 +34,7 @@ const redVersion = {
   grey: '#acacac',
   gray: '#5f5f5f',
   darkGray: '#4d4d4d',
-  lightGray: '#9b9b9b',
+  lightGray: '#dfdfdf',
   white: '#ffffff',
   blue: '#5A81F7',
   bluish: '#f8f8f1',
@@ -43,4 +43,4 @@ const redVersion = {
   yellow: '#ffc247',
 };
 
-export default redVersion;
+export default blueVersion;

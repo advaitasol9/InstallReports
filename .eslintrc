@@ -10,6 +10,8 @@
     "operator-linebreak": "off",
     "import/no-extraneous-dependencies": "off",
     "react/destructuring-assignment": "off",
-    "linebreak-style": "off"
+    "linebreak-style": "off",
+    "no-use-before-define": "off",
+    "no-underscore-dangle": "off"
   }
 }

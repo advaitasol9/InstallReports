@@ -47,7 +47,7 @@ class RNSDropDown extends React.Component {
           shadowRadius: 5,
           shadowOpacity: 1.0,
         }}
-        adjustFrame={params => {
+        adjustFrame={(params) => {
           // eslint-disable-next-line no-param-reassign
           params.left = 0;
           // eslint-disable-next-line no-param-reassign

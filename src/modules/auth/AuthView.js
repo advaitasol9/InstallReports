@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Alert,
   StyleSheet,
   View,
   Text,
@@ -11,9 +12,11 @@ import {
   ImageBackground,
   Linking,
 } from 'react-native';
+import { NavigationEvents } from 'react-navigation';
 
-import { fonts, colors } from '../../styles';
 import { TextInput, Button } from '../../components';
+import { auth, logout } from '../../core/api';
+import { fonts, colors } from '../../styles';
 
 export default class AuthScreen extends React.Component {
   state = {
@@ -43,14 +46,22 @@ export default class AuthScreen extends React.Component {
     this.keyboardDidHideListener.remove();
   }
 
-  _keyboardDidShow() {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ isKeyboardVisible: true });
-  }
-
-  _keyboardDidHide() {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ isKeyboardVisible: false });
+  setFormData(password, email) {
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+    auth('test-app-1/login/', formData).then((response) => {
+      if (response.errorCode) {
+        Alert.alert('A valid email and password must be entered to log in.');
+        this.props.setPassword('');
+      } else {
+        this.props.setPassword('');
+        this.props.setEmail('');
+        this.props.navigation.navigate({ routeName: 'Main' });
+        this.props.setUserInfo(response);
+        this.props.logIn();
+      }
+    });
   }
 
   fadeIn(delay, from = 0) {
@@ -73,6 +84,16 @@ export default class AuthScreen extends React.Component {
     };
   }
 
+  _keyboardDidShow() {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ isKeyboardVisible: true });
+  }
+
+  _keyboardDidHide() {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ isKeyboardVisible: false });
+  }
+
   render() {
     return (
       <ImageBackground
@@ -80,6 +101,16 @@ export default class AuthScreen extends React.Component {
         style={styles.backgroundImage}
         resizeMode="cover"
       >
+        <NavigationEvents
+          onDidFocus={() => {
+            const itemId = this.props.navigation.getParam('logOut', null);
+            if (itemId) {
+              this.props.logOut();
+              this.props.navigation.setParams('logOut', null);
+              logout('test-app-1/logout/', this.props.token);
+            }
+          }}
+        />
         <View style={styles.container}>
           <View style={[styles.section, { paddingTop: 30 }]}>
             <Animated.Image
@@ -102,12 +133,16 @@ export default class AuthScreen extends React.Component {
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
+              onChangeText={text => this.props.setEmail(text)}
+              value={this.props.email}
             />
 
             <TextInput
               placeholder="Password"
               secureTextEntry
               style={styles.textInput}
+              onChangeText={text => this.props.setPassword(text)}
+              value={this.props.password}
             />
 
             <Animated.View
@@ -120,41 +155,14 @@ export default class AuthScreen extends React.Component {
                 style={{ alignSelf: 'stretch', marginBottom: 10 }}
                 caption="Login"
                 onPress={() => {
-                  this.props.setAppOpened();
-                  this.props.navigation.navigate({ routeName: 'Main' });
+                  this.setFormData(this.props.password, this.props.email);
                 }}
               />
-
-              {/* !this.state.isKeyboardVisible && (
-                <View style={styles.socialLoginContainer}>
-                  <Button
-                    style={styles.socialButton}
-                    bordered
-                    rounded
-                    icon={require('../../../assets/images/google-plus.png')}
-                    onPress={() => this.props.navigation.goBack()}
-                  />
-                  <Button
-                    style={[styles.socialButton, styles.socialButtonCenter]}
-                    bordered
-                    rounded
-                    icon={require('../../../assets/images/twitter.png')}
-                    onPress={() => this.props.navigation.goBack()}
-                  />
-                  <Button
-                    style={styles.socialButton}
-                    bordered
-                    rounded
-                    icon={require('../../../assets/images/facebook.png')}
-                    onPress={() => this.props.navigation.goBack()}
-                  />
-                </View>
-              ) */}
 
               {!this.state.isKeyboardVisible && (
                 <TouchableOpacity
                   onPress={() => {
-                    Linking.openURL('https://trello.com/c/8FtwG3Wi')
+                    Linking.openURL('https://trello.com/c/8FtwG3Wi');
                   }}
                   style={{ paddingTop: 30, flexDirection: 'row' }}
                 >
