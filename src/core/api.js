@@ -13,7 +13,7 @@ export const apiGet = (method) => {
   });
 };
 
-export const apiPost = (method, body, token = API_TOKEN_CONFIG) => {
+export const apiPost = (method, body, token) => {
   const url = `${API_PATH}/${method}`;
 
   return fetch(url, {
@@ -28,7 +28,7 @@ export const apiPost = (method, body, token = API_TOKEN_CONFIG) => {
   });
 };
 
-export const apiGetJson = (method) => {
+export const apiGetJson = (method, token) => {
   const url = `${API_PATH}/${method}`;
 
   return fetch(url, {
@@ -37,21 +37,20 @@ export const apiGetJson = (method) => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      'security-token': token,
     },
   }).then((response) => {
-    console.log('apiGetJson', url, response);
     // eslint-disable-next-line
-    if (response && (response.status === 200 || response.status === 201 || response.status === 204)) {
-      console.log(response);
+    if (response && (response.status === 200 || response.status === 201)) {
+      return response.json();
     }
-    console.log(response.json());
     return {
       errorCode: response.status,
     };
   });
 };
 
-export const apiPut = (method, token = API_TOKEN_CONFIG, body) => {
+export const apiPut = (method, token, body) => {
   const url = `${API_PATH}/${method}`;
 
   return fetch(url, {
