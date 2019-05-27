@@ -23,7 +23,7 @@ export default compose(
   ),
   lifecycle({
     componentDidMount() {
-      if (!this.props.authState.isLoggedIn) {
+      if (this.props.authState.isLoggedIn) {
         this.props.navigation.navigate({ routeName: 'Main' });
       }
     },

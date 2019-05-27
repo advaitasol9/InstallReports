@@ -9,7 +9,7 @@ type ActionType = {
 };
 
 export const initialState: AppStateType = {
-  isFirstOpen: true,
+  isLoggedIn: false,
 };
 
 export const LOG_IN = 'AppState/LOG_IN';
@@ -36,12 +36,12 @@ export default function AppStateReducer(
     case LOG_IN:
       return {
         ...state,
-        isLoggedIn: false,
+        isLoggedIn: true,
       };
     case LOG_OUT:
       return {
         ...state,
-        isLoggedIn: true,
+        isLoggedIn: false,
       };
     default:
       return state;
