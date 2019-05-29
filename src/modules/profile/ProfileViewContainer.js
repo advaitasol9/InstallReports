@@ -3,7 +3,7 @@ import { compose } from 'recompose';
 import { connect } from 'react-redux';
 import { logOut } from '../AppState';
 
-import ProfileView from './ProfileView';
+import ProfileScreen from './ProfileView';
 
 export default compose(
   connect(
@@ -12,4 +12,4 @@ export default compose(
       logOut: () => dispatch(logOut()),
     }),
   ),
-)(ProfileView);
+)(ProfileScreen);

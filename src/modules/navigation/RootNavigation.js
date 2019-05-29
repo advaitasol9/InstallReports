@@ -41,34 +41,31 @@ const stackNavigator = createStackNavigator(
         backgroundColor: colors.primary,
         borderBottomWidth: 0,
       },
-      headerBackground: (
-        <Image
-          style={{ flex: 1 }}
-          source={headerBackground}
-          resizeMode="cover"
-        />
-      ),
+      headerBackground: null,
       headerTitleStyle: {
         color: colors.white,
         fontFamily: fonts.primaryRegular,
       },
       headerTintColor: '#222222',
-      headerLeft: props => (
-        <TouchableOpacity
-          onPress={props.onPress}
-          style={{
-            paddingLeft: 25,
-          }}
-        >
-          <Image
-            source={require('../../../assets/images/icons/arrow-back.png')}
-            resizeMode="contain"
+      headerLeft: (props) => {
+        console.log(props);
+        return (
+          <TouchableOpacity
+            onPress={props.onPress}
             style={{
-              height: 20,
+              paddingLeft: 25,
             }}
-          />
-        </TouchableOpacity>
-      ),
+          >
+            <Image
+              source={require('../../../assets/images/icons/arrow-back.png')}
+              resizeMode="contain"
+              style={{
+                height: 20,
+              }}
+            />
+          </TouchableOpacity>
+        )
+      },
     }),
   },
 );

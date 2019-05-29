@@ -7,7 +7,7 @@ import {
 
 import { Text } from '../../components/StyledText';
 
-export default function HomeScreen() {
+export default function SearchScreen() {
   // const rnsUrl = 'https://reactnativestarter.com';
   // const handleClick = () => {
   //   Linking.canOpenURL(rnsUrl).then(supported => {

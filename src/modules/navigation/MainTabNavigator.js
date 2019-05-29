@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import React from 'react';
 import {
-  Image, View, StyleSheet, Text, Alert,
+  Image, View, StyleSheet, Text, Alert, TouchableOpacity,
 } from 'react-native';
 import { createBottomTabNavigator } from 'react-navigation';
 
@@ -87,7 +87,7 @@ export default createBottomTabNavigator(
         header: (
           <View style={styles.headerContainer}>
             <Image style={styles.headerImage} source={hederBackground} />
-            <Text style={styles.headerCaption}>Work Order</Text>
+            <Text style={styles.headerCaption}>Profile</Text>
           </View>
         ),
       },
@@ -116,12 +116,7 @@ export default createBottomTabNavigator(
             { cancelable: true },
           );
         },
-        header: (
-          <View style={styles.headerContainer}>
-            <Image style={styles.headerImage} source={hederBackground} />
-            <Text style={styles.headerCaption}>Logout</Text>
-          </View>
-        ),
+        header: null,
       },
     },
   },

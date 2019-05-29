@@ -1,6 +1,7 @@
 // @flow
 type AppStateType = {
   isLoggedIn: boolean,
+  isConnected: boolean,
 };
 
 type ActionType = {
@@ -10,10 +11,12 @@ type ActionType = {
 
 export const initialState: AppStateType = {
   isLoggedIn: false,
+  isConnected: false,
 };
 
 export const LOG_IN = 'AppState/LOG_IN';
 export const LOG_OUT = 'AppState/LOG_OUT';
+export const IS_CONNECTED = 'AppState/IS_CONNECTED';
 
 
 export function logIn(): ActionType {
@@ -25,6 +28,13 @@ export function logIn(): ActionType {
 export function logOut(): ActionType {
   return {
     type: LOG_OUT,
+  };
+}
+
+export function setConnection(payload): ActionType {
+  return {
+    type: IS_CONNECTED,
+    payload,
   };
 }
 
@@ -42,6 +52,11 @@ export default function AppStateReducer(
       return {
         ...state,
         isLoggedIn: false,
+      };
+    case IS_CONNECTED:
+      return {
+        ...state,
+        isConnected: action.payload,
       };
     default:
       return state;

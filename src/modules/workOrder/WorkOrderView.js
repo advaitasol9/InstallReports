@@ -11,7 +11,7 @@ import {
 import { Text } from '../../components/StyledText';
 import { colors } from '../../styles';
 
-export default function HomeScreen(props) {
+export default function WorkOrderScreen(props) {
   // const rnsUrl = 'https://reactnativestarter.com';
   // const handleClick = () => {
   //   Linking.canOpenURL(rnsUrl).then(supported => {
@@ -27,87 +27,70 @@ export default function HomeScreen(props) {
     {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
   ];
 
-  const renderHeader = () => (
-    <View
-      style={styles.header}
-    >
-      <View
-        style={{ width: '30%', alignItems: 'center' }}
-      >
-        <Image
-          style={styles.logo}
-          source={require('../../../assets/images/logo.png')}
-        />
-      </View>
-      <View
-        style={{ width: '40%', alignItems: 'center' }}
-      >
-        <Text
-          style={{ paddingBottom: 12 }}
-        >
-          My Work Orders
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            props.navigation.navigate({ routeName: 'Search' });
-          }}
-        >
-          <Text
-            style={{ color: colors.primary }}
+  const renderHeader = (changesNum, connectionStatus) => {
+    return (
+      <View style={styles.header}>
+        <View style={{ alignItems: 'center' }}>
+          <Image
+            style={styles.logo}
+            source={require('../../../assets/images/logo.png')}
+          />
+        </View>
+        <View>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={{ paddingBottom: 12 }}>My Work Orders</Text>
+            <View
+              style={[
+                styles.connectionIndicator,
+                {
+                  backgroundColor: connectionStatus ? 'green' : 'red',
+                  marginRight: connectionStatus ? 0 : 8,
+                },
+              ]}
+            />
+            {!connectionStatus && (
+              <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum.length}</Text>
+            )}
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              console.log(changesNum);
+              props.navigation.navigate({ routeName: 'Search' });
+            }}
           >
-            SORT & FILTER
-          </Text>
-        </TouchableOpacity>
+            <Text style={{ textAlign: 'right', color: colors.primary }}>
+              SORT & FILTER
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
 
   const renderTile = (item, index) => (
     <TouchableOpacity
-      onPress={() => {
-        props.navigation.navigate('Activity', { activityId: index });
-      }}
+      onPress={() => props.navigation.navigate('Activity', { activityId: index })}
       style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
     >
-      <View style={{ flexDirection: 'row', width: '100%', paddingRight: 16 }}>
-        <View style={{ width: '15%', alignItems: 'center' }}>
-          <Image
-            style={{ width: 50, height: 50, aspectRatio: 1 }}
-            source={require('../../../assets/images/tileLogoExample.png')}
-          />
-        </View>
-        <View style={{ width: '85%', paddingLeft: 8 }}>
-          <Text style={{ fontSize: 16, fontWeight: '500' }}>
-            Starbucks
-          </Text>
-          <Text style={{ ontSize: 14, fontWeight: 'normal', paddingTop: 8 }}>
-            HiVee Inline & Encap
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row', justifyContent: 'space-between', width: '100%', height: 32,
-            }}
-          >
-            <View style={{ flexDirection: 'row' }}>
-              <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ color: '#636363', fontSize: 12, marginRight: 24 }}>
-                  #12123
-                </Text>
-                <Text style={{ color: '#636363', fontSize: 12 }}>
-                  Elbur, Il
-                </Text>
-              </View>
+      <View style={styles.tileLogoContainer}>
+        <Image
+          style={styles.tileLogo}
+          source={require('../../../assets/images/tileLogoExample.png')}
+        />
+      </View>
+      <View style={styles.tileInfoContainer}>
+        <Text style={styles.infoCompany}>Starbucks</Text>
+        <Text style={styles.infoTitle}>HiVee Inline & Encap</Text>
+        <View style={styles.infoBottomSection}>
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#12123</Text>
+              <Text style={styles.infoBottomText}>Elbur, Il</Text>
             </View>
-            <View style={{ flexDirection: 'row' }}>
-              <Text
-                style={{
-                  paddingTop: 10, color: '#636363', fontSize: 10, justifyContent: 'center',
-                }}
-              >
-                Due 7/5/19
-              </Text>
-            </View>
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={styles.infoBottomText}>Due 7/5/19</Text>
           </View>
         </View>
       </View>
@@ -117,7 +100,7 @@ export default function HomeScreen(props) {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="blue" barStyle="dark-content" />
-      {renderHeader()}
+      {renderHeader(props.changesInOffline, props.connectionStatus)}
       <FlatList
         ListHeaderComponent={null}
         scrollEventThrottle={16}
@@ -157,6 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 25,
     paddingBottom: 10,
+    paddingHorizontal: 16,
   },
   logo: {
     height: 60,
@@ -168,5 +152,46 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     backgroundColor: 'white',
     marginBottom: 8,
+    flexDirection: 'row',
+    paddingRight: 16,
+  },
+  connectionIndicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginLeft: 16,
+  },
+  tileLogoContainer: {
+    width: '15%',
+    alignItems: 'center',
+  },
+  tileLogo: {
+    width: 50,
+    height: 50,
+    aspectRatio: 1,
+  },
+  tileInfoContainer: {
+    width: '85%',
+    paddingLeft: 8,
+  },
+  infoCompany: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  infoTitle: {
+    fontSize: 20,
+    fontWeight: '500',
+    paddingTop: 8,
+  },
+  infoBottomSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    height: 32,
+  },
+  infoBottomText: {
+    color: '#636363',
+    fontSize: 12,
   },
 });
