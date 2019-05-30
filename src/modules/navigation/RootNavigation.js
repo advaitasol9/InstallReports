@@ -27,9 +27,7 @@ const stackNavigator = createStackNavigator(
     },
     Activity: {
       screen: ActivityScreen,
-      navigationOptions: {
-        title: 'Activity',
-      },
+      navigationOptions: {},
     },
   },
   {
@@ -38,8 +36,9 @@ const stackNavigator = createStackNavigator(
         fontFamily: fonts.primaryLight,
       },
       headerStyle: {
-        backgroundColor: colors.primary,
+        backgroundColor: 'white',
         borderBottomWidth: 0,
+        height: 80,
       },
       headerBackground: null,
       headerTitleStyle: {

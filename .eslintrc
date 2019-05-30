@@ -12,6 +12,7 @@
     "react/destructuring-assignment": "off",
     "linebreak-style": "off",
     "no-use-before-define": "off",
+    "react/prop-types": "off",
     "no-underscore-dangle": "off"
   }
 }

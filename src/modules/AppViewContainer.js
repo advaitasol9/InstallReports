@@ -19,7 +19,7 @@ export default compose(
   ),
   lifecycle({
     componentWillMount() {
-      StatusBar.setBarStyle('light-content');
+      StatusBar.setBarStyle('dark-content');
       if (Platform.OS === 'android') {
         // eslint-disable-next-line no-unused-expressions
         UIManager.setLayoutAnimationEnabledExperimental &&

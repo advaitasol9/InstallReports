@@ -49,7 +49,7 @@ export default function WorkOrderScreen(props) {
               ]}
             />
             {!connectionStatus && (
-              <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum.length}</Text>
+              <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum}</Text>
             )}
           </View>
           <TouchableOpacity
@@ -96,11 +96,10 @@ export default function WorkOrderScreen(props) {
       </View>
     </TouchableOpacity>
   );
-
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="blue" barStyle="dark-content" />
-      {renderHeader(props.changesInOffline, props.connectionStatus)}
+      <StatusBar backgroundColor={colors.lightGray} barStyle="dark-content" />
+      {renderHeader(props.changes.length, props.connectionStatus)}
       <FlatList
         ListHeaderComponent={null}
         scrollEventThrottle={16}
@@ -141,6 +140,15 @@ const styles = StyleSheet.create({
     paddingTop: 25,
     paddingBottom: 10,
     paddingHorizontal: 16,
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   logo: {
     height: 60,

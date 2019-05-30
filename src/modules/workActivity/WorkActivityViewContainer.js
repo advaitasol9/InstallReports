@@ -1,5 +1,6 @@
-// @flow
-import { compose } from 'recompose';
+import {
+  compose, setStatic, withState, lifecycle,
+} from 'recompose';
 import { connect } from 'react-redux';
 import { setChanges } from '../workOrder/WorkOrderState';
 
@@ -16,4 +17,13 @@ export default compose(
       setChanges: arr => dispatch(setChanges(arr)),
     }),
   ),
+  setStatic('navigationOptions', () => ({
+    header: null,
+  })),
+  withState('changesInOffline', 'setChangesInOffline', 0),
+  lifecycle({
+    componentDidMount() {
+      this.props.setChangesInOffline(this.props.changes.length);
+    },
+  }),
 )(WorkActivityView);

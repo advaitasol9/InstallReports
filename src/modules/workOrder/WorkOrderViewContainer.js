@@ -11,25 +11,19 @@ export default compose(
       connectionStatus: state.app.isConnected,
       changes: state.workOrder.changesInOffline,
     }),
-    dispatch => ({
-      logOut: () => dispatch(logOut()),
-    }),
+    dispatch => ({}),
   ),
-  withState('changesInOffline', 'setChanges', 0),
+  withState('changesInOffline', 'setChangesInOffline', 0),
   lifecycle({
     componentDidMount() {
-      console.log(this.props);
-      this.props.setChanges(this.props.changes.length);
       apiGetJson('test-app-1/activities/', this.props.token)
         .then((response) => {
           console.log(response);
         });
       this._subscribe = this.props.navigation.addListener('didFocus', () => {
-        this.props.setChanges(this.props.changes);
+        console.log(this.propschangesInOffline);
+        this.props.setChangesInOffline(this.props.changes.length);
       });
-    },
-    componentWillUnmount() {
-      console.log('chuchuchu');
     },
   }),
 )(WorkOrderScreen);
