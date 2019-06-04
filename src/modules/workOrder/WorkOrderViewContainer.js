@@ -21,7 +21,6 @@ export default compose(
           console.log(response);
         });
       this._subscribe = this.props.navigation.addListener('didFocus', () => {
-        console.log(this.propschangesInOffline);
         this.props.setChangesInOffline(this.props.changes.length);
       });
     },

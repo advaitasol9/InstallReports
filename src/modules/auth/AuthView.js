@@ -57,9 +57,9 @@ export default class AuthScreen extends React.Component {
       } else {
         this.props.setPassword('');
         this.props.setEmail('');
-        this.props.navigation.navigate({ routeName: 'Main' });
         this.props.setUserInfo(response);
         this.props.logIn();
+        this.props.navigation.navigate({ routeName: 'Main' });
       }
     });
   }

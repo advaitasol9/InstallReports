@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import { Text } from '../../components/StyledText';
+import { Header } from '../../components';
 import { colors } from '../../styles';
 
 export default function WorkOrderScreen(props) {
@@ -26,47 +27,6 @@ export default function WorkOrderScreen(props) {
   const data = [
     {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
   ];
-
-  const renderHeader = (changesNum, connectionStatus) => {
-    return (
-      <View style={styles.header}>
-        <View style={{ alignItems: 'center' }}>
-          <Image
-            style={styles.logo}
-            source={require('../../../assets/images/logo.png')}
-          />
-        </View>
-        <View>
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={{ paddingBottom: 12 }}>My Work Orders</Text>
-            <View
-              style={[
-                styles.connectionIndicator,
-                {
-                  backgroundColor: connectionStatus ? 'green' : 'red',
-                  marginRight: connectionStatus ? 0 : 8,
-                },
-              ]}
-            />
-            {!connectionStatus && (
-              <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum}</Text>
-            )}
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              console.log(changesNum);
-              props.navigation.navigate({ routeName: 'Search' });
-            }}
-          >
-            <Text style={{ textAlign: 'right', color: colors.primary }}>
-              SORT & FILTER
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
 
   const renderTile = (item, index) => (
     <TouchableOpacity
@@ -99,7 +59,12 @@ export default function WorkOrderScreen(props) {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={colors.lightGray} barStyle="dark-content" />
-      {renderHeader(props.changes.length, props.connectionStatus)}
+      <Header
+        connectionStatus={props.connectionStatus}
+        changesNum={props.changes.length}
+        navigation={props.navigation}
+        sortAndFilter
+      />
       <FlatList
         ListHeaderComponent={null}
         scrollEventThrottle={16}
@@ -131,30 +96,6 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 30,
   },
-  header: {
-    width: '100%',
-    backgroundColor: 'white',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 25,
-    paddingBottom: 10,
-    paddingHorizontal: 16,
-    zIndex: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  logo: {
-    height: 60,
-    aspectRatio: 1.5,
-    resizeMode: 'contain',
-  },
   tileContainer: {
     width: '100%',
     paddingTop: 8,
@@ -162,12 +103,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     flexDirection: 'row',
     paddingRight: 16,
-  },
-  connectionIndicator: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginLeft: 16,
   },
   tileLogoContainer: {
     width: '15%',

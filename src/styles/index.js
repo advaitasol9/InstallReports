@@ -120,8 +120,8 @@ Typography.loadTypographies({
 
 Assets.loadAssetsGroup('images', {});
 
-Assets.loadAssetsGroup('icons', {});
-
 const scale = (size: number): number => (width / guidelineBaseWidth) * size;
 
-export { colors, fonts, scale, commonStyles };
+export {
+  colors, fonts, scale, commonStyles,
+};

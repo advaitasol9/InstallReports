@@ -1,11 +1,8 @@
-import {
-  compose, setStatic, withState, lifecycle,
-} from 'recompose';
+// @flow
+import { compose, withState, lifecycle } from 'recompose';
 import { connect } from 'react-redux';
-import { setChanges } from '../workOrder/WorkOrderState';
 
-
-import WorkActivityView from './WorkActivityView';
+import WorkOrderCommentView from './WorkOrderCommentView';
 
 export default compose(
   connect(
@@ -13,17 +10,12 @@ export default compose(
       changes: state.workOrder.changesInOffline,
       connectionStatus: state.app.isConnected,
     }),
-    dispatch => ({
-      setChanges: arr => dispatch(setChanges(arr)),
-    }),
+    dispatch => ({}),
   ),
-  setStatic('navigationOptions', () => ({
-    header: null,
-  })),
   withState('changesInOffline', 'setChangesInOffline', 0),
   lifecycle({
     componentDidMount() {
       this.props.setChangesInOffline(this.props.changes.length);
     },
   }),
-)(WorkActivityView);
+)(WorkOrderCommentView);

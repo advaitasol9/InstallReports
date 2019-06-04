@@ -6,6 +6,7 @@ import GridRow from './GridRow';
 import TextInput from './TextInput';
 import SegmentedControl from './SegmentedControl';
 import Text from './StyledText';
+import Header from './Header';
 
 export {
   // ## Generator Components Exports
@@ -16,4 +17,5 @@ export {
   TextInput,
   SegmentedControl,
   Text,
+  Header,
 };

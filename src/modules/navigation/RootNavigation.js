@@ -3,13 +3,11 @@ import { Image, TouchableOpacity } from 'react-native';
 import { createAppContainer, createStackNavigator } from 'react-navigation';
 
 import MainTabNavigator from './MainTabNavigator';
+import WorkOrderTabNavigator from './WorkOrderTabNavigator';
 
 import AuthScreen from '../auth/AuthViewContainer';
-import ActivityScreen from '../workActivity/WorkActivityViewContainer';
 
 import { colors, fonts } from '../../styles';
-
-const headerBackground = require('../../../assets/images/topBarBg-red.png');
 
 const stackNavigator = createStackNavigator(
   {
@@ -21,13 +19,15 @@ const stackNavigator = createStackNavigator(
     },
     Main: {
       screen: MainTabNavigator,
-      navigationOptions: () => ({
+      navigationOptions: {
         header: null,
-      }),
+      },
     },
     Activity: {
-      screen: ActivityScreen,
-      navigationOptions: {},
+      screen: WorkOrderTabNavigator,
+      navigationOptions: {
+        header: null,
+      },
     },
   },
   {
@@ -46,25 +46,22 @@ const stackNavigator = createStackNavigator(
         fontFamily: fonts.primaryRegular,
       },
       headerTintColor: '#222222',
-      headerLeft: (props) => {
-        console.log(props);
-        return (
-          <TouchableOpacity
-            onPress={props.onPress}
+      headerLeft: props => (
+        <TouchableOpacity
+          onPress={props.onPress}
+          style={{
+            paddingLeft: 25,
+          }}
+        >
+          <Image
+            source={require('../../../assets/images/icons/arrow-back.png')}
+            resizeMode="contain"
             style={{
-              paddingLeft: 25,
+              height: 20,
             }}
-          >
-            <Image
-              source={require('../../../assets/images/icons/arrow-back.png')}
-              resizeMode="contain"
-              style={{
-                height: 20,
-              }}
-            />
-          </TouchableOpacity>
-        )
-      },
+          />
+        </TouchableOpacity>
+      ),
     }),
   },
 );

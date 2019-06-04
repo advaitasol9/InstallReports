@@ -886,9 +886,9 @@
     universal-user-agent "^2.1.0"
 
 "@octokit/rest@^16.14.1":
-  version "16.27.0"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.27.0.tgz#6c2d1cba3efb8866ef2741c64d23b8f257c9dc89"
-  integrity sha512-UvCxVOCfHzEhOaltSKQBy81kMqQ+hglF3rAR4STut4WWr2tXvVnrIkGxeblO0TvmTt5zuxfgQfgG5kAHUT44RA==
+  version "16.27.1"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.27.1.tgz#7bdb988b71bb355ecedd22e9e3d8956eb89a10b9"
+  integrity sha512-/2XdHf/rjD0qw5mxiMP7ipo3vSx2WS716fOOydAIHFdl18Q06hkpz+5RAmfdrM34aoEd3NUExikAifz3kg9Fzw==
   dependencies:
     "@octokit/request" "^4.0.1"
     "@octokit/request-error" "^1.0.2"
@@ -7087,9 +7087,9 @@ react-native-blur@^3.1.1:
     prop-types "^15.5.10"
 
 react-native-calendars@^1.22.0:
-  version "1.145.0"
-  resolved "https://registry.yarnpkg.com/react-native-calendars/-/react-native-calendars-1.145.0.tgz#11371389ec18ea5cc57ffe04c234ff92878a70d5"
-  integrity sha512-YqGLwSMsVqp7+yFUov8JZDEHPJlNVbg+DM+YTv9faSwqUFpAMPnpXpQAUIvudp+58LdAcT/uBpn146gVeKL2FA==
+  version "1.155.0"
+  resolved "https://registry.yarnpkg.com/react-native-calendars/-/react-native-calendars-1.155.0.tgz#c54484761113a5e9d281c0f08dd62e6a98f8cc91"
+  integrity sha512-1n5ShSfS2Kmh6ch55sAbAp03suflNKZZOpotujrMCvQNWoFcChX8d31sGdnK75F1WxIVrG2OFiL0lZZaoHHvNQ==
   dependencies:
     lodash.get "^4.4.2"
     lodash.isequal "^4.5.0"
@@ -7107,9 +7107,9 @@ react-native-fast-image@^6.0.0:
   integrity sha512-jzgFAZrrWQXsnyiLpKgwkHva6YzD24/ZQG65en7kx8YWmS2H14Tpj5J6h0KQZhV3KxBSeCQbKE+vh99bSpT0/Q==
 
 react-native-gesture-handler@^1.0.16, react-native-gesture-handler@^1.1.0:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-1.2.1.tgz#9c48fb1ab13d29cece24bbb77b1e847eebf27a2b"
-  integrity sha512-c1+L72Vjc/bwHKcIJ8a2/88SW9l3/axcAIpg3zB1qTzwdCxHZJeQn6d58cQXHPepxFBbgfTCo60B7SipSfo+zw==
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-1.2.2.tgz#570f7d8d3906fe9561f22360a3ab3462d06c3dc6"
+  integrity sha512-dlgd8XMXI2Aymh/C3+/FR9wzVbA8ILuBPsi4JC+HxmlpcNVXfxwMOG8JDCenPzW0CTRkWJwoIMPm2Xj0MtnIYA==
   dependencies:
     hoist-non-react-statics "^2.3.1"
     invariant "^2.2.2"
@@ -7215,10 +7215,10 @@ react-native-platform-touchable@^1.1.1:
   resolved "https://registry.yarnpkg.com/react-native-platform-touchable/-/react-native-platform-touchable-1.1.1.tgz#fde4acc65eea585d28b164d0c3716a42129a68e4"
   integrity sha1-/eSsxl7qWF0osWTQw3FqQhKaaOQ=
 
-react-native-reanimated@^1.0.0-alpha.12:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-1.0.1.tgz#5ecb6a2f6dad0351077ac9b771ca943b7ad6feda"
-  integrity sha512-RENoo6/sJc3FApP7vJ1Js7WyDuTVh97bbr5aMjJyw3kqpR2/JDHyL/dQFfOvSSAc+VjitpR9/CfPPad7tLRiIA==
+react-native-reanimated@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-1.0.0.tgz#d4e356e852ec55611de565d8791542eeb25a45ae"
+  integrity sha512-jfg+lYZ2QeeV+JMibjXwHoLDZIRVwZT2qdvDDmbAsMmxRNGI95evMPXKWa3BqkzWLb2SlZ2T/MBSGrqt/CiCAQ==
 
 react-native-safe-area-view@^0.12.0:
   version "0.12.0"
@@ -7265,9 +7265,9 @@ react-native-text-size@^2.0.4:
   integrity sha512-dkzmfFiKY4iwk73cvgrbUZ5HFB8ZdOFErRVhDWKBNxML/59dDkzTITBaZ8GKwsfGxNHKOXdHD2JdOoPRwAE+yQ==
 
 react-native-ui-lib@^3.18.0:
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/react-native-ui-lib/-/react-native-ui-lib-3.26.0.tgz#7b9c76cb95392f4bb6b05a1c3d11ccdc8e6563d5"
-  integrity sha512-sG1+9bNg3Zr8dnSG6eFoggCzIBcOJXlyq5HfMfRQx79gAmyZr1maEt6EEOLcUJh40FzsAcHaJtNUUiQ7NgxFBA==
+  version "3.27.0"
+  resolved "https://registry.yarnpkg.com/react-native-ui-lib/-/react-native-ui-lib-3.27.0.tgz#609af8f7f9551d757cbf097a6706ee802692a544"
+  integrity sha512-AwbRv8MNwVbMEV/h7XLWHXAK2S2s1UAY2LQ9YzgurD655L/71RNPQtzNgbCo0TZNFekt7oQmSdcvIYOBYGQFAA==
   dependencies:
     babel-plugin-transform-inline-environment-variables "^0.0.2"
     color "^3.1.0"
@@ -7278,7 +7278,7 @@ react-native-ui-lib@^3.18.0:
     react-native-blur "^3.1.1"
     react-native-gesture-handler "^1.1.0"
     react-native-interactable "0.1.10"
-    react-native-reanimated "^1.0.0-alpha.12"
+    react-native-reanimated "1.0.0"
     react-native-text-size "^2.0.4"
     semver "^5.5.0"
     url-parse "^1.2.0"
