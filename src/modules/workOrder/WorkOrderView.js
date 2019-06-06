@@ -30,7 +30,7 @@ export default function WorkOrderScreen(props) {
 
   const renderTile = (item, index) => (
     <TouchableOpacity
-      onPress={() => props.navigation.navigate('Activity', { activityId: index })}
+      onPress={() => props.navigation.navigate('Details', { activityId: index })}
       style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
     >
       <View style={styles.tileLogoContainer}>

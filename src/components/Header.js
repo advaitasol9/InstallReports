@@ -3,6 +3,9 @@ import React from 'react';
 import {
   TouchableOpacity, View, Text, Image, Dimensions,
 } from 'react-native';
+import {
+  DrawerActions,
+} from 'react-navigation';
 
 import { colors } from '../styles';
 
@@ -11,27 +14,9 @@ const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
 export const screenWidth = width;
 
-
-const SideBar = () => {
-  return (
-    <View
-      style={{
-        position: 'absolute',
-        width: screenWidth,
-        height: screenHeight,
-        backgroundColor: 'black',
-        opacity: 0.5,
-        zIndex: 10,
-      }}
-    />
-  );
-};
-
-
 export default function Header({
-  connectionStatus, changesNum, navigation, sortAndFilter,
+  connectionStatus, changesNum, navigation, sortAndFilter, sideBar,
 }) {
-  console.log(navigation);
   return (
     <React.Fragment>
       <View style={styles.header}>
@@ -55,6 +40,17 @@ export default function Header({
             />
             {!connectionStatus && (
               <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum}</Text>
+            )}
+            {sideBar && (
+              <TouchableOpacity
+                onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+                style={{ marginTop: -8, marginLeft: 12 }}
+              >
+                <Image
+                  style={styles.burger}
+                  source={require('../../assets/images/burger1.png')}
+                />
+              </TouchableOpacity>
             )}
           </View>
           {sortAndFilter && (
@@ -104,6 +100,11 @@ const styles = {
   logo: {
     height: 60,
     aspectRatio: 1.5,
+    resizeMode: 'contain',
+  },
+  burger: {
+    width: 32,
+    height: 32,
     resizeMode: 'contain',
   },
 };

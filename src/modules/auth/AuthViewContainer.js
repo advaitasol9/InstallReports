@@ -3,6 +3,7 @@ import { compose, lifecycle, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { logIn, logOut } from '../AppState';
 import { setUserInfo } from '../profile/ProfileState';
+import { logout } from '../../core/api';
 
 
 import AuthView from './AuthView';
@@ -23,8 +24,13 @@ export default compose(
   ),
   lifecycle({
     componentDidMount() {
-      if (this.props.authState.isLoggedIn) {
-        this.props.navigation.navigate({ routeName: 'Main' });
+      const itemId = this.props.navigation.getParam('logOut', null);
+      if (itemId) {
+        this.props.logOut();
+        this.props.navigation.setParams('logOut', null);
+        logout('test-app-1/logout/', this.props.token);
+      } else if (this.props.authState.isLoggedIn) {
+        this.props.navigation.navigate({ routeName: 'Home' });
       }
     },
   }),

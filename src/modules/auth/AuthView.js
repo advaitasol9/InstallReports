@@ -12,10 +12,9 @@ import {
   ImageBackground,
   Linking,
 } from 'react-native';
-import { NavigationEvents } from 'react-navigation';
 
 import { TextInput, Button } from '../../components';
-import { auth, logout } from '../../core/api';
+import { auth } from '../../core/api';
 import { fonts, colors } from '../../styles';
 
 export default class AuthScreen extends React.Component {
@@ -59,7 +58,7 @@ export default class AuthScreen extends React.Component {
         this.props.setEmail('');
         this.props.setUserInfo(response);
         this.props.logIn();
-        this.props.navigation.navigate({ routeName: 'Main' });
+        this.props.navigation.navigate({ routeName: 'Home' });
       }
     });
   }
@@ -101,16 +100,6 @@ export default class AuthScreen extends React.Component {
         style={styles.backgroundImage}
         resizeMode="cover"
       >
-        <NavigationEvents
-          onDidFocus={() => {
-            const itemId = this.props.navigation.getParam('logOut', null);
-            if (itemId) {
-              this.props.logOut();
-              this.props.navigation.setParams('logOut', null);
-              logout('test-app-1/logout/', this.props.token);
-            }
-          }}
-        />
         <View style={styles.container}>
           <View style={[styles.section, { paddingTop: 30 }]}>
             <Animated.Image

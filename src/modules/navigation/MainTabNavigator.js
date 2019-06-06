@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import React from 'react';
 import {
-  Image, View, StyleSheet, Text, Alert, TouchableOpacity,
+  Image, View, StyleSheet, Text, Alert,
 } from 'react-native';
 import { createBottomTabNavigator } from 'react-navigation';
 
@@ -107,9 +107,7 @@ export default createBottomTabNavigator(
               {
                 text: 'OK',
                 onPress: () => {
-                  props.navigation.navigate('Auth', {
-                    logOut: true,
-                  });
+                  props.navigation.navigate('LogIn', { logOut: true });
                 },
               },
             ],

@@ -7,6 +7,7 @@ import TextInput from './TextInput';
 import SegmentedControl from './SegmentedControl';
 import Text from './StyledText';
 import Header from './Header';
+import SideMenu from './SideMenu';
 
 export {
   // ## Generator Components Exports
@@ -18,4 +19,5 @@ export {
   SegmentedControl,
   Text,
   Header,
+  SideMenu,
 };

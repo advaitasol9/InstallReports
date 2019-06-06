@@ -9,11 +9,12 @@ export default function WorkOrderCommentView(props) {
   console.log(props);
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor={colors.lightGray} barStyle="light-content" />
+      <StatusBar backgroundColor={colors.lightGray} />
       <Header
         connectionStatus={props.connectionStatus}
         changesNum={props.changes.length}
         navigation={props.navigation}
+        sideBar
       />
       <View
         style={{

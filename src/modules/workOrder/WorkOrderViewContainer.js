@@ -24,5 +24,8 @@ export default compose(
         this.props.setChangesInOffline(this.props.changes.length);
       });
     },
+    componentWillUnmount() {
+      this._subscribe.remove();
+    },
   }),
 )(WorkOrderScreen);

@@ -3,7 +3,7 @@ import { View, Platform, StyleSheet, TextInput } from 'react-native';
 
 import { fonts, colors } from '../styles';
 
-const RNSTextInput = props => {
+const RNSTextInput = (props) => {
   const finalStyle = [
     styles.default,
     props.type === 'bordered' && styles.bordered,

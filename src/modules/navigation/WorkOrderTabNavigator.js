@@ -1,11 +1,13 @@
 /* eslint-disable import/no-unresolved */
 import React from 'react';
 import {
-  Image, View, StyleSheet,
+  Image, View, StyleSheet, Dimensions,
 } from 'react-native';
-import { createBottomTabNavigator } from 'react-navigation';
+import { createBottomTabNavigator, createDrawerNavigator } from 'react-navigation';
 
 import { colors, fonts } from '../../styles';
+
+import { SideMenu } from '../../components';
 
 import DetailsScreen from '../workActivity/workOrderDetails/WorkOrderDetailsViewContainer';
 import DocsScreen from '../workActivity/workOrderDocs/WorkOrderDocsViewContainer';
@@ -13,11 +15,16 @@ import QuestionsScreen from '../workActivity/workOrderQuestions/WorkOrderQuestio
 import CommentScreen from '../workActivity/workOrderComment/WorkOrderCommentViewContainer';
 import ManagerScreen from '../workActivity/workOrderManager/WorkOrderManagerViewContainer';
 
+
 const iconDetails = require('../../../assets/images/tabbar/home.png');
 const iconDocs = require('../../../assets/images/tabbar/home.png');
 const iconQuestions = require('../../../assets/images/tabbar/home.png');
 const iconComment = require('../../../assets/images/tabbar/home.png');
 const iconManager = require('../../../assets/images/tabbar/home.png');
+
+const { height, width } = Dimensions.get('window');
+export const screenHeight = height;
+export const screenWidth = width;
 
 const styles = StyleSheet.create({
   tabBarItemContainer: {
@@ -56,7 +63,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default createBottomTabNavigator(
+const WorkOrder = createBottomTabNavigator(
   {
     Details: {
       screen: DetailsScreen,
@@ -141,3 +148,14 @@ export default createBottomTabNavigator(
     },
   },
 );
+
+export default createDrawerNavigator({
+  HomeTabs: {
+    screen: WorkOrder,
+  },
+}, {
+  drawerWidth: screenWidth * 0.85,
+  backgroundColor: colors.grey,
+  drawerPosition: 'right',
+  contentComponent: props => <SideMenu {...props} />,
+});
