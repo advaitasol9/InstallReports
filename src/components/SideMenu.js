@@ -48,8 +48,6 @@ function SideMenu(props) {
       >
         <Text style={styles.text}>LogOut</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={{ position: 'absolute', height: 36, width: 36, backgroundColor: 'white', top: 0, left: 0 }}>
-      </TouchableOpacity>
     </View>
   );
 }

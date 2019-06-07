@@ -8,6 +8,7 @@ import SegmentedControl from './SegmentedControl';
 import Text from './StyledText';
 import Header from './Header';
 import SideMenu from './SideMenu';
+import PartialModal from './PartialModal';
 
 export {
   // ## Generator Components Exports
@@ -20,4 +21,5 @@ export {
   Text,
   Header,
   SideMenu,
+  PartialModal,
 };
