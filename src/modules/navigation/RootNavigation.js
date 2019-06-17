@@ -4,10 +4,20 @@ import MainTabNavigator from './MainTabNavigator';
 import WorkOrderTabNavigator from './WorkOrderTabNavigator';
 
 import AuthScreen from '../auth/AuthViewContainer';
+import CameraScreen from '../camera/CameraViewContainer';
 
 const AuthStack = createStackNavigator({
   LogIn: {
     screen: AuthScreen,
+    navigationOptions: {
+      header: null,
+    },
+  },
+});
+
+const CameraStack = createStackNavigator({
+  Camera: {
+    screen: CameraScreen,
     navigationOptions: {
       header: null,
     },
@@ -26,6 +36,9 @@ const RootStack = createSwitchNavigator({
   },
   WorkOrder: {
     screen: WorkOrderTabNavigator,
+  },
+  CameraStack: {
+    screen: CameraStack,
   },
 }, {
   initialRouteName: 'Auth',

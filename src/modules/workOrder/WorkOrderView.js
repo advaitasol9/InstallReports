@@ -6,7 +6,11 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
+import moment from 'moment';
+import { apiGetJson } from '../../core/api';
+
 
 import { Text } from '../../components/StyledText';
 import { Header } from '../../components';
@@ -24,13 +28,11 @@ export default function WorkOrderScreen(props) {
   //   });
   // };
 
-  const data = [
-    {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-  ];
+  console.log(props.orderList);
 
   const renderTile = (item, index) => (
     <TouchableOpacity
-      onPress={() => props.navigation.navigate('Details', { activityId: index })}
+      onPress={() => props.navigation.navigate('Details', { activityId: item.id })}
       style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
     >
       <View style={styles.tileLogoContainer}>
@@ -40,22 +42,25 @@ export default function WorkOrderScreen(props) {
         />
       </View>
       <View style={styles.tileInfoContainer}>
-        <Text style={styles.infoCompany}>Starbucks</Text>
-        <Text style={styles.infoTitle}>HiVee Inline & Encap</Text>
+        <Text style={styles.infoCompany}>{item.name}</Text>
+        <Text style={styles.infoTitle}>{item.notes}</Text>
         <View style={styles.infoBottomSection}>
           <View style={{ flexDirection: 'row' }}>
             <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#12123</Text>
-              <Text style={styles.infoBottomText}>Elbur, Il</Text>
+              <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#{item.id}</Text>
+              <Text style={styles.infoBottomText}>
+                {`${item.address_1}, ${item.city}, ${item.state}`}
+              </Text>
             </View>
           </View>
           <View style={{ flexDirection: 'row' }}>
-            <Text style={styles.infoBottomText}>Due 7/5/19</Text>
+            <Text style={styles.infoBottomText}>Due {moment(item.date_1).format('DD/MM/YY')}</Text>
           </View>
         </View>
       </View>
     </TouchableOpacity>
   );
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={colors.lightGray} barStyle="dark-content" />
@@ -65,13 +70,28 @@ export default function WorkOrderScreen(props) {
         navigation={props.navigation}
         sortAndFilter
       />
-      <FlatList
-        ListHeaderComponent={null}
-        scrollEventThrottle={16}
-        data={data}
-        keyExtractor={item => item.id}
-        renderItem={({ item, index }) => renderTile(item, index)}
-      />
+      {
+        props.orderList === []
+          ? (
+            <View style={styles.containerIndicator}>
+              <ActivityIndicator color={colors.primary} />
+            </View>
+          )
+          : (
+            <FlatList
+              ListHeaderComponent={null}
+              scrollEventThrottle={16}
+              refreshing={false}
+              onRefresh={async () => {
+                const data = await apiGetJson('test-app-1/activities/', props.token);
+                props.setOrderList(data.data);
+              }}
+              data={props.orderList}
+              keyExtractor={item => item.id}
+              renderItem={({ item, index }) => renderTile(item, index)}
+            />
+          )
+      }
     </View>
   );
 }
@@ -81,6 +101,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-around',
+    backgroundColor: colors.lightGray,
+  },
+  containerIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: colors.lightGray,
   },
   bgImage: {

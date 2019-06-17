@@ -8,7 +8,8 @@ import { Button } from '../../../../components';
 import { apiPost } from '../../../../core/api';
 
 
-export default function WorkActivityView(props) {
+export default function DetailMainView(props) {
+  console.log(props.activityData);
   return (
     <React.Fragment>
       <View
@@ -21,16 +22,16 @@ export default function WorkActivityView(props) {
             </Text>
           </TouchableOpacity>
           <Text style={styles.activityHeader}>
-            Work Order #{props.navigation.state.params.activityId}
+            Work Order #{props.activityData.id}
           </Text>
           <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
-            Project: Galaxy 25zx Sales Display
+            Project: {props.activityData.notes}
           </Text>
           <Text style={{ paddingTop: 8 }}>
-            Verizon Wireless - Yorkville #685
+            {props.activityData.name} - {props.activityData.city} #685
           </Text>
           <Text style={{ paddingTop: 8 }}>
-            122 W Veterans Pkwy, Yorkville, IL 60560
+            {`${props.activityData.address_1}, ${props.activityData.city}, ${props.activityData.state} ${props.activityData.zip}`}
           </Text>
           <TouchableOpacity style={{ width: 100, paddingTop: 8 }} onPress={() => props.navigation.navigate('Work Order')}>
             <Text style={styles.linkButton}>
@@ -49,9 +50,9 @@ export default function WorkActivityView(props) {
                     style={{ width: '80%' }}
                     onPress={() => {
                       props.saveChanges();
-                      apiPost('test-app-1/spectrum/activities/1/status/In_Progress', {}, props.token)
+                      props.setInProgress(true);
+                      apiPost(`test-app-1/spectrum/activities/${props.activityId}/status/In_Progress`, {}, props.token)
                         .then((response) => {
-                          props.setInProgress(true);
                           console.log(response);
                         });
                     }}

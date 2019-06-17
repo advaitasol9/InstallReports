@@ -1,5 +1,5 @@
 import {
-  compose, withState,
+  compose,
 } from 'recompose';
 
 

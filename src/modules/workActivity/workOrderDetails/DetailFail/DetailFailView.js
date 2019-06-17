@@ -1,8 +1,9 @@
 // @flow
 import React from 'react';
 import {
-  StyleSheet, View, Text, Dimensions,
+  StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions, Image,
 } from 'react-native';
+import IO from 'react-native-vector-icons/Ionicons';
 
 import { colors } from '../../../../styles';
 import { Button } from '../../../../components';
@@ -12,20 +13,104 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 
-export default function WorkActivityView(props) {
+export default function DetailFailedView(props) {
+  const Required = () => (
+    <View style={styles.requiredBlock}>
+      <Text style={styles.requiredText}>
+        required
+      </Text>
+    </View>
+  );
+
+  const renderPhoto = (photo) => {
+    console.log(photo);
+    return (
+      <Image source={{ uri: photo }} style={styles.photoBlock} />
+    );
+  };
+
   return (
     <React.Fragment>
-      <Button
-        bgColor={colors.red}
-        style={{ width: '45%' }}
-        onPress={() => {
-          props.setScreen('Main');
-        }}
-      >
-        <Text style={{ fontSize: 20, color: colors.white }}>
-          Back to Details
-        </Text>
-      </Button>
+      <View style={styles.partialInstallationsHeader}>
+        <Text style={styles.partialInstallations}>Failed Installation</Text>
+      </View>
+      <ScrollView>
+        <View style={styles.scrollContainer}>
+          <Text style={{ fontSize: 16 }}>
+            A failed installation occurs when an installation will never be comleted due to circumstances like a closed or incorrect location.
+          </Text>
+          <Text style={{ fontSize: 16, marginTop: 16 }}>
+            Please explain why the installation cannot be comleted. Take photos to document the situation.
+          </Text>
+          <TextInput
+            multiline
+            placeholder="Placeholder..."
+            style={[styles.inputStyle, { height: 160 }]}
+          />
+          <Required />
+          <View style={{ marginTop: 24 }}>
+            <Button
+              bgColor={colors.blue}
+              onPress={() => {
+                console.log(props);
+                props.navigation.navigate('Camera', { screen: 'Failed', activityId: props.activityId });
+              }}
+            >
+              <Text style={{ fontSize: 20, color: colors.white }}>
+                Add Photo(s)
+              </Text>
+            </Button>
+          </View>
+          <Required />
+          <View style={styles.photoSection}>
+            { props.photos.map(photo => renderPhoto(photo)) }
+          </View>
+          <TouchableOpacity
+            style={{
+              display: props.photos.length === 0 ? 'none' : 'flex',
+              alignItems: 'center',
+              width: '100%',
+            }}
+            onPress={() => {
+              props.addPhoto([]);
+            }}
+          >
+            <IO
+              style={{
+                color: colors.red,
+                fontSize: 48,
+                marginTop: 16,
+              }}
+              name="md-close-circle"
+            />
+          </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            <Button
+              bgColor={colors.green}
+              style={{ width: '45%' }}
+              onPress={() => {
+                props.setModalVisible(true);
+              }}
+            >
+              <Text style={{ fontSize: 20, color: colors.white }}>
+                Submit
+              </Text>
+            </Button>
+            <Button
+              bgColor={colors.red}
+              style={{ width: '45%' }}
+              onPress={() => {
+                props.addPhoto([]);
+                props.setScreen('Main');
+              }}
+            >
+              <Text style={{ fontSize: 20, color: colors.white }}>
+                Cancel
+              </Text>
+            </Button>
+          </View>
+        </View>
+      </ScrollView>
     </React.Fragment>
   );
 }

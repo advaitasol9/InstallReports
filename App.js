@@ -8,6 +8,9 @@ import { store, persistor } from './src/redux/store';
 
 import AppView from './src/modules/AppViewContainer';
 
+
+console.disableYellowBox = true;
+
 export default function App() {
   return (
     <Provider store={store}>

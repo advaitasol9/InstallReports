@@ -26,12 +26,18 @@ export default compose(
   withState('changesInOffline', 'setChangesInOffline', 0),
   withState('screen', 'setScreen', 'Main'),
   withState('inProgress', 'setInProgress', false),
+  withState('activityData', 'setActivityData', {}),
   lifecycle({
     componentDidMount() {
       this.props.setChangesInOffline(this.props.changes.length);
+      const screen = this.props.navigation.getParam('screen', null);
+      if (screen) {
+        this.props.setScreen(screen);
+        this.props.setInProgress(true);
+      }
       apiGetJson(`test-app-1/activities/${this.props.navigation.state.params.activityId}`, this.props.token)
         .then((response) => {
-          console.log(response);
+          this.props.setActivityData(response.data);
         });
     },
   }),

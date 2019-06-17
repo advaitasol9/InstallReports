@@ -40,7 +40,13 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
+	<key>NSCameraUsageDescription</key>
+	<string>Камера необходима, чтобы делать фотографии для отправки данных</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Необходим доступ к фотоальбому, чтобы иметь возможность выбрать заранее сделанную фотографию</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Необходим доступ к фотоальбому, чтобы иметь возможность выбрать заранее сделанную фотографию</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Lato-Bold.ttf</string>

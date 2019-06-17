@@ -51,6 +51,8 @@ export default function WorkActivityView(props) {
           token={props.token}
           inProgress={props.inProgress}
           setInProgress={props.setInProgress}
+          activityData={props.activityData}
+          activityId={props.navigation.state.params.activityId}
         />
       );
     }
@@ -61,6 +63,7 @@ export default function WorkActivityView(props) {
           setScreen={props.setScreen}
           navigation={props.navigation}
           setModalVisible={props.setModalVisible}
+          activityId={props.navigation.state.params.activityId}
         />
       );
     }
@@ -71,6 +74,7 @@ export default function WorkActivityView(props) {
           setScreen={props.setScreen}
           navigation={props.navigation}
           setModalVisible={props.setModalVisible}
+          activityId={props.navigation.state.params.activityId}
         />
       );
     }

@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import {
-  StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions,
+  StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions, Image,
 } from 'react-native';
 import IO from 'react-native-vector-icons/Ionicons';
 
@@ -13,7 +13,7 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 
-export default function WorkActivityView(props) {
+export default function DetailPartialView(props) {
   const Required = () => (
     <View style={styles.requiredBlock}>
       <Text style={styles.requiredText}>
@@ -21,6 +21,13 @@ export default function WorkActivityView(props) {
       </Text>
     </View>
   );
+
+  const renderPhoto = (photo) => {
+    console.log(photo);
+    return (
+      <Image source={{ uri: photo }} style={styles.photoBlock} />
+    );
+  };
 
   return (
     <React.Fragment>
@@ -42,7 +49,13 @@ export default function WorkActivityView(props) {
           />
           <Required />
           <View style={{ marginTop: 24 }}>
-            <Button bgColor={colors.blue}>
+            <Button
+              bgColor={colors.blue}
+              onPress={() => {
+                console.log(props);
+                props.navigation.navigate('Camera', { screen: 'Partial', activityId: props.activityId });
+              }}
+            >
               <Text style={{ fontSize: 20, color: colors.white }}>
                 Add Photo(s)
               </Text>
@@ -50,30 +63,27 @@ export default function WorkActivityView(props) {
           </View>
           <Required />
           <View style={styles.photoSection}>
-            <View style={styles.photoBlock}>
-              <Text>Place for photo</Text>
-            </View>
-            <View style={styles.photoBlock}>
-              <Text>Place for photo</Text>
-            </View>
+            { props.photos.map(photo => renderPhoto(photo)) }
           </View>
-          <View
+          <TouchableOpacity
             style={{
+              display: props.photos.length === 0 ? 'none' : 'flex',
               alignItems: 'center',
               width: '100%',
             }}
+            onPress={() => {
+              props.addPhoto([]);
+            }}
           >
-            <TouchableOpacity>
-              <IO
-                style={{
-                  color: colors.red,
-                  fontSize: 48,
-                  marginTop: 16,
-                }}
-                name="md-close-circle"
-              />
-            </TouchableOpacity>
-          </View>
+            <IO
+              style={{
+                color: colors.red,
+                fontSize: 48,
+                marginTop: 16,
+              }}
+              name="md-close-circle"
+            />
+          </TouchableOpacity>
           <Text style={{ fontSize: 16, marginTop: 16 }}>
             Manager on Duty Signeture:
           </Text>
@@ -104,6 +114,7 @@ export default function WorkActivityView(props) {
               bgColor={colors.red}
               style={{ width: '45%' }}
               onPress={() => {
+                props.addPhoto([]);
                 props.setScreen('Main');
               }}
             >

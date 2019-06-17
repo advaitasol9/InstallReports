@@ -14,12 +14,11 @@ export default compose(
     dispatch => ({}),
   ),
   withState('changesInOffline', 'setChangesInOffline', 0),
+  withState('orderList', 'setOrderList', []),
   lifecycle({
-    componentDidMount() {
-      apiGetJson('test-app-1/activities/', this.props.token)
-        .then((response) => {
-          console.log(response);
-        });
+    async componentDidMount() {
+      const data = await apiGetJson('test-app-1/activities/', this.props.token);
+      this.props.setOrderList(data.data);
       this._subscribe = this.props.navigation.addListener('didFocus', () => {
         this.props.setChangesInOffline(this.props.changes.length);
       });
