@@ -1,22 +1,64 @@
 // @flow
 import React from 'react';
 import {
-  StyleSheet, View, Text, TouchableOpacity, ScrollView,
+  StyleSheet, View, Text, TouchableOpacity, ScrollView, StatusBar,
 } from 'react-native';
 import { colors } from '../../../../styles';
-import { Button } from '../../../../components';
+import { Button, PartialModal, Header } from '../../../../components';
 import { apiPost } from '../../../../core/api';
 
 
 export default function DetailMainView(props) {
-  console.log(props.activityData);
+  const saveChanges = () => {
+    if (!props.connectionStatus) {
+      const { changes } = props;
+      let matches = 0;
+      if (changes.length === 0) {
+        changes.push({
+          activityId: props.activityId,
+        });
+        props.setChanges(changes);
+        props.setChangesInOffline(1);
+      } else {
+        for (let i = 0; i < changes.length; i += 1) {
+          if (changes[i].activityId === props.activityId) {
+            matches += 1;
+            break;
+          }
+        }
+        if (matches === 0) {
+          changes.push({
+            activityId: props.activityId,
+          });
+          props.setChanges(changes);
+          props.setChangesInOffline(changes.length);
+        }
+      }
+    } else {
+      console.log('Send changes');
+    }
+  };
   return (
-    <React.Fragment>
+    <View style={styles.container}>
+      <StatusBar backgroundColor={colors.lightGray} />
+      <Header
+        connectionStatus={props.connectionStatus}
+        changesNum={props.changes.length}
+        navigation={props.navigation}
+        sideBar
+        indicator
+      />
       <View
         style={styles.detailStatic}
       >
         <View style={{ width: '100%', justifyContent: 'flex-start' }}>
-          <TouchableOpacity style={{ width: 100 }} onPress={() => props.navigation.navigate('Work Order')}>
+          <TouchableOpacity
+            style={{ width: 100 }}
+            onPress={() => {
+              props.setActivityId(null);
+              props.navigation.navigate('Work Order');
+            }}
+          >
             <Text style={styles.linkButton}>
               Back to list
             </Text>
@@ -49,8 +91,9 @@ export default function DetailMainView(props) {
                     bgColor={colors.green}
                     style={{ width: '80%' }}
                     onPress={() => {
-                      props.saveChanges();
+                      saveChanges();
                       props.setInProgress(true);
+                      props.navigation.navigate('DetailsPreInstall');
                       apiPost(`test-app-1/spectrum/activities/${props.activityId}/status/In_Progress`, {}, props.token)
                         .then((response) => {
                           console.log(response);
@@ -85,7 +128,12 @@ export default function DetailMainView(props) {
             <Text>Scope of Work</Text>
             <View style={styles.detailDescription}>
               <Text>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras gravida elit sit amet orci sagittis, vel ultrices metus consectetur. In ex augue, congue eget enim vel, iaculis commodo mi. Phasellus egestas lobortis metus vitae rhoncus. Nullam volutpat egestas ante, et convallis nulla rutrum sit amet. Nulla congue libero at mi gravida iaculis.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Cras gravida elit sit amet orci sagittis, vel ultrices metus consectetur.
+                In ex augue, congue eget enim vel, iaculis commodo mi.
+                Phasellus egestas lobortis metus vitae rhoncus.
+                Nullam volutpat egestas ante, et convallis nulla rutrum sit amet.
+                Nulla congue libero at mi gravida iaculis.
               </Text>
             </View>
           </View>
@@ -93,7 +141,12 @@ export default function DetailMainView(props) {
             <Text>Special Instructions</Text>
             <View style={styles.detailDescription}>
               <Text>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras gravida elit sit amet orci sagittis, vel ultrices metus consectetur. In ex augue, congue eget enim vel, iaculis commodo mi. Phasellus egestas lobortis metus vitae rhoncus. Nullam volutpat egestas ante, et convallis nulla rutrum sit amet. Nulla congue libero at mi gravida iaculis.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Cras gravida elit sit amet orci sagittis, vel ultrices metus consectetur.
+                In ex augue, congue eget enim vel, iaculis commodo mi.
+                Phasellus egestas lobortis metus vitae rhoncus.
+                Nullam volutpat egestas ante, et convallis nulla rutrum sit amet.
+                Nulla congue libero at mi gravida iaculis.
               </Text>
             </View>
           </View>
@@ -139,7 +192,7 @@ export default function DetailMainView(props) {
                 <View>
                   <Button
                     primary
-                    onPress={() => props.setScreen('Partial')}
+                    onPress={() => props.navigation.navigate('DetailsPartial')}
                     bgColor={colors.blue}
                   >
                     <Text style={{ color: 'white' }}>Partial Installation</Text>
@@ -147,7 +200,7 @@ export default function DetailMainView(props) {
                   <Button
                     style={{ marginTop: 24 }}
                     bgColor={colors.blue}
-                    onPress={() => props.setScreen('Failed')}
+                    onPress={() => props.navigation.navigate('DetailsFail')}
                   >
                     <Text style={{ color: 'white' }}>Failed Installation</Text>
                   </Button>
@@ -159,7 +212,8 @@ export default function DetailMainView(props) {
           }
         </View>
       </ScrollView>
-    </React.Fragment>
+      <PartialModal />
+    </View>
   );
 }
 
@@ -174,7 +228,8 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 32,
+    paddingVertical: 24,
+    paddingHorizontal: 32,
     backgroundColor: colors.white,
   },
   detailDescription: {

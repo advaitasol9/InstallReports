@@ -1,17 +1,35 @@
 // @flow
 import React from 'react';
 import {
-  StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions, Image,
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Dimensions,
+  Image,
+  StatusBar,
+  Alert,
 } from 'react-native';
+import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
 
 import { colors } from '../../../../styles';
-import { Button } from '../../../../components';
+import { Button, PartialModal, Header } from '../../../../components';
 
 const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
 export const screenWidth = width;
 
+const options = {
+  quality: 1.0,
+  maxWidth: 500,
+  maxHeight: 500,
+  storageOptions: {
+    skipBackup: true,
+  },
+};
 
 export default function DetailFailedView(props) {
   const Required = () => (
@@ -30,17 +48,27 @@ export default function DetailFailedView(props) {
   };
 
   return (
-    <React.Fragment>
+    <View style={styles.container}>
+      <StatusBar backgroundColor={colors.lightGray} />
+      <Header
+        connectionStatus={props.connectionStatus}
+        changesNum={props.changes.length}
+        navigation={props.navigation}
+        sideBar
+        indicator
+      />
       <View style={styles.partialInstallationsHeader}>
         <Text style={styles.partialInstallations}>Failed Installation</Text>
       </View>
       <ScrollView>
         <View style={styles.scrollContainer}>
           <Text style={{ fontSize: 16 }}>
-            A failed installation occurs when an installation will never be comleted due to circumstances like a closed or incorrect location.
+            A failed installation occurs when an installation will never be comleted due
+            to circumstanceslike a closed or incorrect location.
           </Text>
           <Text style={{ fontSize: 16, marginTop: 16 }}>
-            Please explain why the installation cannot be comleted. Take photos to document the situation.
+            Please explain why the installation cannot be comleted.
+            Take photos to document the situation.
           </Text>
           <TextInput
             multiline
@@ -52,8 +80,41 @@ export default function DetailFailedView(props) {
             <Button
               bgColor={colors.blue}
               onPress={() => {
-                console.log(props);
-                props.navigation.navigate('Camera', { screen: 'Failed', activityId: props.activityId });
+                Alert.alert(
+                  'Add photo',
+                  '',
+                  [
+                    {
+                      text: 'Choose from gallery',
+                      onPress: () => {
+                        ImagePicker.launchImageLibrary(options, (response) => {
+                          const { photos } = props;
+                          photos.push(response.uri);
+                          props.addPhoto(photos);
+                          props.setChangesInOffline(props.changesInOffline);
+                        });
+                      },
+                    },
+                    {
+                      text: 'Take a photo',
+                      onPress: () => {
+                        props.navigation.navigate(
+                          'Camera',
+                          {
+                            photos: props.photos,
+                            addPhoto: arr => props.addPhoto(arr),
+                            screen: 'DetailsFail',
+                          },
+                        );
+                      },
+                    },
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                  ],
+                  { cancelable: true },
+                );
               }}
             >
               <Text style={{ fontSize: 20, color: colors.white }}>
@@ -101,7 +162,7 @@ export default function DetailFailedView(props) {
               style={{ width: '45%' }}
               onPress={() => {
                 props.addPhoto([]);
-                props.setScreen('Main');
+                props.navigation.navigate('DetailsMain', { photo: props.photos });
               }}
             >
               <Text style={{ fontSize: 20, color: colors.white }}>
@@ -111,11 +172,18 @@ export default function DetailFailedView(props) {
           </View>
         </View>
       </ScrollView>
-    </React.Fragment>
+      <PartialModal />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    backgroundColor: colors.lightGray,
+  },
   scrollContainer: {
     paddingTop: 24,
     paddingHorizontal: 24,

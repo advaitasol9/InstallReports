@@ -1,26 +1,24 @@
 // @flow
 import { compose, withState, lifecycle } from 'recompose';
 import { connect } from 'react-redux';
-import { addPhoto } from '../workActivity/workOrderDetails/WorkOrderDetailState';
 
 import CameraView from './CameraView';
 
 export default compose(
   connect(
-    state => ({
-      photos: state.workOrderDetail.photos,
-    }),
-    dispatch => ({
-      addPhoto: arr => dispatch(addPhoto(arr)),
-    }),
+    state => ({}),
+    dispatch => ({}),
   ),
   withState('cameraType', 'setCameraType', 0),
   withState('cameraFlashMode', 'setCameraFlashMode', 0),
   withState('photoUri', 'setPhotoUri', ''),
   withState('photoModal', 'setPhotoModal', false),
+  withState('photos', 'setPhotos', []),
+  withState('backRoute', 'setBackRoute', ''),
   lifecycle({
     componentDidMount() {
-      console.log(this.props.navigation.state.params.activityId);
+      this.props.setPhotos(this.props.navigation.state.params.photos);
+      this.props.setBackRoute(this.props.navigation.state.params.screen);
     },
   }),
 

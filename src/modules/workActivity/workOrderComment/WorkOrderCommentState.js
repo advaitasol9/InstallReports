@@ -3,18 +3,18 @@ const initialState = {
   photos: [],
 };
 
-export const ADD_PHOTO = 'ADD_PHOTO';
+export const ADD_COMMENT_PHOTO = 'ADD_COMMENT_PHOTO';
 
-export function addPhoto(payload) {
+export function addCommentPhoto(payload) {
   return {
-    type: ADD_PHOTO,
+    type: ADD_COMMENT_PHOTO,
     payload,
   };
 }
 
 export default function AppStateReducer(state = initialState, action) {
   switch (action.type) {
-    case ADD_PHOTO:
+    case ADD_COMMENT_PHOTO:
       console.log(action);
       return {
         ...state,

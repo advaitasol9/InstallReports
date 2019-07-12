@@ -4,12 +4,20 @@ import { combineReducers } from 'redux';
 import app from '../modules/AppState';
 import profile from '../modules/profile/ProfileState';
 import workOrder from '../modules/workOrder/WorkOrderState';
-import workOrderDetail from '../modules/workActivity/workOrderDetails/WorkOrderDetailState';
+import detailFail from '../modules/workActivity/workOrderDetails/DetailFail/DetailFailState';
+import detailPartial from '../modules/workActivity/workOrderDetails/DetailPartial/DetailPartialState';
+import detailPreInstall from '../modules/workActivity/workOrderDetails/DetailPreInstall/DetailPreInstallState';
+import workOrderQuestion from '../modules/workActivity/workOrderQuestions/WorkOrderQuestionsState';
+import workOrderComment from '../modules/workActivity/workOrderComment/WorkOrderCommentState';
 
 export default combineReducers({
   // ## Generator Reducers
   app,
   profile,
   workOrder,
-  workOrderDetail,
+  detailFail,
+  detailPartial,
+  detailPreInstall,
+  workOrderQuestion,
+  workOrderComment,
 });

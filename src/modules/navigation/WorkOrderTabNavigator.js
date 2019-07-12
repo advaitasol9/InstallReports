@@ -1,26 +1,22 @@
-/* eslint-disable import/no-unresolved */
 import React from 'react';
 import {
-  Image, View, StyleSheet, Dimensions,
+  View, StyleSheet, Dimensions,
 } from 'react-native';
-import { createBottomTabNavigator, createDrawerNavigator } from 'react-navigation';
+import { createBottomTabNavigator, createDrawerNavigator, createStackNavigator } from 'react-navigation';
+import FA from 'react-native-vector-icons/FontAwesome5';
 
 import { colors, fonts } from '../../styles';
 
 import { SideMenu } from '../../components';
 
-import DetailsScreen from '../workActivity/workOrderDetails/WorkOrderDetailsViewContainer';
+import DetailsScreen from '../workActivity/workOrderDetails/DetailMain/DetailMainViewContainer';
+import DetailsScreenFailure from '../workActivity/workOrderDetails/DetailFail/DetailFailViewContainer';
+import DetailsScreenPartial from '../workActivity/workOrderDetails/DetailPartial/DetailPartialViewContainer';
+import DetailsScreenPreInstall from '../workActivity/workOrderDetails/DetailPreInstall/DetailPreInstallViewContainer';
 import DocsScreen from '../workActivity/workOrderDocs/WorkOrderDocsViewContainer';
 import QuestionsScreen from '../workActivity/workOrderQuestions/WorkOrderQuestionsViewContainer';
 import CommentScreen from '../workActivity/workOrderComment/WorkOrderCommentViewContainer';
 import ManagerScreen from '../workActivity/workOrderManager/WorkOrderManagerViewContainer';
-
-
-const iconDetails = require('../../../assets/images/tabbar/home.png');
-const iconDocs = require('../../../assets/images/tabbar/home.png');
-const iconQuestions = require('../../../assets/images/tabbar/home.png');
-const iconComment = require('../../../assets/images/tabbar/home.png');
-const iconManager = require('../../../assets/images/tabbar/home.png');
 
 const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
@@ -63,10 +59,37 @@ const styles = StyleSheet.create({
   },
 });
 
+const DetailsStack = createStackNavigator({
+  DetailsMain: {
+    screen: DetailsScreen,
+    navigationOptions: {
+      header: null,
+    },
+  },
+  DetailsPartial: {
+    screen: DetailsScreenPartial,
+    navigationOptions: {
+      header: null,
+    },
+  },
+  DetailsFail: {
+    screen: DetailsScreenFailure,
+    navigationOptions: {
+      header: null,
+    },
+  },
+  DetailsPreInstall: {
+    screen: DetailsScreenPreInstall,
+    navigationOptions: {
+      header: null,
+    },
+  },
+});
+
 const WorkOrder = createBottomTabNavigator(
   {
     Details: {
-      screen: DetailsScreen,
+      screen: DetailsStack,
       navigationOptions: {
         header: null,
       },
@@ -101,32 +124,35 @@ const WorkOrder = createBottomTabNavigator(
       // eslint-disable-next-line react/prop-types
       tabBarIcon: ({ focused }) => {
         const { routeName } = navigation.state;
-        let iconSource;
+        let iconName;
         switch (routeName) {
           case 'Details':
-            iconSource = iconDetails;
+            iconName = 'wrench';
             break;
           case 'Docs':
-            iconSource = iconDocs;
+            iconName = 'file';
             break;
           case 'Questions':
-            iconSource = iconQuestions;
+            iconName = 'question-circle';
             break;
           case 'Comment':
-            iconSource = iconComment;
+            iconName = 'comment-dots';
             break;
           case 'Manager':
-            iconSource = iconManager;
+            iconName = 'black-tie';
             break;
           default:
-            iconSource = iconManager;
+            iconName = 'wrench';
         }
         return (
           <View style={styles.tabBarItemContainer}>
-            <Image
-              resizeMode="contain"
-              source={iconSource}
-              style={[styles.tabBarIcon, focused && styles.tabBarIconFocused]}
+            <FA
+              style={{
+                fontSize: 20,
+              }}
+              name={iconName}
+              backgroundColor="transparent"
+              color={focused ? colors.primary : colors.grey}
             />
           </View>
         );
@@ -136,14 +162,12 @@ const WorkOrder = createBottomTabNavigator(
     animationEnabled: false,
     swipeEnabled: true,
     tabBarOptions: {
+      activeTintColor: colors.primary,
       showLabel: true,
       style: {
         backgroundColor: colors.white,
         borderTopWidth: 0.5,
         borderTopColor: '#d6d6d6',
-      },
-      labelStyle: {
-        color: colors.grey,
       },
     },
   },

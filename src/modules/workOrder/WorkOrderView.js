@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
-  ActivityIndicator,
 } from 'react-native';
 import moment from 'moment';
 import { apiGetJson } from '../../core/api';
@@ -32,7 +31,10 @@ export default function WorkOrderScreen(props) {
 
   const renderTile = (item, index) => (
     <TouchableOpacity
-      onPress={() => props.navigation.navigate('Details', { activityId: item.id })}
+      onPress={() => {
+        props.setActivityId(item.id);
+        props.navigation.navigate('Details');
+      }}
       style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
     >
       <View style={styles.tileLogoContainer}>
@@ -69,12 +71,13 @@ export default function WorkOrderScreen(props) {
         changesNum={props.changes.length}
         navigation={props.navigation}
         sortAndFilter
+        indicator
       />
       {
-        props.orderList === []
+        props.orderList === [] && props.connectionStatus
           ? (
             <View style={styles.containerIndicator}>
-              <ActivityIndicator color={colors.primary} />
+              <Text>There is no connection</Text>
             </View>
           )
           : (

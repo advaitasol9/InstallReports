@@ -27,7 +27,6 @@ export default compose(
       const itemId = this.props.navigation.getParam('logOut', null);
       if (itemId) {
         this.props.logOut();
-        this.props.navigation.setParams('logOut', null);
         logout('test-app-1/logout/', this.props.token);
       } else if (this.props.authState.isLoggedIn) {
         this.props.navigation.navigate({ routeName: 'Home' });

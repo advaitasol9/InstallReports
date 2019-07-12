@@ -135,6 +135,10 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-image-picker')
+    implementation project(':@terrylinla_react-native-sketch-canvas')
+    implementation project(':react-native-pdf')
+    implementation project(':rn-fetch-blob')
     implementation project(':@react-native-community_netinfo')
     implementation project(':react-native-fast-image')
     implementation project(':react-native-maps')

@@ -1,4 +1,7 @@
 // ## Generator Components Imports
+import ActivityTitle from './ActivityTitle';
+import ActivityStatus from './ActivityStatus';
+import ActivityInfoSection from './ActivityInfoSection';
 import Button from './Button';
 import RadioGroup from './RadioGroup';
 import Dropdown from './Dropdown';
@@ -9,9 +12,17 @@ import Text from './StyledText';
 import Header from './Header';
 import SideMenu from './SideMenu';
 import PartialModal from './PartialModal';
+import ManagerModal from './ManagerModal';
+import Accordion from './Accordion';
+import FilterItem from './FilterItem';
+import Loading from './Loading';
+
 
 export {
   // ## Generator Components Exports
+  ActivityTitle,
+  ActivityStatus,
+  ActivityInfoSection,
   Button,
   RadioGroup,
   Dropdown,
@@ -22,4 +33,8 @@ export {
   Header,
   SideMenu,
   PartialModal,
+  ManagerModal,
+  Accordion,
+  FilterItem,
+  Loading,
 };

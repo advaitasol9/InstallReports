@@ -4,17 +4,15 @@ import {
   Image, View, StyleSheet, Text, Alert,
 } from 'react-native';
 import { createBottomTabNavigator } from 'react-navigation';
+import FA from 'react-native-vector-icons/FontAwesome5';
 
 import { colors, fonts } from '../../styles';
 
 import WorkOrderScreen from '../workOrder/WorkOrderViewContainer';
 import SearchScreen from '../search/SearchViewContainer';
 import ProfileScreen from '../profile/ProfileViewContainer';
+import Logout from '../logout/LogoutViewContainer';
 
-const iconHome = require('../../../assets/images/tabbar/home.png');
-const iconGrids = require('../../../assets/images/tabbar/grids.png');
-const iconPages = require('../../../assets/images/tabbar/pages.png');
-const iconComponents = require('../../../assets/images/tabbar/components.png');
 
 const hederBackground = require('../../../assets/images/topBarBg-red.png');
 
@@ -93,7 +91,7 @@ export default createBottomTabNavigator(
       },
     },
     Logout: {
-      screen: WorkOrderScreen,
+      screen: Logout,
       navigationOptions: {
         tabBarOnPress: (props) => {
           Alert.alert(
@@ -123,29 +121,32 @@ export default createBottomTabNavigator(
       // eslint-disable-next-line react/prop-types
       tabBarIcon: ({ focused }) => {
         const { routeName } = navigation.state;
-        let iconSource;
+        let iconName;
         switch (routeName) {
           case 'Work Order':
-            iconSource = iconHome;
+            iconName = 'wrench';
             break;
           case 'Search':
-            iconSource = iconGrids;
+            iconName = 'search';
             break;
           case 'Profile':
-            iconSource = iconPages;
+            iconName = 'user-circle';
             break;
           case 'Logout':
-            iconSource = iconComponents;
+            iconName = 'sign-out-alt';
             break;
           default:
-            iconSource = iconComponents;
+            iconName = 'wrench';
         }
         return (
           <View style={styles.tabBarItemContainer}>
-            <Image
-              resizeMode="contain"
-              source={iconSource}
-              style={[styles.tabBarIcon, focused && styles.tabBarIconFocused]}
+            <FA
+              style={{
+                fontSize: 20,
+              }}
+              name={iconName}
+              backgroundColor="transparent"
+              color={focused ? colors.primary : colors.grey}
             />
           </View>
         );
@@ -155,14 +156,12 @@ export default createBottomTabNavigator(
     animationEnabled: false,
     swipeEnabled: false,
     tabBarOptions: {
+      activeTintColor: colors.primary,
       showLabel: true,
       style: {
         backgroundColor: colors.white,
         borderTopWidth: 0.5,
         borderTopColor: '#d6d6d6',
-      },
-      labelStyle: {
-        color: colors.grey,
       },
     },
   },

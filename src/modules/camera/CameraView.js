@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
@@ -11,7 +11,6 @@ import {
   CameraRoll,
 } from 'react-native';
 import { RNCamera } from 'react-native-camera';
-import { connect } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 let factor;
@@ -25,7 +24,6 @@ if (width > 512) {
 let myRef;
 
 export function Camera(props) {
-  console.log(props);
   const flashIcon = () => {
     let icon;
 
@@ -40,7 +38,6 @@ export function Camera(props) {
   };
 
   const takePicture = async () => {
-    console.log(myRef);
     if (myRef) {
       const options = { quality: 0.3, base64: true };
       const data = await myRef.takePictureAsync(options);
@@ -85,7 +82,9 @@ export function Camera(props) {
       <View style={{ flex: 1, position: 'relative', justifyContent: 'flex-end' }}>
         <Image
           source={{ uri: props.photoUri }}
-          style={{ position: 'absolute', left: 0, top: 0, width, height }}
+          style={{
+            position: 'absolute', left: 0, top: 0, width, height,
+          }}
         />
         <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
           <TouchableOpacity
@@ -110,7 +109,7 @@ export function Camera(props) {
               CameraRoll.saveToCameraRoll(props.photoUri);
               const { photos } = props;
               photos.push(props.photoUri);
-              props.addPhoto(photos);
+              props.navigation.state.params.addPhoto(photos);
               props.setPhotoModal(false);
             }}
           >
@@ -164,6 +163,7 @@ export function Camera(props) {
             : RNCamera.Constants.Type.front
         }
         flashMode={cameraFlash()}
+        captureAudio={false}
       />
       <View
         style={{
@@ -181,7 +181,7 @@ export function Camera(props) {
             justifyContent: 'center',
           }}
           onPress={() => {
-            props.navigation.navigate('Details', { screen: props.navigation.state.params.screen, activityId: props.navigation.state.params.activityId });
+            props.navigation.navigate(props.backRoute);
           }}
         >
           <Image
@@ -260,4 +260,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect()(Camera);
+export default (Camera);

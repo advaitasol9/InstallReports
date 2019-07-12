@@ -8,7 +8,7 @@ import colors from './colors';
 import fonts from './fonts';
 import commonStyles from './common';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 // Guideline sizes are based on standard ~5" screen mobile device
 const guidelineBaseWidth: number = 350;
@@ -123,5 +123,5 @@ Assets.loadAssetsGroup('images', {});
 const scale = (size: number): number => (width / guidelineBaseWidth) * size;
 
 export {
-  colors, fonts, scale, commonStyles,
+  colors, fonts, scale, commonStyles, width, height,
 };

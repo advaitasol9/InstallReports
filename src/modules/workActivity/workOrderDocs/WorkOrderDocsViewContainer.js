@@ -3,19 +3,28 @@ import { compose, withState, lifecycle } from 'recompose';
 import { connect } from 'react-redux';
 
 import WorkOrderDocsView from './WorkOrderDocsView';
+import { setActivityId } from '../../workOrder/WorkOrderState';
+import { apiGetJson } from '../../../core/api';
+
 
 export default compose(
   connect(
     state => ({
-      changes: state.workOrder.changesInOffline,
-      connectionStatus: state.app.isConnected,
+      token: state.profile.security_token.token,
+      activityId: state.workOrder.activityId,
     }),
-    dispatch => ({}),
+    dispatch => ({
+      setActivityId: id => dispatch(setActivityId(id)),
+    }),
   ),
-  withState('changesInOffline', 'setChangesInOffline', 0),
+  withState('inProgress', 'setInProgress', false),
+  withState('activityData', 'setActivityData', {}),
   lifecycle({
     componentDidMount() {
-      this.props.setChangesInOffline(this.props.changes.length);
+      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
+        .then((response) => {
+          this.props.setActivityData(response.data);
+        });
     },
   }),
 )(WorkOrderDocsView);

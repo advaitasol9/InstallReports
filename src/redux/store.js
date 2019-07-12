@@ -29,7 +29,7 @@ const enhancer = composeEnhancers(...enhancers);
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['workOrderDetail'],
+  blacklist: ['detailFail', 'detailPartial', 'workOrderQuestion', 'workOrderComment'],
 };
 
 const persistedReducer = persistReducer(persistConfig, reducer);

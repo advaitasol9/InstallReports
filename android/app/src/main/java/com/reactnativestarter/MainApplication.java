@@ -3,6 +3,10 @@ package com.reactnativestarter;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.imagepicker.ImagePickerPackage;
+import com.terrylinla.rnsketchcanvas.SketchCanvasPackage;
+import org.wonday.pdf.RCTPdfView;
+import com.RNFetchBlob.RNFetchBlobPackage;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
 import com.dylanvann.fastimage.FastImageViewPackage;
 import com.airbnb.android.react.maps.MapsPackage;
@@ -32,6 +36,10 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ImagePickerPackage(),
+            new SketchCanvasPackage(),
+            new RCTPdfView(),
+            new RNFetchBlobPackage(),
             new NetInfoPackage(),
             new FastImageViewPackage(),
             new MapsPackage(),

@@ -15,20 +15,20 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 export default function Header({
-  connectionStatus, changesNum, navigation, sortAndFilter, sideBar,
+  connectionStatus, changesNum, navigation, sortAndFilter, sideBar, indicator,
 }) {
   return (
-    <React.Fragment>
-      <View style={styles.header}>
-        <View style={{ alignItems: 'center' }}>
-          <Image
-            style={styles.logo}
-            source={require('../../assets/images/logo.png')}
-          />
-        </View>
-        <View>
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={{ paddingBottom: 12 }}>My Work Orders</Text>
+    <View style={styles.header}>
+      <View style={{ alignItems: 'center' }}>
+        <Image
+          style={styles.logo}
+          source={require('../../assets/images/logo.png')}
+        />
+      </View>
+      <View>
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={{ paddingBottom: 12 }}>My Work Orders</Text>
+          {indicator && (
             <View
               style={[
                 styles.connectionIndicator,
@@ -38,36 +38,36 @@ export default function Header({
                 },
               ]}
             />
-            {!connectionStatus && (
-              <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum}</Text>
-            )}
-            {sideBar && (
-              <TouchableOpacity
-                onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
-                style={{ marginTop: -8, marginLeft: 12 }}
-              >
-                <Image
-                  style={styles.burger}
-                  source={require('../../assets/images/burger1.png')}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-          {sortAndFilter && (
+          )}
+          {indicator && !connectionStatus && (
+            <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum}</Text>
+          )}
+          {sideBar && (
             <TouchableOpacity
-              onPress={() => {
-                console.log(changesNum);
-                navigation.navigate({ routeName: 'Search' });
-              }}
+              onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+              style={{ marginTop: -8, marginLeft: 12 }}
             >
-              <Text style={{ textAlign: 'right', color: colors.primary }}>
-                SORT & FILTER
-              </Text>
+              <Image
+                style={styles.burger}
+                source={require('../../assets/images/burger1.png')}
+              />
             </TouchableOpacity>
           )}
         </View>
+        {sortAndFilter && (
+          <TouchableOpacity
+            onPress={() => {
+              console.log(changesNum);
+              navigation.navigate({ routeName: 'Search' });
+            }}
+          >
+            <Text style={{ textAlign: 'right', color: colors.primary }}>
+              SORT & FILTER
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
-    </React.Fragment>
+    </View>
   );
 }
 

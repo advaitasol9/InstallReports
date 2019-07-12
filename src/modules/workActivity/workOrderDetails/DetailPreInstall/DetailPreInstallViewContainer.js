@@ -1,44 +1,41 @@
 import {
-  compose, setStatic, withState, lifecycle,
+  compose, withState, lifecycle,
 } from 'recompose';
 import { connect } from 'react-redux';
-import { setChanges } from '../../workOrder/WorkOrderState';
-import { apiGetJson } from '../../../core/api';
-import { setPartModalVisible } from '../../AppState';
+import { addPreInstallPhoto } from './DetailPreInstallState';
 
-import WorkOrderDetailsView from './WorkOrderDetailsView';
+import { setChanges, setActivityId } from '../../../workOrder/WorkOrderState';
+import { apiGetJson } from '../../../../core/api';
+import { setPartModalVisible } from '../../../AppState';
+
+import DetailPreInstallView from './DetailPreInstallView';
 
 export default compose(
   connect(
     state => ({
       changes: state.workOrder.changesInOffline,
+      activityId: state.workOrder.activityId,
       connectionStatus: state.app.isConnected,
       token: state.profile.security_token.token,
+      photos: state.detailPartial.photos,
     }),
     dispatch => ({
       setChanges: arr => dispatch(setChanges(arr)),
       setModalVisible: payload => dispatch(setPartModalVisible(payload)),
+      setActivityId: id => dispatch(setActivityId(id)),
+      addPhoto: arr => dispatch(addPreInstallPhoto(arr)),
     }),
   ),
-  setStatic('navigationOptions', () => ({
-    header: null,
-  })),
   withState('changesInOffline', 'setChangesInOffline', 0),
-  withState('screen', 'setScreen', 'Main'),
-  withState('inProgress', 'setInProgress', false),
   withState('activityData', 'setActivityData', {}),
   lifecycle({
     componentDidMount() {
+      console.log(this.props);
       this.props.setChangesInOffline(this.props.changes.length);
-      const screen = this.props.navigation.getParam('screen', null);
-      if (screen) {
-        this.props.setScreen(screen);
-        this.props.setInProgress(true);
-      }
-      apiGetJson(`test-app-1/activities/${this.props.navigation.state.params.activityId}`, this.props.token)
+      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
         .then((response) => {
           this.props.setActivityData(response.data);
         });
     },
   }),
-)(WorkOrderDetailsView);
+)(DetailPreInstallView);
