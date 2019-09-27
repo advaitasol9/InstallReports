@@ -14,7 +14,12 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
+import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
+import RNFetchBlob from 'rn-fetch-blob';
 
+import {
+  apiChangeStatus, apiGet, apiPut, apiPostImage, apiPatchImage, apiPostComment,
+} from '../../../../core/api';
 import { colors } from '../../../../styles';
 import { Button, PartialModal, Header } from '../../../../components';
 
@@ -75,6 +80,8 @@ export default function DetailPartialView(props) {
             multiline
             placeholder="Placeholder..."
             style={[styles.inputStyle, { height: 160 }]}
+            onChangeText={text => props.setComment(text)}
+            value={props.comment}
           />
           <Required />
           <View style={{ marginTop: 24 }}>
@@ -118,11 +125,10 @@ export default function DetailPartialView(props) {
                   { cancelable: true },
                 );
               }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                Add Photo(s)
-              </Text>
-            </Button>
+              textColor={colors.white}
+              textStyle={{ fontSize: 20 }}
+              caption="Add Photo(s)"
+            />
           </View>
           <Required />
           <View style={styles.photoSection}>
@@ -154,29 +160,87 @@ export default function DetailPartialView(props) {
           <Text style={{ fontSize: 16, marginTop: 16 }}>
             Manager on Duty Signeture:
           </Text>
-          <TextInput
-            multiline
-            placeholder="Placeholder..."
-            style={[styles.inputStyle, { height: 80 }]}
+          <RNSketchCanvas
+            containerStyle={[
+              styles.inputStyle,
+              {
+                height: 200,
+                paddingHorizontal: 0,
+                paddingVertical: 0,
+              },
+            ]}
+            canvasStyle={{ backgroundColor: 'transparent', flex: 1 }}
+            defaultStrokeIndex={0}
+            defaultStrokeWidth={5}
+            strokeColor={colors.primary}
+            clearComponent={(
+              <View style={styles.functionButton}>
+                <Text style={{ color: colors.primary }}>
+                  Clear
+                </Text>
+              </View>
+            )}
+            onStrokeEnd={(path) => {
+              const { signature } = props;
+              signature.push(path.path.data);
+              props.setSignature(signature);
+            }}
           />
           <Required />
           <TextInput
             placeholder="Enter name..."
             style={styles.inputStyle}
+            onChangeText={text => props.setName(text)}
+            value={props.name}
           />
           <Required />
           <View style={styles.buttonRow}>
             <Button
-              bgColor={colors.green}
+              bgColor={
+                (props.photos.length === 0 || props.name === '' || props.signature === '' || props.comment === '')
+                  ? '#b1cec1'
+                  : colors.green
+              }
+              disabled={props.photos.length === 0 || props.name === '' || props.signature === '' || props.comment === ''}
               style={{ width: '45%' }}
-              onPress={() => {
-                props.setModalVisible(true);
+              onPress={async () => {
+                await apiChangeStatus('Partial', props.activityId, props.token)
+                  .then((response) => {
+                    const res = response.json();
+                    console.log(response, res);
+                    props.setModalVisible(true);
+                  });
+                const data = `text=${props.commentText}&user_ids=%5B${props.accountId}%5D&undefined=`;
+                apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
+                  console.log(resPostText);
+                  apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
+                    console.log('res   ', res);
+                    apiPut(res.data.url, props.token, props.photos[0]).then((putRes) => {
+                      console.log('putRes', putRes);
+                      RNFetchBlob.fs.stat(props.photos[0].replace('file://', ''))
+                        .then((stats) => {
+                          const formData = new FormData();
+                          formData.append('file_type', 'image/jpeg');
+                          formData.append('name', stats.filename);
+                          formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                          formData.append('size', stats.size);
+                          apiPostImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
+                            console.log('postRes', postRes);
+                            const patchData = `logo_file_id=${postRes.data.activities[0].logo_file_id}`;
+                            patchData.append('logo_file_id', postRes.data.activities[0].logo_file_id);
+                            apiPatchImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}`, patchData, props.token).then((patchRes) => {
+                              console.log('patchRes', patchRes);
+                            });
+                          });
+                        });
+                    });
+                  });
+                });
               }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                Submit
-              </Text>
-            </Button>
+              textColor={colors.white}
+              textStyle={{ fontSize: 20 }}
+              caption="Submit"
+            />
             <Button
               bgColor={colors.red}
               style={{ width: '45%' }}
@@ -184,15 +248,17 @@ export default function DetailPartialView(props) {
                 props.addPhoto([]);
                 props.navigation.navigate('DetailsMain');
               }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                Cancel
-              </Text>
-            </Button>
+              textColor={colors.white}
+              textStyle={{ fontSize: 20 }}
+              caption="Cancel"
+            />
           </View>
         </View>
       </ScrollView>
-      <PartialModal />
+      <PartialModal
+        commentText={props.comment}
+        navigation={props.navigation}
+      />
     </View>
   );
 }
@@ -263,5 +329,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 24,
+  },
+  functionButton: {
+    margin: 16,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
   },
 });

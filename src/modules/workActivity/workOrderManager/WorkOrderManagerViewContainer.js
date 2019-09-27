@@ -21,11 +21,13 @@ export default compose(
   withState('inProgress', 'setInProgress', false),
   withState('activityData', 'setActivityData', {}),
   withState('signature', 'setSignature', []),
+  withState('isLoading', 'setIsloading', true),
   lifecycle({
     componentDidMount() {
       apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-        .then((response) => {
-          this.props.setActivityData(response.data);
+        .then(async (response) => {
+          await this.props.setActivityData(response.data);
+          this.props.setIsloading(false);
         });
     },
   }),

@@ -29,39 +29,41 @@ export default function WorkOrderScreen(props) {
 
   console.log(props.orderList);
 
-  const renderTile = (item, index) => (
-    <TouchableOpacity
-      onPress={() => {
-        props.setActivityId(item.id);
-        props.navigation.navigate('Details');
-      }}
-      style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
-    >
-      <View style={styles.tileLogoContainer}>
-        <Image
-          style={styles.tileLogo}
-          source={require('../../../assets/images/tileLogoExample.png')}
-        />
-      </View>
-      <View style={styles.tileInfoContainer}>
-        <Text style={styles.infoCompany}>{item.name}</Text>
-        <Text style={styles.infoTitle}>{item.notes}</Text>
-        <View style={styles.infoBottomSection}>
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#{item.id}</Text>
-              <Text style={styles.infoBottomText}>
-                {`${item.address_1}, ${item.city}, ${item.state}`}
-              </Text>
+  const renderTile = (item, index) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          props.setActivityId(item.activityId);
+          props.navigation.navigate('Details');
+        }}
+        style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
+      >
+        <View style={styles.tileLogoContainer}>
+          <Image
+            style={styles.tileLogo}
+            source={require('../../../assets/images/tileLogoExample.png')}
+          />
+        </View>
+        <View style={styles.tileInfoContainer}>
+          <Text style={styles.infoCompany}>{item.name}</Text>
+          <Text style={styles.infoTitle}>{item.name}</Text>
+          <View style={styles.infoBottomSection}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#{item.id}</Text>
+                <Text style={styles.infoBottomText}>
+                  {`${item.address_1}, ${item.city}, ${item.state}`}
+                </Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={styles.infoBottomText}>Due {moment(item.date_1).format('DD/MM/YY')}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={styles.infoBottomText}>Due {moment(item.date_1).format('DD/MM/YY')}</Text>
-          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -86,8 +88,22 @@ export default function WorkOrderScreen(props) {
               scrollEventThrottle={16}
               refreshing={false}
               onRefresh={async () => {
-                const data = await apiGetJson('test-app-1/activities/', props.token);
-                props.setOrderList(data.data);
+                const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', props.token);
+                const result = [];
+                await data.data.forEach((activity) => {
+                  if (activity.items.length > 0) {
+                    activity.items.forEach(async (item) => {
+                      console.log(item);
+                      result.push({
+                        ...item,
+                        address_1: activity.address_1,
+                        city: activity.city,
+                        state: activity.state,
+                      });
+                    });
+                  }
+                });
+                props.setOrderList(result);
               }}
               data={props.orderList}
               keyExtractor={item => item.id}

@@ -118,11 +118,10 @@ export default function DetailPartialView(props) {
                   { cancelable: true },
                 );
               }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                Add Photo(s)
-              </Text>
-            </Button>
+              textColor={colors.white}
+              textStyle={{ fontSize: 20 }}
+              caption="Add Photo(s)"
+            />
           </View>
           <Required />
           <View style={styles.photoSection}>
@@ -158,11 +157,10 @@ export default function DetailPartialView(props) {
               onPress={() => {
                 props.setModalVisible(true);
               }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                Submit
-              </Text>
-            </Button>
+              textColor={colors.white}
+              textStyle={{ fontSize: 20 }}
+              caption="Submit"
+            />
             <Button
               bgColor={colors.red}
               style={{ width: '45%' }}
@@ -170,11 +168,10 @@ export default function DetailPartialView(props) {
                 props.addPhoto([]);
                 props.navigation.navigate('DetailsMain');
               }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                Cancel
-              </Text>
-            </Button>
+              textColor={colors.white}
+              textStyle={{ fontSize: 20 }}
+              caption="Cancel"
+            />
           </View>
         </View>
       </ScrollView>

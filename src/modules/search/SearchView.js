@@ -9,6 +9,7 @@ import {
   TextInput,
   Platform,
   ScrollView,
+  Modal,
 } from 'react-native';
 import moment from 'moment';
 import FA from 'react-native-vector-icons/FontAwesome5';
@@ -18,56 +19,8 @@ import { Button, Accordion } from '../../components';
 import { Text } from '../../components/StyledText';
 import { colors, width, height } from '../../styles';
 
-const filterList = [
-  {
-    id: 1,
-    title: 'someTitle 1',
-    numOfOrders: '1',
-  },
-  {
-    id: 2,
-    title: 'someTitle 2',
-    numOfOrders: '2',
-  },
-  {
-    id: 3,
-    title: 'someTitle 3',
-    numOfOrders: '3',
-  },
-  {
-    id: 4,
-    title: 'someTitle 4',
-    numOfOrders: '4',
-  },
-  {
-    id: 5,
-    title: 'someTitle 5',
-    numOfOrders: '5',
-  },
-  {
-    id: 6,
-    title: 'someTitle 6',
-    numOfOrders: '6',
-  },
-  {
-    id: 7,
-    title: 'someTitle 7',
-    numOfOrders: '7',
-  },
-  {
-    id: 8,
-    title: 'someTitle 8',
-    numOfOrders: '8',
-  },
-  {
-    id: 9,
-    title: 'someTitle 9',
-    numOfOrders: '9',
-  },
-];
-
 const SearhHeader = ({
-  connectionStatus, orderList, setSearchResult, searchResult, setFiltersOpen, filtersOpen,
+  connectionStatus, orderList, setSearchResult, searchResult, setFiltersOpen, filtersOpen, token,
 }) => (
   <View style={styles.headerContainer}>
     <View style={styles.headerTop}>
@@ -86,9 +39,13 @@ const SearhHeader = ({
             color: colors.grey,
             padding: 0,
           }}
-          onChangeText={(text) => {
-            if (connectionStatus) {
-              console.log(text);
+          onChangeText={async (text) => {
+            if (text === '') {
+              const response = await apiGetJson('test-app-1/activities', token);
+              setSearchResult(response.data);
+            } else if (connectionStatus) {
+              const response = await apiGetJson(`test-app-1/activities?search={"name":"${text}"}`, token);
+              setSearchResult(response.data);
             } else if (orderList !== [] && !connectionStatus) {
               const newResult = [];
               orderList.forEach((item) => {
@@ -119,123 +76,123 @@ const SearhHeader = ({
 );
 
 const SearchSideFilter = props => (
-  <View
-    style={[
-      styles.sideFilterContainer,
-      {
-        width: props.filtersOpen ? width : 0,
-        height: props.filtersOpen ? height : 0,
-      },
-    ]}
+  <Modal
+    animationType="fade"
+    transparent
+    visible={props.filtersOpen}
   >
     <View
       style={[
-        styles.sideFilterBackground,
+        styles.sideFilterContainer,
         {
-          width: props.filtersOpen ? width : 0,
-          height: props.filtersOpen ? height : 0,
+          width,
+          height,
+          backgroundColor: 'rgba(0,0,0,0.75)',
         },
       ]}
-    />
-    <View
-      style={{
-        width: width * 0.85,
-        height: height - 50,
-        backgroundColor: colors.white,
-        paddingBottom: Platform.OS === 'android' ? 20 : 0,
-      }}
     >
-      <View style={styles.sideFilterHeader}>
-        <Text style={{ fontSize: 16 }}>{props.searchResult.length} Results</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity
-            onPress={() => {
-              props.setClientFilter([]);
-              props.setDateFilter([]);
-              props.setProjectFilter([]);
-              props.setLocationFilter([]);
-              console.log(
-                props.clientFilter, '   ',
-                props.dateFilter, '   ',
-                props.projectFilter, '   ',
-                props.locationFilter,
-              );
-            }}
-          >
-            <Text style={{ fontSize: 16, paddingRight: 12, color: colors.grey }}>CLEAR ALL</Text>
-          </TouchableOpacity>
-          <Button
-            bgColor={colors.blue}
-            onPress={() => {
-              props.setFiltersOpen(!props.filtersOpen);
-              console.log(props.setFiltersOpen, '   ', props.filtersOpen);
-            }}
-          >
-            <Text style={{ fontSize: 16, color: colors.white }}>Done</Text>
-          </Button>
+      <View
+        style={{
+          width: width * 0.85,
+          height,
+          backgroundColor: colors.white,
+          paddingBottom: Platform.OS === 'android' ? 20 : 0,
+        }}
+      >
+        <View style={styles.sideFilterHeader}>
+          <Text style={{ fontSize: 16 }}>{props.searchResult.length} Results</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity
+              onPress={() => {
+                props.setNotesFilter([]);
+                props.setCitiesFilter([]);
+                props.setStatesFilter([]);
+              }}
+            >
+              <Text style={{ fontSize: 16, paddingRight: 12, color: colors.grey }}>CLEAR ALL</Text>
+            </TouchableOpacity>
+            <Button
+              bgColor={colors.blue}
+              onPress={async () => {
+                console.log(props.citiesFilter.join('","'));
+                const response = await apiGetJson(
+                  `test-app-1/activities?search={${props.citiesFilter.length > 0 ? `"city":"${props.citiesFilter[0]}"` : ''}${props.statesFilter.length > 0 && props.citiesFilter.length > 0 ? ',' : ''}${props.statesFilter.length > 0 ? `"state":"${props.statesFilter[0]}"` : ''}${props.notesFilter.length > 0 && props.statesFilter.length > 0 ? ',' : ''}${props.notesFilter.length > 0 ? `"notes":"${props.notesFilter[0]}"` : ''}}`,
+                  props.token,
+                );
+                console.log(response);
+                props.setSearchResult(response.data);
+                props.setFiltersOpen(!props.filtersOpen);
+                props.setNotesFilter([]);
+                props.setCitiesFilter([]);
+                props.setStatesFilter([]);
+              }}
+              caption="Done"
+              textColor={colors.white}
+            />
+          </View>
         </View>
+        <ScrollView>
+          <Accordion
+            title="Cities"
+            setFilters={props.setCitiesFilter}
+            filter={props.citiesFilter}
+            column="city"
+          />
+          <Accordion
+            title="Notes"
+            setFilters={props.setNotesFilter}
+            filter={props.notesFilter}
+            column="notes"
+          />
+          <Accordion
+            title="States"
+            setFilters={props.setStatesFilter}
+            filter={props.statesFilter}
+            column="state"
+          />
+        </ScrollView>
       </View>
-      <ScrollView>
-        <Accordion
-          title="Client"
-          data={filterList}
-          setFilters={props.setClientFilter}
-          filter={props.clientFilter}
-        />
-        <Accordion
-          title="Project"
-          data={filterList}
-          setFilters={props.setProjectFilter}
-          filter={props.projectFilter}
-        />
-        <Accordion
-          title="Due Date"
-          data={filterList}
-          setFilters={props.setDateFilter}
-          filter={props.dateFilter}
-        />
-        <Accordion
-          title="Location"
-          data={filterList}
-          setFilters={props.setLocationFilter}
-          filter={props.locationFilter}
-        />
-      </ScrollView>
     </View>
-  </View>
+  </Modal>
 );
 
 export default function WorkOrderScreen(props) {
-  const renderTile = (item, index) => (
-    <TouchableOpacity
-      onPress={() => props.navigation.navigate('Details', { activityId: item.id })}
-      style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
-    >
-      <View style={styles.tileLogoContainer}>
-        <Image
-          style={styles.tileLogo}
-          source={require('../../../assets/images/tileLogoExample.png')}
-        />
-      </View>
-      <View style={styles.tileInfoContainer}>
-        <Text style={styles.infoCompany}>{item.name}</Text>
-        <Text style={styles.infoTitle}>{item.notes}</Text>
-        <View style={styles.infoBottomSection}>
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#{item.id}</Text>
-              <Text style={styles.infoBottomText}>
-                {`${item.address_1}, ${item.city}, ${item.state}`}
-              </Text>
+  const renderTile = (item, index) => {
+    console.log(item);
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          props.setActivityId(item.id);
+          props.navigation.navigate('Details');
+        }}
+        style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
+      >
+        <View style={styles.tileLogoContainer}>
+          <Image
+            style={styles.tileLogo}
+            source={require('../../../assets/images/tileLogoExample.png')}
+          />
+        </View>
+        <View style={styles.tileInfoContainer}>
+          <Text style={styles.infoCompany}>{item.name}</Text>
+          <Text style={styles.infoTitle}>{item.name}</Text>
+          <View style={styles.infoBottomSection}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#{item.id}</Text>
+                <Text style={styles.infoBottomText}>
+                  {`${item.address_1}, ${item.city}, ${item.state}`}
+                </Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={styles.infoBottomText}>Due {moment(item.date_1).format('DD/MM/YY')}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={styles.infoBottomText}>Due {moment(item.date_1).format('DD/MM/YY')}</Text>
-          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <React.Fragment>
@@ -248,7 +205,11 @@ export default function WorkOrderScreen(props) {
           searchResult={props.searchResult}
           setFiltersOpen={props.setFiltersOpen}
           filtersOpen={props.filtersOpen}
+          token={props.token}
         />
+
+
+        { console.log(props.searchResult, props.orderList) }
         {
           props.orderList === [] && props.connectionStatus
             ? (
@@ -376,17 +337,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   sideFilterContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
     alignItems: 'flex-end',
-  },
-  sideFilterBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    opacity: 0.3,
-    backgroundColor: colors.black,
   },
   sideFilterHeader: {
     flexDirection: 'row',

@@ -1,18 +1,17 @@
-package com.reactnativestarter;
+package com.flatlogic.dsma;
 
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.github.reactnativecommunity.location.RNLocationPackage;
+import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.terrylinla.rnsketchcanvas.SketchCanvasPackage;
 import org.wonday.pdf.RCTPdfView;
 import com.RNFetchBlob.RNFetchBlobPackage;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
-import com.dylanvann.fastimage.FastImageViewPackage;
-import com.airbnb.android.react.maps.MapsPackage;
 import com.horcrux.svg.SvgPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
-import com.reactcommunity.rnlocalize.RNLocalizePackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.facebook.react.ReactNativeHost;
@@ -36,16 +35,15 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNLocationPackage(),
+            new GeolocationPackage(),
             new ImagePickerPackage(),
             new SketchCanvasPackage(),
             new RCTPdfView(),
             new RNFetchBlobPackage(),
             new NetInfoPackage(),
-            new FastImageViewPackage(),
-            new MapsPackage(),
             new SvgPackage(),
             new VectorIconsPackage(),
-            new RNLocalizePackage(),
             new LinearGradientPackage(),
             new RNGestureHandlerPackage(),
             new RNCameraPackage()

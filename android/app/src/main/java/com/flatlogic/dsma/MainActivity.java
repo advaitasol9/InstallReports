@@ -1,4 +1,4 @@
-package com.reactnativestarter;
+package com.flatlogic.dsma;
 
 import com.facebook.react.ReactActivity;
 

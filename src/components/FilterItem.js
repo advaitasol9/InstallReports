@@ -16,11 +16,7 @@ const PartialModal = (props) => {
         console.log(props);
         if (!props.checked) {
           const arr = props.filter;
-          arr.push({
-            id: props.id,
-            numOfOrder: props.numOfOrder,
-            title: props.title,
-          });
+          arr.push(props.title);
           console.log(arr);
           props.setFilters(arr);
         } else {

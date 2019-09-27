@@ -23,6 +23,7 @@ export const LOG_IN = 'AppState/LOG_IN';
 export const LOG_OUT = 'AppState/LOG_OUT';
 export const IS_CONNECTED = 'AppState/IS_CONNECTED';
 export const IS_PART_MODAL = 'AppState/IS_PART_MODAL';
+export const IS_FAILED_MODAL = 'AppState/IS_FAILED_MODAL';
 export const IS_MANAGER_MODAL = 'AppState/IS_MANAGER_MODAL';
 
 export function logIn(): ActionType {
@@ -47,6 +48,13 @@ export function setConnection(payload): ActionType {
 export function setPartModalVisible(payload): ActionType {
   return {
     type: IS_PART_MODAL,
+    payload,
+  };
+}
+
+export function setFailedModalVisible(payload): ActionType {
+  return {
+    type: IS_FAILED_MODAL,
     payload,
   };
 }
@@ -79,6 +87,11 @@ export default function AppStateReducer(
         isConnected: action.payload,
       };
     case IS_PART_MODAL:
+      return {
+        ...state,
+        isPartModal: action.payload,
+      };
+    case IS_FAILED_MODAL:
       return {
         ...state,
         isPartModal: action.payload,

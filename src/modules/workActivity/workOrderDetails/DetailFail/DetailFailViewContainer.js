@@ -6,7 +6,7 @@ import { addFailPhoto } from './DetailFailState';
 
 import { setChanges, setActivityId } from '../../../workOrder/WorkOrderState';
 import { apiGetJson } from '../../../../core/api';
-import { setPartModalVisible } from '../../../AppState';
+import { setFailedModalVisible } from '../../../AppState';
 
 import DetailFailView from './DetailFailView';
 
@@ -21,13 +21,14 @@ export default compose(
     }),
     dispatch => ({
       setChanges: arr => dispatch(setChanges(arr)),
-      setModalVisible: payload => dispatch(setPartModalVisible(payload)),
+      setModalVisible: payload => dispatch(setFailedModalVisible(payload)),
       setActivityId: id => dispatch(setActivityId(id)),
       addPhoto: arr => dispatch(addFailPhoto(arr)),
     }),
   ),
   withState('changesInOffline', 'setChangesInOffline', 0),
   withState('activityData', 'setActivityData', {}),
+  withState('comment', 'setComment', ''),
   lifecycle({
     componentDidMount() {
       console.log(this.props);

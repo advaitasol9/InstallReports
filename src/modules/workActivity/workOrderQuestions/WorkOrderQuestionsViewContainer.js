@@ -23,12 +23,14 @@ export default compose(
   withState('changesInOffline', 'setChangesInOffline', 0),
   withState('inProgress', 'setInProgress', false),
   withState('activityData', 'setActivityData', {}),
+  withState('isLoading', 'setIsloading', true),
   lifecycle({
     componentDidMount() {
       this.props.setChangesInOffline(this.props.changes.length);
       apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-        .then((response) => {
-          this.props.setActivityData(response.data);
+        .then(async (response) => {
+          await this.props.setActivityData(response.data);
+          this.props.setIsloading(false);
         });
     },
   }),

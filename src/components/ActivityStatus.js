@@ -3,21 +3,13 @@ import React from 'react';
 import {
   View, StyleSheet, Text,
 } from 'react-native';
-
 import { colors } from '../styles';
 
 const colorSelect = (status) => {
-  if (status === 3) {
+  if (status === 2) {
     return colors.yellow;
   }
   return 'transparent';
-};
-
-const textSelect = (status) => {
-  if (status === 3) {
-    return 'In Progress';
-  }
-  return 'In Progress';
 };
 
 const ActivityStatus = props => (
@@ -25,13 +17,14 @@ const ActivityStatus = props => (
     style={[
       styles.container,
       {
-        backgroundColor: colorSelect(props.status),
-        display: props.status !== 3 ? 'none' : 'flex',
+        backgroundColor: colors.yellow,
+        display: 'flex',
       },
     ]}
   >
+    {console.log(props.status)}
     <Text style={styles.statusText}>
-      Work Order - {textSelect(props.status)}
+      Work Order - {props.status}
     </Text>
   </View>
 );

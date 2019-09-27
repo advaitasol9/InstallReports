@@ -1,4 +1,5 @@
 // ## Generator Components Imports
+import FailedModal from './FailedModal';
 import ActivityTitle from './ActivityTitle';
 import ActivityStatus from './ActivityStatus';
 import ActivityInfoSection from './ActivityInfoSection';
@@ -20,6 +21,7 @@ import Loading from './Loading';
 
 export {
   // ## Generator Components Exports
+  FailedModal,
   ActivityTitle,
   ActivityStatus,
   ActivityInfoSection,

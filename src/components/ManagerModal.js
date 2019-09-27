@@ -2,12 +2,11 @@ import React from 'react';
 import { compose } from 'recompose';
 import { connect } from 'react-redux';
 import {
-  View, Dimensions, StyleSheet, Text,
+  View, Dimensions, StyleSheet, Text, Modal,
 } from 'react-native';
 
 import Button from './Button';
 import { setManagerModalVisible } from '../modules/AppState';
-import { apiPost } from '../core/api';
 
 import { colors } from '../styles';
 
@@ -19,29 +18,35 @@ const ManagerModal = (props) => {
   console.log(props);
   if (props.isModalVisible) {
     return (
-      <View style={styles.modalContainer}>
-        <View style={styles.background} />
-        <View style={styles.modalForm}>
-          <Text style={styles.modalTitle}>Work Order Complete!</Text>
-          <Text style={styles.modalText}>
-            Thank you! This work order is now complete and will be submitted for internal review.
-            It will be removed from the active work order list.
-          </Text>
-          <View style={styles.buttonRow}>
-            <Button
-              bgColor={colors.green}
-              style={{ width: '100%' }}
-              onPress={() => {
-                props.setModalVisible(false);
-              }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                OK
-              </Text>
-            </Button>
+      <Modal
+        animationType="fade"
+        transparent
+        visible
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.background} />
+          <View style={styles.modalForm}>
+            <Text style={styles.modalTitle}>Work Order Complete!</Text>
+            <Text style={styles.modalText}>
+              Thank you! This work order is now complete and will be submitted for internal review.
+              It will be removed from the active work order list.
+            </Text>
+            <View style={styles.buttonRow}>
+              <Button
+                bgColor={colors.green}
+                style={{ width: '100%' }}
+                onPress={() => {
+                  props.setModalVisible(false);
+                  props.navigation.navigate('Work Order');
+                }}
+                textColor={colors.white}
+                caption="OK"
+                textStyle={{ fontSize: 20 }}
+              />
+            </View>
           </View>
         </View>
-      </View>
+      </Modal>
     );
   }
   return null;

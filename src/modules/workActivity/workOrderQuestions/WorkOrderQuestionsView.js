@@ -9,6 +9,7 @@ import {
   Alert,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
@@ -48,21 +49,21 @@ export default function WorkOrderQuestionsView(props) {
         navigation={props.navigation}
         sideBar
       />
-      <React.Fragment>
+      <ScrollView style={{ width: '100%' }}>
         <ActivityInfoSection
           navigation={props.navigation}
           activityData={props.activityData}
         />
         {
-          props.status === 3 && (
+          props.status !== 'Open' && (
             <React.Fragment>
-              <ActivityStatus status={props.status} />
+              <ActivityStatus status={props.activityData.status} />
               <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
             </React.Fragment>
           )
         }
         <ActivityTitle title="Manager on Duty Feedback" />
-        <ScrollView style={{ backgroundColor: colors.lightGray, width: '100%' }}>
+        <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
           <View style={styles.scrollContainer}>
             <Text>1. Did you take BEFORE picture? If NO please answer why</Text>
             <TextInput
@@ -110,11 +111,10 @@ export default function WorkOrderQuestionsView(props) {
                     { cancelable: true },
                   );
                 }}
-              >
-                <Text style={{ fontSize: 20, color: colors.white }}>
-                  Add Photo(s)
-                </Text>
-              </Button>
+                textColor={colors.white}
+                textStyle={{ fontSize: 20 }}
+                caption="Add Photo(s)"
+              />
             </View>
             <View style={styles.photoSection}>
               { props.photos.map(photo => renderPhoto(photo)) }
@@ -140,8 +140,8 @@ export default function WorkOrderQuestionsView(props) {
               />
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </React.Fragment>
+        </View>
+      </ScrollView>
     </View>
   );
 }

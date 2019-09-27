@@ -1,20 +1,15 @@
 import React from 'react';
-import LinearGradient from 'react-native-linear-gradient';
 import {
   Image,
   StyleSheet,
   TouchableOpacity,
   View,
   Text,
-  ActivityIndicator,
 } from 'react-native';
 
-import { colors, fonts } from '../styles';
-
-const borderRadius = 40;
+import { colors } from '../styles';
 
 export default function RNSButton(props) {
-  const caption = props.caption && props.caption.toUpperCase();
   let icon;
   if (props.icon) {
     icon = (
@@ -22,118 +17,45 @@ export default function RNSButton(props) {
     );
   }
 
-  let content;
-
-  if (props.bordered) {
-    const borderedStyle = [
-      styles.button,
-      props.small && styles.buttonSmall,
-      styles.border,
-      props.primary && {
-        borderColor: colors.primary,
-      },
-      props.secondary && {
-        borderColor: colors.secondary,
-      },
-      props.bgColor && {
-        borderColor: props.bgColor,
-      },
-      props.rounded && styles.rounded,
-    ];
-    const textStyle = [
-      styles.caption,
-      props.small && styles.captionSmall,
-      styles.secondaryCaption,
-      icon && styles.captionWithIcon,
-      props.primary && {
-        color: colors.primary,
-      },
-      props.secondary && {
-        color: colors.secondary,
-      },
-      props.bgColor && {
-        color: props.bgColor,
-      },
-      props.textColor && {
-        color: props.textColor,
-      },
-    ];
-
-    content = (
-      <View style={borderedStyle}>
-        {icon && <View>{icon}</View>}
-        {props.loading && <ActivityIndicator color="white" />}
-        {!props.loading && props.caption && (
-          <Text style={textStyle}>{caption}</Text>
-        )}
-        {props.children && props.children}
-      </View>
-    );
-  } else {
-    const isPrimary = props.primary || (!props.primary && !props.secondary);
-    let gradientArray =
-      props.bgGradientStart && props.bgGradientEnd
-        ? [props.bgGradientStart, props.bgGradientEnd]
-        : undefined;
-
-    if (!gradientArray) {
-      gradientArray = isPrimary
-        ? [colors.primaryGradientStart, colors.primaryGradientEnd]
-        : [colors.secondaryGradientStart, colors.secondaryGradientEnd];
-    }
-
-    if (props.bgColor) {
-      gradientArray = [props.bgColor, props.bgColor];
-    }
-
-    content = (
-      <LinearGradient
-        start={{ x: 0.5, y: 1 }}
-        end={{ x: 1, y: 1 }}
-        colors={gradientArray}
-        style={[
-          styles.button,
-          props.small && styles.buttonSmall,
-          styles.primaryButton,
-          props.rounded && { borderRadius },
-          props.action && styles.action,
-        ]}
-      >
-        {icon && <View>{icon}</View>}
-        {props.loading && <ActivityIndicator color="white" />}
-        {!props.loading && props.caption && (
-          <Text
-            style={[
-              styles.caption,
-              props.small && styles.captionSmall,
-              styles.secondaryCaption,
-              icon && styles.captionWithIcon,
-              props.primary && {
-                color: colors.primary,
-              },
-              props.secondary && {
-                color: colors.secondary,
-              },
-              props.bgColor && {
-                color: props.bgColor,
-              },
-              props.textColor && {
-                color: props.textColor,
-              },
-            ]}
-          >
-            {caption}
-          </Text>
-        )}
-        {!props.loading && props.children && props.children}
-      </LinearGradient>
-    );
-  }
+  const borderedStyle = [
+    styles.button,
+    props.small && styles.buttonSmall,
+    styles.border,
+    props.primary && {
+      borderColor: colors.primary,
+    },
+    props.secondary && {
+      borderColor: colors.secondary,
+    },
+    props.bgColor && {
+      borderColor: props.bgColor,
+    },
+    props.rounded && styles.rounded,
+  ];
+  const textStyle = [
+    styles.caption,
+    props.small && styles.captionSmall,
+    styles.secondaryCaption,
+    icon && styles.captionWithIcon,
+    props.primary && {
+      color: colors.primary,
+    },
+    props.secondary && {
+      color: colors.secondary,
+    },
+    props.bgColor && {
+      color: props.bgColor,
+    },
+    props.textColor && {
+      color: props.textColor,
+    },
+  ];
 
   return (
     <TouchableOpacity
       accessibilityTraits="button"
       onPress={props.onPress}
+      disabled={props.disabled}
       activeOpacity={0.8}
       style={[
         styles.container,
@@ -142,7 +64,27 @@ export default function RNSButton(props) {
         props.style,
       ]}
     >
-      {content}
+      <View
+        style={[
+          styles.button,
+          props.small && styles.buttonSmall,
+          styles.border,
+          { backgroundColor: props.bgColor },
+          props.primary && {
+            borderColor: colors.primary,
+          },
+          props.secondary && {
+            borderColor: colors.secondary,
+          },
+          props.bgColor && {
+            borderColor: props.bgColor,
+          },
+          props.rounded && styles.rounded,
+        ]}
+      >
+        {icon && <View>{icon}</View>}
+        <Text style={[textStyle, props.textStyle]}>{props.caption}</Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -191,7 +133,6 @@ const styles = StyleSheet.create({
   caption: {
     letterSpacing: 1,
     fontSize: 15,
-    fontFamily: fonts.primaryBold,
   },
   captionSmall: {
     fontSize: 12,

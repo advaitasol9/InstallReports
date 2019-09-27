@@ -25,14 +25,34 @@ export default compose(
   ),
   withState('changesInOffline', 'setChangesInOffline', 0),
   withState('activityData', 'setActivityData', {}),
+  withState('isLoading', 'setIsloading', true),
   withState('inProgress', 'setInProgress', false),
+  withState('details', 'setDetails', []),
   lifecycle({
-    componentDidMount() {
+    async componentDidMount() {
       console.log(this.props);
       this.props.setChangesInOffline(this.props.changes.length);
-      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
+      await apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
         .then((response) => {
+          console.log(response);
+          if (
+            response.data.status !== 'Open'
+            || response.data.status !== 'Open_Rejecte'
+            || response.data.status !== 'Open_Partial'
+          ) {
+            this.props.setInProgress(true);
+          }
           this.props.setActivityData(response.data);
+          this.props.setIsloading(false);
+        });
+      await apiGetJson(
+        `test-app-1/activities/${this.props.activityId}/details`,
+        this.props.token,
+        'multipart/form-data',
+      )
+        .then((response) => {
+          console.log(response);
+          this.props.setDetails(response.data[0]);
         });
     },
   }),

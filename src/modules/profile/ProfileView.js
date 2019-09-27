@@ -2,9 +2,9 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  Image,
 } from 'react-native';
 
+import { colors } from '../../styles';
 import { Text } from '../../components/StyledText';
 
 export default function ProfileScreen() {
@@ -21,11 +21,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../../assets/images/background-red.png')}
-        style={styles.bgImage}
-        resizeMode="cover"
-      />
       <View style={styles.section}>
         <Text size={30} bold white style={styles.title}>
           Profile Screen
@@ -40,10 +35,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-around',
-  },
-  bgImage: {
-    flex: 1,
-    position: 'absolute',
+    backgroundColor: colors.lightGray,
   },
   section: {
     flex: 1,

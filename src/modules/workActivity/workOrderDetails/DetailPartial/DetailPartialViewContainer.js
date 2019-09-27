@@ -28,6 +28,9 @@ export default compose(
   ),
   withState('changesInOffline', 'setChangesInOffline', 0),
   withState('activityData', 'setActivityData', {}),
+  withState('name', 'setName', ''),
+  withState('signature', 'setSignature', []),
+  withState('comment', 'setComment', ''),
   lifecycle({
     componentDidMount() {
       console.log(this.props);

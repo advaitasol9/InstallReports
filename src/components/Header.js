@@ -26,8 +26,8 @@ export default function Header({
         />
       </View>
       <View>
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={{ paddingBottom: 12 }}>My Work Orders</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          <Text>My Work Orders</Text>
           {indicator && (
             <View
               style={[
@@ -45,7 +45,7 @@ export default function Header({
           {sideBar && (
             <TouchableOpacity
               onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
-              style={{ marginTop: -8, marginLeft: 12 }}
+              style={{ marginLeft: 12, alignItems: 'center' }}
             >
               <Image
                 style={styles.burger}
@@ -98,8 +98,8 @@ const styles = {
     elevation: 5,
   },
   logo: {
-    height: 60,
-    aspectRatio: 1.5,
+    height: 30,
+    aspectRatio: 4,
     resizeMode: 'contain',
   },
   burger: {

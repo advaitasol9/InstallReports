@@ -9,7 +9,6 @@ import {
   Platform,
   LayoutAnimation,
   TouchableOpacity,
-  ImageBackground,
   Linking,
 } from 'react-native';
 
@@ -50,6 +49,7 @@ export default class AuthScreen extends React.Component {
     formData.append('email', email);
     formData.append('password', password);
     auth('test-app-1/login/', formData).then((response) => {
+      console.log(response);
       if (response.errorCode) {
         Alert.alert('A valid email and password must be entered to log in.');
         this.props.setPassword('');
@@ -95,12 +95,15 @@ export default class AuthScreen extends React.Component {
 
   render() {
     return (
-      <ImageBackground
-        source={require('../../../assets/images/background-red.png')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
+      <View style={styles.backgroundImage}>
         <View style={styles.container}>
+          <Text
+            style={{
+              position: 'absolute', right: 32, top: 24, color: 'red', fontSize: 20,
+            }}
+          >
+            v 0.3
+          </Text>
           <View style={[styles.section, { paddingTop: 30 }]}>
             <Animated.Image
               resizeMode="contain"
@@ -147,7 +150,6 @@ export default class AuthScreen extends React.Component {
                   this.setFormData(this.props.password, this.props.email);
                 }}
               />
-
               {!this.state.isKeyboardVisible && (
                 <TouchableOpacity
                   onPress={() => {
@@ -168,7 +170,7 @@ export default class AuthScreen extends React.Component {
             </Animated.View>
           </Animated.View>
         </View>
-      </ImageBackground>
+      </View>
     );
   }
 }
@@ -181,6 +183,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   backgroundImage: {
+    backgroundColor: '#808080',
     flex: 1,
   },
   section: {

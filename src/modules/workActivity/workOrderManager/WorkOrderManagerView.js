@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  StyleSheet, View, Text, StatusBar, ScrollView, TextInput,
+  StyleSheet, View, Text, StatusBar, ScrollView, TextInput, ActivityIndicator,
 } from 'react-native';
 import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
 import { Dropdown } from 'react-native-material-dropdown';
@@ -14,6 +14,7 @@ import {
   ActivityTitle,
   ActivityStatus,
 } from '../../../components';
+import { apiChangeStatus } from '../../../core/api';
 
 export default function WorkOrderManagerView(props) {
   console.log(props);
@@ -24,21 +25,21 @@ export default function WorkOrderManagerView(props) {
         navigation={props.navigation}
         sideBar
       />
-      <React.Fragment>
+      <ScrollView style={{ width: '100%' }}>
         <ActivityInfoSection
           navigation={props.navigation}
           activityData={props.activityData}
         />
         {
-          props.status === 3 && (
+          props.status !== 'Open' && (
             <React.Fragment>
-              <ActivityStatus status={props.status} />
+              <ActivityStatus status={props.activityData.status} />
               <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
             </React.Fragment>
           )
         }
         <ActivityTitle title="Manager on Duty Feedback" />
-        <ScrollView style={{ backgroundColor: colors.lightGray, width: '100%' }}>
+        <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
           <View style={[styles.scrollContainer, { paddingBottom: 8 }]}>
             <Text>Was the installer friendly and professional?</Text>
             <Dropdown
@@ -113,18 +114,23 @@ export default function WorkOrderManagerView(props) {
             <Button
               bgColor={colors.green}
               onPress={() => {
-                console.log(props);
+                apiChangeStatus('Complete', props.activityId, props.token)
+                  .then((response) => {
+                    const res = response.json();
+                    if (res.data === null) {
+                      props.navigation.navigate('Work Order');
+                    }
+                  });
                 props.setModalVisible(true);
               }}
-            >
-              <Text style={{ fontSize: 20, color: colors.white }}>
-                Submit
-              </Text>
-            </Button>
+              textColor={colors.white}
+              textStyle={{ fontSize: 20 }}
+              caption="Submit"
+            />
           </View>
-        </ScrollView>
-        <ManagerModal />
-      </React.Fragment>
+        </View>
+      </ScrollView>
+      <ManagerModal />
     </View>
   );
 }
