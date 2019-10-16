@@ -45,22 +45,29 @@ export default class AuthScreen extends React.Component {
   }
 
   setFormData(password, email) {
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('password', password);
-    auth('test-app-1/login/', formData).then((response) => {
-      console.log(response);
-      if (response.errorCode) {
-        Alert.alert('A valid email and password must be entered to log in.');
-        this.props.setPassword('');
-      } else {
-        this.props.setPassword('');
-        this.props.setEmail('');
-        this.props.setUserInfo(response);
-        this.props.logIn();
-        this.props.navigation.navigate({ routeName: 'Home' });
-      }
-    });
+    if (!this.props.connectionStatus) {
+      Alert.alert('There is no connection.');
+    } else {
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
+      auth('test-app-1/login/', formData).then((response) => {
+        console.log(response);
+        if (!this.props.connectionStatus) {
+          Alert.alert('There is no connection');
+        }
+        if (response.errorCode) {
+          Alert.alert('A valid email and password must be entered to log in.');
+          this.props.setPassword('');
+        } else {
+          this.props.setPassword('');
+          this.props.setEmail('');
+          this.props.setUserInfo(response);
+          this.props.logIn();
+          this.props.navigation.navigate({ routeName: 'Home' });
+        }
+      });
+    }
   }
 
   fadeIn(delay, from = 0) {
@@ -99,10 +106,10 @@ export default class AuthScreen extends React.Component {
         <View style={styles.container}>
           <Text
             style={{
-              position: 'absolute', right: 32, top: 24, color: 'red', fontSize: 20,
+              position: 'absolute', right: 32, top: 24, color: 'black', fontSize: 12,
             }}
           >
-            v 0.3
+            v 0.5
           </Text>
           <View style={[styles.section, { paddingTop: 30 }]}>
             <Animated.Image

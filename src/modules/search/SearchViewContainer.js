@@ -1,7 +1,7 @@
 import { compose, lifecycle, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { apiGetJson } from '../../core/api';
-import { setOrderList, setActivityId } from '../workOrder/WorkOrderState';
+import { setOrderList, setActivityId, setItemId } from '../workOrder/WorkOrderState';
 
 
 import SearchView from './SearchView';
@@ -16,12 +16,13 @@ export default compose(
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
       setActivityId: id => dispatch(setActivityId(id)),
+      setItemId: id => dispatch(setItemId(id)),
     }),
   ),
   withState('searchResult', 'setSearchResult', []),
   withState('searchText', 'setSearchText', ''),
   withState('filtersOpen', 'setFiltersOpen', false),
-  withState('notesFilter', 'setNotesFilter', []),
+  withState('datesFilter', 'setDatesFilter', []),
   withState('citiesFilter', 'setCitiesFilter', []),
   withState('statesFilter', 'setStatesFilter', []),
   lifecycle({
@@ -30,16 +31,12 @@ export default compose(
         const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', this.props.token);
         const result = [];
         await data.data.forEach((activity) => {
-          if (activity.items.length > 0) {
-            activity.items.forEach(async (item) => {
-              console.log(item);
-              result.push({
-                ...item,
-                address_1: activity.address_1,
-                city: activity.city,
-                state: activity.state,
-              });
-            });
+          if (activity.items.length > 0
+            && activity.status !== 'Partial'
+            && activity.status !== 'Failed'
+            && activity.status !== 'Complete'
+          ) {
+            result.push(activity);
           }
         });
         this.props.setSearchResult(result);

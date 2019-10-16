@@ -14,6 +14,7 @@
     "no-use-before-define": "off",
     "react/prop-types": "off",
     "global-require": "off",
-    "no-underscore-dangle": "off"
+    "no-underscore-dangle": "off",
+    "no-restricted-syntax": "off"
   }
 }

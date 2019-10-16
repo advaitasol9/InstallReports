@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 
 import Button from './Button';
-import { setPartModalVisible } from '../modules/AppState';
+import { setIncompleteModalVisible } from '../modules/AppState';
 
 import { colors } from '../styles';
 
@@ -15,35 +15,34 @@ const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
 export const screenWidth = width;
 
-const FailedModal = (props) => {
+const ManagerModal = (props) => {
   console.log(props);
-  if (props.isPartModalVisible) {
+  if (props.isModalVisible) {
     return (
       <Modal
         animationType="fade"
         transparent
         visible
       >
-        <View
-          style={styles.modalContainer}
-        >
+        <View style={styles.modalContainer}>
+          <View style={styles.background} />
           <View style={styles.modalForm}>
-            <Text style={styles.modalTitle}>Succeed</Text>
+            <Text style={styles.modalTitle}>Work Order Incomplete</Text>
             <Text style={styles.modalText}>
-              This will close this work orderande remove it from your list. You will no longer be
-              able to view or edit this work order. Your comments and attachments will be added
-              to the work order and returned to dispatch to resolve any issues.
+              All Installer Questions must be answered completely before you can
+              access this section. Please review and be sure all requested indormation and photos
+              heve been provided.
             </Text>
             <View style={styles.buttonRow}>
               <Button
                 bgColor={colors.green}
                 style={{ width: '100%' }}
-                onPress={async () => {
-                  await props.navigation.navigate('Work Order');
-                  await props.setModalVisible(false);
+                onPress={() => {
+                  props.setModalVisible(false);
+                  props.navigation.navigate('Questions');
                 }}
                 textColor={colors.white}
-                caption="Close"
+                caption="OK"
                 textStyle={{ fontSize: 20 }}
               />
             </View>
@@ -57,10 +56,24 @@ const FailedModal = (props) => {
 
 const styles = StyleSheet.create({
   modalContainer: {
+    top: 0,
+    left: 0,
+    position: 'absolute',
     height: screenHeight,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.75)',
+    width: screenWidth,
+    backgroundColor: 'transparent',
     alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 3,
+  },
+  background: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: screenHeight,
+    width: screenWidth,
+    backgroundColor: colors.black,
+    opacity: 0.5,
   },
   modalForm: {
     width: screenWidth * 0.9,
@@ -80,7 +93,6 @@ const styles = StyleSheet.create({
   buttonRow: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     paddingTop: 32,
   },
 });
@@ -88,11 +100,10 @@ const styles = StyleSheet.create({
 export default compose(
   connect(
     state => ({
-      token: state.profile.security_token.token,
-      isPartModalVisible: state.app.isPartModal,
+      isModalVisible: state.app.isIncompleteModal,
     }),
     dispatch => ({
-      setModalVisible: payload => dispatch(setPartModalVisible(payload)),
+      setModalVisible: payload => dispatch(setIncompleteModalVisible(payload)),
     }),
   ),
-)(withNavigation(FailedModal));
+)(withNavigation(ManagerModal));

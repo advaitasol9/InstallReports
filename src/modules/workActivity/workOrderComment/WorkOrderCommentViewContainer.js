@@ -13,6 +13,8 @@ export default compose(
       changes: state.workOrder.changesInOffline,
       token: state.profile.security_token.token,
       activityId: state.workOrder.activityId,
+      connectionStatus: state.app.isConnected,
+      orderList: state.workOrder.orderList,
       photos: state.workOrderComment.photos,
     }),
     dispatch => ({
@@ -21,25 +23,38 @@ export default compose(
       setChanges: arr => dispatch(setChanges(arr)),
     }),
   ),
-  withState('changesInOffline', 'setChangesInOffline', 0),
+  withState('numOfChanges', 'setNumOfChanges', 0),
   withState('activityData', 'setActivityData', {}),
   withState('comment', 'setComment', ''),
   withState('data', 'setData', []),
   withState('isLoading', 'setIsloading', true),
   lifecycle({
     componentWillMount() {
-      this.props.setChangesInOffline(this.props.changes.length);
-      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-        .then((response) => {
-          this.props.setActivityData(response.data);
-          this.props.setIsloading(false);
-        });
+      this.props.setNumOfChanges(this.props.changes.length);
 
-      apiGetJson(`test-app-1/activities/${this.props.activityId}/comments`, this.props.token)
-        .then((response) => {
-          console.log(response.data);
-          this.props.setData(response.data);
-        });
+      if (this.props.navigation.state.params
+        && this.props.navigation.state.params.screenData.text) {
+        this.props.setComment(this.props.navigation.state.params.screenData.text);
+      }
+
+      if (this.props.connectionStatus) {
+        apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
+          .then((response) => {
+            this.props.setActivityData(response.data);
+            this.props.setIsloading(false);
+          });
+
+        apiGetJson(`test-app-1/activities/${this.props.activityId}/comments`, this.props.token)
+          .then((response) => {
+            console.log(response.data);
+            this.props.setData(response.data);
+          });
+      } else {
+        this.props.setActivityData(
+          this.props.orderList.filter(order => order.id === this.props.activityId)[0],
+        );
+        this.props.setIsloading(false);
+      }
     },
   }),
 )(WorkOrderCommentView);

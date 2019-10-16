@@ -15,6 +15,7 @@ export default compose(
     state => ({
       authState: state.app,
       token: state.profile.security_token.token,
+      connectionStatus: state.app.isConnected,
     }),
     dispatch => ({
       logIn: () => dispatch(logIn()),

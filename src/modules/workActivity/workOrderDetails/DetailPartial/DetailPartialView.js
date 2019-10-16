@@ -1,5 +1,5 @@
 // @flow
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -18,8 +18,9 @@ import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
 import RNFetchBlob from 'rn-fetch-blob';
 
 import {
-  apiChangeStatus, apiGet, apiPut, apiPostImage, apiPatchImage, apiPostComment,
+  apiChangeStatus, apiGet, apiPostImage, apiPatchImage, apiPostComment,
 } from '../../../../core/api';
+import setChangesInOffline from '../../../../core/setChanges';
 import { colors } from '../../../../styles';
 import { Button, PartialModal, Header } from '../../../../components';
 
@@ -38,6 +39,16 @@ const options = {
 
 
 export default function DetailPartialView(props) {
+  let canvasRef = useRef(null);
+  useEffect(() => {
+    console.log(props.pathes);
+    if (props.pathes) {
+      props.pathes.map((item, index) => {
+        canvasRef.addPath(item);
+      });
+    }
+  }, []);
+
   const Required = () => (
     <View style={styles.requiredBlock}>
       <Text style={styles.requiredText}>
@@ -46,10 +57,25 @@ export default function DetailPartialView(props) {
     </View>
   );
 
-  const renderPhoto = (photo) => {
-    console.log(photo);
+  const renderPhoto = (photo, index) => {
+    const photosCopy = props.photos.slice();
     return (
-      <Image source={{ uri: photo }} style={styles.photoBlock} />
+      <View style={{ position: 'relative' }}>
+        <TouchableOpacity
+          style={styles.delPhoto}
+          onPress={async () => {
+            await photosCopy.splice(index, 1);
+            props.addPhoto(photosCopy);
+          }}
+        >
+          <View style={styles.whiteBackground} />
+          <IO
+            style={styles.delIcon}
+            name="md-close-circle"
+          />
+        </TouchableOpacity>
+        <Image source={{ uri: photo }} style={styles.photoBlock} />
+      </View>
     );
   };
 
@@ -98,9 +124,11 @@ export default function DetailPartialView(props) {
                         ImagePicker.launchImageLibrary(options, (response) => {
                           console.log(response);
                           const { photos } = props;
-                          photos.push(response.uri);
-                          props.addPhoto(photos);
-                          props.setChangesInOffline(props.changesInOffline);
+                          if (!response.didCancel) {
+                            photos.push(response.uri);
+                            props.addPhoto(photos);
+                            props.setNumOfChanges(props.numOfChanges);
+                          }
                         });
                       },
                     },
@@ -113,6 +141,11 @@ export default function DetailPartialView(props) {
                             photos: props.photos,
                             addPhoto: arr => props.addPhoto(arr),
                             screen: 'DetailsPartial',
+                            screenData: {
+                              text: props.comment,
+                              name: props.name,
+                              signature: props.pathes,
+                            },
                           },
                         );
                       },
@@ -132,35 +165,13 @@ export default function DetailPartialView(props) {
           </View>
           <Required />
           <View style={styles.photoSection}>
-            {
-              props.photos.map((photo) => {
-                console.log(photo);
-                return renderPhoto(photo);
-              })
-            }
+            { props.photos.map((photo, index) => renderPhoto(photo, index)) }
           </View>
-          <TouchableOpacity
-            style={{
-              display: props.photos.length === 0 ? 'none' : 'flex',
-              alignSelf: 'center',
-            }}
-            onPress={() => {
-              props.addPhoto([]);
-            }}
-          >
-            <IO
-              style={{
-                color: colors.red,
-                fontSize: 48,
-                marginTop: 16,
-              }}
-              name="md-close-circle"
-            />
-          </TouchableOpacity>
           <Text style={{ fontSize: 16, marginTop: 16 }}>
             Manager on Duty Signeture:
           </Text>
           <RNSketchCanvas
+            ref={(c) => { canvasRef = c; }}
             containerStyle={[
               styles.inputStyle,
               {
@@ -181,9 +192,12 @@ export default function DetailPartialView(props) {
               </View>
             )}
             onStrokeEnd={(path) => {
-              const { signature } = props;
+              console.log(props);
+              const { signature, pathes } = props;
               signature.push(path.path.data);
+              pathes.push(path);
               props.setSignature(signature);
+              props.setPathes(pathes);
             }}
           />
           <Required />
@@ -204,38 +218,56 @@ export default function DetailPartialView(props) {
               disabled={props.photos.length === 0 || props.name === '' || props.signature === '' || props.comment === ''}
               style={{ width: '45%' }}
               onPress={async () => {
-                await apiChangeStatus('Partial', props.activityId, props.token)
-                  .then((response) => {
-                    const res = response.json();
-                    console.log(response, res);
-                    props.setModalVisible(true);
-                  });
-                const data = `text=${props.commentText}&user_ids=%5B${props.accountId}%5D&undefined=`;
-                apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
-                  console.log(resPostText);
-                  apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
-                    console.log('res   ', res);
-                    apiPut(res.data.url, props.token, props.photos[0]).then((putRes) => {
-                      console.log('putRes', putRes);
-                      RNFetchBlob.fs.stat(props.photos[0].replace('file://', ''))
-                        .then((stats) => {
-                          const formData = new FormData();
-                          formData.append('file_type', 'image/jpeg');
-                          formData.append('name', stats.filename);
-                          formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                          formData.append('size', stats.size);
-                          apiPostImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
-                            console.log('postRes', postRes);
-                            const patchData = `logo_file_id=${postRes.data.activities[0].logo_file_id}`;
-                            patchData.append('logo_file_id', postRes.data.activities[0].logo_file_id);
-                            apiPatchImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}`, patchData, props.token).then((patchRes) => {
-                              console.log('patchRes', patchRes);
-                            });
-                          });
-                        });
+                if (!props.connectionStatus) {
+                  setChangesInOffline(
+                    props.changes,
+                    props.setChanges,
+                    props.setNumOfChanges,
+                    props.comment,
+                    props.activityId,
+                    props.accountId,
+                    props.photos,
+                    'Partial',
+                  );
+                  props.setModalVisible(true);
+                } else {
+                  await apiChangeStatus('Failed', props.activityId, props.token)
+                    .then((response) => {
+                      const res = response.json();
+                      console.log(response, res);
+                      props.setModalVisible(true);
                     });
+                  const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
+                  apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
+                    if (props.photos.length > 0) {
+                      props.photos.forEach((item) => {
+                        apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
+                          RNFetchBlob.fetch('PUT', res.data.url, {
+                            'security-token': props.token,
+                            'Content-Type': 'application/octet-stream',
+                          }, RNFetchBlob.wrap(item.replace('file://', '')))
+                            .then(() => {
+                              RNFetchBlob.fs.stat(item.replace('file://', ''))
+                                .then((stats) => {
+                                  const formData = new FormData();
+                                  formData.append('file_type', 'image/jpeg');
+                                  formData.append('name', stats.filename);
+                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                  formData.append('size', stats.size);
+                                  apiPostImage(
+                                    `http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`,
+                                    formData, props.token,
+                                  );
+                                });
+                            })
+                            .catch((err) => {
+                              console.log(err);
+                            });
+                        });
+                      });
+                    }
                   });
-                });
+                }
               }}
               textColor={colors.white}
               textStyle={{ fontSize: 20 }}
@@ -255,10 +287,7 @@ export default function DetailPartialView(props) {
           </View>
         </View>
       </ScrollView>
-      <PartialModal
-        commentText={props.comment}
-        navigation={props.navigation}
-      />
+      <PartialModal />
     </View>
   );
 }
@@ -336,5 +365,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+  },
+  delPhoto: {
+    position: 'absolute',
+    top: 28,
+    right: 16,
+    zIndex: 10,
+    alignItems: 'center',
+  },
+  delIcon: {
+    color: colors.red,
+    fontSize: 48,
+  },
+  whiteBackground: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    top: 10,
+    borderRadius: 16,
+    backgroundColor: 'white',
   },
 });

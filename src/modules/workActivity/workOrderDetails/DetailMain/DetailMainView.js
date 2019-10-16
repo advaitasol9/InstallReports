@@ -21,44 +21,11 @@ import {
   ActivityTitle,
   ActivityStatus,
 } from '../../../../components';
-import { apiChangeStatus } from '../../../../core/api';
-import { apiGetJson } from '../../../../core/api';
-
 
 export default function DetailMainView(props) {
-  const saveChanges = () => {
-    if (!props.connectionStatus) {
-      const { changes } = props;
-      let matches = 0;
-      if (changes.length === 0) {
-        changes.push({
-          activityId: props.activityId,
-        });
-        props.setChanges(changes);
-        props.setChangesInOffline(1);
-      } else {
-        for (let i = 0; i < changes.length; i += 1) {
-          if (changes[i].activityId === props.activityId) {
-            matches += 1;
-            break;
-          }
-        }
-        if (matches === 0) {
-          changes.push({
-            activityId: props.activityId,
-          });
-          props.setChanges(changes);
-          props.setChangesInOffline(changes.length);
-        }
-      }
-    } else {
-      console.log('Send changes');
-    }
-  };
-
   if (props.isLoading === true) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.backgroundActivity}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -97,10 +64,26 @@ export default function DetailMainView(props) {
               Project: {props.activityData.name}
             </Text>
             <Text style={{ paddingTop: 8 }}>
-              {props.activityData.notes} - {props.activityData.city} #685
+              {props.activityData.notes && (
+                `${props.activityData.notes}`
+              )}
+              {props.activityData.city && (
+                ` - ${props.activityData.city}`
+              )}
             </Text>
             <Text style={{ paddingTop: 8 }}>
-              {`${props.activityData.address_1}, ${props.activityData.city}, ${props.activityData.state} ${props.activityData.zip}`}
+              {props.activityData.address_2 && (
+                `${props.activityData.address_2}, `
+              )}
+              {props.activityData.city && (
+                `${props.activityData.city}, `
+              )}
+              {props.activityData.state && (
+                `${props.activityData.state}, `
+              )}
+              {props.activityData.zip && (
+                `${props.activityData.zip}`
+              )}
             </Text>
             <TouchableOpacity
               style={{ width: 100, paddingTop: 8 }}
@@ -148,25 +131,13 @@ export default function DetailMainView(props) {
                 props.activityData.status === 'Open'
                 || props.activityData.status === 'Open_Rejecte'
                 || props.activityData.status === 'Open_Partial'
-                || !props.inProgress
                   ? (
                     <View style={{ paddingTop: 32, alignItems: 'center' }}>
                       <Button
                         bgColor={colors.green}
                         style={{ width: '80%' }}
                         onPress={() => {
-                          saveChanges();
-                          // props.navigation.navigate('DetailsPreInstall');
-                          apiChangeStatus('In_Progress', props.activityId, props.token)
-                            .then((response) => {
-                              console.log(response.json());
-                              apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-                                .then((res) => {
-                                  console.log(res);
-                                  this.props.setActivityData(response.data);
-                                  this.props.setIsloading(false);
-                                });
-                            });
+                          props.navigation.navigate('DetailsPreInstall');
                         }}
                         textColor={colors.white}
                         textStyle={{ fontSize: 20 }}
@@ -183,7 +154,7 @@ export default function DetailMainView(props) {
         {
           props.status !== 'Open' && (
             <React.Fragment>
-              <ActivityStatus status={props.activityData.status.replace(/_/g, ' ')} />
+              <ActivityStatus status={props.activityData.status} />
               <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
             </React.Fragment>
           )
@@ -193,6 +164,102 @@ export default function DetailMainView(props) {
           <View style={styles.scrollContainer}>
             {(props.details !== undefined) && (
               <View style={{ width: '100%' }}>
+                {
+                  props.activityData.scope_of_work_app_active && (
+                    <View>
+                      <Text>Scope of Work</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.scope_of_work}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
+                {
+                  props.activityData.special_instructions_app_active && (
+                    <View>
+                      <Text>Special Instructions</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.special_instructions}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
+                {
+                  props.activityData.installation_hours_app_active && (
+                    <View>
+                      <Text>Hours of Installation</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.installation_hours}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
+                {
+                  props.activityData.union_reqs_app_active && (
+                    <View>
+                      <Text>Union Requirements</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.union_reqs}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
+                {
+                  props.activityData.disposal_reqs_app_active && (
+                    <View>
+                      <Text>Disposal Requirements</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.disposal_reqs}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
+                {
+                  props.activityData.material_delivery_shipping_app_active && (
+                    <View>
+                      <Text>Material Delivery / Shipping</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.material_delivery_shipping}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
+                {
+                  props.activityData.specialty_trades_req_app_active && (
+                    <View>
+                      <Text>Specialty Trades Required</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.specialty_trades_req}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
+                {
+                  props.activityData.client_onsite_app_active && (
+                    <View>
+                      <Text>Client Onsite?</Text>
+                      <View style={styles.detailDescription}>
+                        <Text>
+                          {props.details.client_onsite}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                }
                 {
                   props.details.f1 && (
                     <View>
@@ -321,7 +388,6 @@ export default function DetailMainView(props) {
                 || props.activityData.status === 'Open_Partial'
                 || props.activityData.status === 'Partial'
                 || props.activityData.status === 'Failed'
-                || !props.inProgress
                   ? (
                     null
                   )
@@ -386,5 +452,11 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 24,
     paddingTop: 20,
+  },
+  backgroundActivity: {
+    backgroundColor: 'white',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

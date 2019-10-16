@@ -22,9 +22,8 @@ const ActivityStatus = props => (
       },
     ]}
   >
-    {console.log(props.status)}
     <Text style={styles.statusText}>
-      Work Order - {props.status}
+      Work Order - {props.status.replace(/_/g, ' ')}
     </Text>
   </View>
 );

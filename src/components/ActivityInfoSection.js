@@ -21,10 +21,26 @@ const ActivityInfoSection = props => (
         Project: {props.activityData.notes}
       </Text>
       <Text style={{ paddingTop: 8 }}>
-        {props.activityData.name} - {props.activityData.city} #685
+        {props.activityData.notes && (
+          `${props.activityData.notes}`
+        )}
+        {props.activityData.city && (
+          ` - ${props.activityData.city}`
+        )}
       </Text>
       <Text style={{ paddingTop: 8 }}>
-        {`${props.activityData.address_1}, ${props.activityData.city}, ${props.activityData.state} ${props.activityData.zip}`}
+        {props.activityData.address_2 && (
+          `${props.activityData.address_2}, `
+        )}
+        {props.activityData.city && (
+          `${props.activityData.city}, `
+        )}
+        {props.activityData.state && (
+          `${props.activityData.state}, `
+        )}
+        {props.activityData.zip && (
+          `${props.activityData.zip}`
+        )}
       </Text>
       <TouchableOpacity style={{ width: 100, paddingTop: 8 }} onPress={() => props.navigation.navigate('Work Order')}>
         <Text style={styles.linkButton}>

@@ -10,6 +10,16 @@ import { apiGetJson } from '../core/api';
 import FilterItem from './FilterItem';
 
 const Accordion = (props) => {
+  const filterTitle = (item) => {
+    let title = '';
+    for (const key in item) {
+      if ({}.hasOwnProperty.call(item, key)) {
+        title = `${title}, ${item[key]}`;
+      }
+    }
+    return title.slice(2);
+  };
+
   return (
     <View>
       <TouchableOpacity
@@ -25,20 +35,14 @@ const Accordion = (props) => {
         props.isOpen && (
           <View style={{ width: '100%' }}>
             {
-              props.data.map((item, index) => {
-                if (item[props.column] === null) {
-                  return null;
-                }
-                return (
-                  <FilterItem
-                    id={index}
-                    title={item[props.column]}
-                    numOfOrders={1}
-                    setFilters={props.setFilters}
-                    filter={props.filter}
-                  />
-                );
-              })
+              props.data.map((item, index) => (
+                <FilterItem
+                  id={item.id}
+                  title={filterTitle(item.columns)}
+                  setFilters={props.setFilters}
+                  filter={props.filter}
+                />
+              ))
             }
           </View>
         )
@@ -67,10 +71,25 @@ export default compose(
   withState('data', 'setData', []),
   lifecycle({
     async componentWillMount() {
-      console.log(this.props);
-      const response = await apiGetJson(`test-app-1/activities/uniques?entity=activities&columns=["${this.props.column}"]`, this.props.token);
-      this.props.setData(response.data);
-      console.log(response.data);
+      const response = await apiGetJson(`test-app-1/activities/uniques?entity=${this.props.entity}&columns=["${this.props.column}"]`, this.props.token);
+      const filterItems = [];
+      await response.data.forEach(async (item, index) => {
+        if (item[Object.keys(item)[0]] !== null) {
+          await apiGetJson(
+            `test-app-1/activities?search={"${Object.keys(item)[0]}":"${item[Object.keys(item)[0]]}"}`,
+            this.props.token,
+          ).then(async (res) => {
+            if (res.data.filter(order => order.status === 'Open' || order.status === 'In_Progress').length > 0) {
+              await filterItems.push({
+                columns: item,
+                id: index,
+              });
+              await this.props.setData(filterItems);
+            }
+          });
+        }
+      });
+      console.log(this.props.data);
     },
   }),
 )(Accordion);

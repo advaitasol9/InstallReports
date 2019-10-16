@@ -181,7 +181,12 @@ export function Camera(props) {
             justifyContent: 'center',
           }}
           onPress={() => {
-            props.navigation.navigate(props.backRoute);
+            props.navigation.navigate(
+              props.backRoute,
+              {
+                screenData: props.navigation.state.params.screenData,
+              },
+            );
           }}
         >
           <Image

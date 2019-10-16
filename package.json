@@ -7,7 +7,7 @@
     "test": "jest",
     "test:update": "jest -u",
     "test:coverage": "jest --coverage",
-    "run:ios": "react-native run-ios --simulator='iPhone 6s (12.2)'",
+    "run:ios": "react-native run-ios --simulator='iPhone 8 (12.4)'",
     "run:android": "react-native run-android",
     "lint": "./node_modules/eslint/bin/eslint.js src",
     "lint:fix": "./node_modules/eslint/bin/eslint.js src --fix",

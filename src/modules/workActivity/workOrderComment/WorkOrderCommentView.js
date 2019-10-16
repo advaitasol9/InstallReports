@@ -23,8 +23,9 @@ import {
   ActivityTitle,
   Button,
 } from '../../../components';
+import setChangesInOffline from '../../../core/setChanges';
 import {
-  apiGet, apiPostImage, apiPatchImage, apiPostComment, apiGetJson,
+  apiGet, apiPostImage, apiPostComment, apiGetJson,
 } from '../../../core/api';
 
 const options = {
@@ -37,16 +38,31 @@ const options = {
 };
 
 export default function WorkOrderCommentView(props) {
-  const renderPhoto = (photo) => {
-    console.log(photo);
+  const renderPhoto = (photo, index) => {
+    const photosCopy = props.photos.slice();
     return (
-      <Image source={{ uri: photo }} style={styles.photoBlock} />
+      <View style={{ position: 'relative' }}>
+        <TouchableOpacity
+          style={styles.delPhoto}
+          onPress={async () => {
+            await photosCopy.splice(index, 1);
+            props.addPhoto(photosCopy);
+          }}
+        >
+          <View style={styles.whiteBackground} />
+          <IO
+            style={styles.delIcon}
+            name="md-close-circle"
+          />
+        </TouchableOpacity>
+        <Image source={{ uri: photo }} style={styles.photoBlock} />
+      </View>
     );
   };
 
   if (props.isLoading === true) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.backgroundActivity}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -65,7 +81,7 @@ export default function WorkOrderCommentView(props) {
           navigation={props.navigation}
           activityData={props.activityData}
         />
-        <ActivityStatus status={props.activityData.status.replace(/_/g, ' ')} />
+        <ActivityStatus status={props.activityData.status} />
         <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
         <ActivityTitle title="Comments" />
         <View
@@ -96,9 +112,11 @@ export default function WorkOrderCommentView(props) {
                         onPress: () => {
                           ImagePicker.launchImageLibrary(options, (response) => {
                             const { photos } = props;
-                            photos.push(response.uri);
-                            props.addPhoto(photos);
-                            props.setChangesInOffline(props.changesInOffline);
+                            if (!response.didCancel) {
+                              photos.push(response.uri);
+                              props.addPhoto(photos);
+                              props.setNumOfChanges(props.numOfChanges);
+                            }
                           });
                         },
                       },
@@ -111,6 +129,9 @@ export default function WorkOrderCommentView(props) {
                               photos: props.photos,
                               addPhoto: arr => props.addPhoto(arr),
                               screen: 'Comment',
+                              screenData: {
+                                text: props.comment,
+                              },
                             },
                           );
                         },
@@ -129,27 +150,8 @@ export default function WorkOrderCommentView(props) {
               />
             </View>
             <View style={styles.photoSection}>
-              { props.photos.map(photo => renderPhoto(photo)) }
+              { props.photos.map((photo, index) => renderPhoto(photo, index)) }
             </View>
-            <TouchableOpacity
-              style={{
-                display: props.photos.length === 0 ? 'none' : 'flex',
-                alignItems: 'center',
-                width: '100%',
-              }}
-              onPress={() => {
-                props.addPhoto([]);
-              }}
-            >
-              <IO
-                style={{
-                  color: colors.red,
-                  fontSize: 48,
-                  marginTop: 16,
-                }}
-                name="md-close-circle"
-              />
-            </TouchableOpacity>
             <View style={{ marginTop: 24 }}>
               <Button
                 bgColor={
@@ -159,58 +161,74 @@ export default function WorkOrderCommentView(props) {
                 }
                 disabled={props.photos.length === 0 && props.comment === ''}
                 onPress={async () => {
-                  const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
-                  await apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
-                    console.log(resPostText);
-                    props.photos.forEach((item) => {
-                      apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
-                        console.log('res   ', res);
-                        RNFetchBlob.fetch('PUT', res.data.url, {
-                          'security-token': props.token,
-                          'Content-Type': 'application/octet-stream',
-                        }, RNFetchBlob.wrap(item))
-                          .then((blobRes) => {
-                            console.log(blobRes.text());
-                            RNFetchBlob.fs.stat(item.replace('file://', ''))
-                              .then((stats) => {
-                                const formData = new FormData();
-                                formData.append('file_type', 'image/jpeg');
-                                formData.append('name', stats.filename);
-                                formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                formData.append('size', stats.size);
-                                apiPostImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
-                                  console.log('postRes', postRes);
-                                  const patchData = new FormData();
-                                  patchData.append('logo_file_id', postRes.data.comments[0].logo_file_id);
-                                  apiGetJson(`test-app-1/activities/${props.activityId}/comments`, props.token)
-                                    .then((response) => {
-                                      console.log(response.data);
-                                      props.setData(response.data);
+                  if (!props.connectionStatus) {
+                    setChangesInOffline(
+                      props.changes,
+                      props.setChanges,
+                      props.setNumOfChanges,
+                      props.comment,
+                      props.activityId,
+                      props.accountId,
+                      props.photos,
+                      null,
+                    );
+                    await props.addPhoto([]);
+                    await props.setComment('');
+                  } else {
+                    const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
+                    await apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
+                      console.log(resPostText);
+                      if (props.photos.length > 0) {
+                        props.photos.forEach((item) => {
+                          apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
+                            console.log(res);
+                            RNFetchBlob.fetch('PUT', res.data.url, {
+                              'security-token': props.token,
+                              'Content-Type': 'application/octet-stream',
+                            }, RNFetchBlob.wrap(item.replace('file://', '')))
+                              .then(() => {
+                                RNFetchBlob.fs.stat(item.replace('file://', ''))
+                                  .then((stats) => {
+                                    const formData = new FormData();
+                                    formData.append('file_type', 'image/jpeg');
+                                    formData.append('name', stats.filename);
+                                    formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                    formData.append('size', stats.size);
+                                    apiPostImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
+                                      console.log(postRes);
+                                      apiGetJson(`test-app-1/activities/${props.activityId}/comments`, props.token)
+                                        .then((response) => {
+                                          props.setData(response.data);
+                                        });
                                     });
-                                  apiPatchImage(
-                                    `http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}`,
-                                    patchData,
-                                    props.token,
-                                  );
-                                });
+                                  });
+                              })
+                              .catch((err) => {
+                                console.log(err);
                               });
-                          })
-                          .catch((err) => {
-                            console.log(err);
                           });
-                      });
+                        });
+                      } else {
+                        apiGetJson(`test-app-1/activities/${props.activityId}/comments`, props.token)
+                          .then((response) => {
+                            console.log(response.data);
+                            props.setData(response.data);
+                          });
+                      }
                     });
-                  });
-                  await props.addPhoto([]);
-                  await props.setComment('');
-                  console.log(props.data);
+                    await props.addPhoto([]);
+                    await props.setComment('');
+                  }
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
                 caption="Submit"
               />
             </View>
-            {props.data.map(item => (
+            {!props.connectionStatus && (
+              <Text>Cant load comments. There is no connection</Text>
+            )}
+            {props.connectionStatus && props.data.map(item => (
               <View
                 style={{
                   width: '100%',
@@ -301,5 +319,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
+  },
+  delPhoto: {
+    position: 'absolute',
+    top: 28,
+    right: 16,
+    zIndex: 10,
+    alignItems: 'center',
+  },
+  delIcon: {
+    color: colors.red,
+    fontSize: 48,
+  },
+  whiteBackground: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    top: 10,
+    borderRadius: 16,
+    backgroundColor: 'white',
+  },
+  backgroundActivity: {
+    backgroundColor: 'white',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

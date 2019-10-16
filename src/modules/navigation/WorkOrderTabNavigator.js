@@ -2,7 +2,7 @@ import React from 'react';
 import {
   View, StyleSheet, Dimensions,
 } from 'react-native';
-import { createBottomTabNavigator, createDrawerNavigator, createStackNavigator } from 'react-navigation';
+import { createBottomTabNavigator, createDrawerNavigator, createSwitchNavigator } from 'react-navigation';
 import FA from 'react-native-vector-icons/FontAwesome5';
 
 import { colors, fonts } from '../../styles';
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const DetailsStack = createStackNavigator({
+const DetailsStack = createSwitchNavigator({
   DetailsMain: {
     screen: DetailsScreen,
     navigationOptions: {

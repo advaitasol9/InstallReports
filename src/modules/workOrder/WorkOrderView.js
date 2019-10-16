@@ -1,18 +1,12 @@
 import React from 'react';
 import {
-  StyleSheet,
-  View,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  StatusBar,
+  StyleSheet, View, FlatList, StatusBar,
 } from 'react-native';
-import moment from 'moment';
 import { apiGetJson } from '../../core/api';
 
 
 import { Text } from '../../components/StyledText';
-import { Header } from '../../components';
+import { Header, OrderListTile } from '../../components';
 import { colors } from '../../styles';
 
 export default function WorkOrderScreen(props) {
@@ -27,43 +21,15 @@ export default function WorkOrderScreen(props) {
   //   });
   // };
 
-  console.log(props.orderList);
-
-  const renderTile = (item, index) => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          props.setActivityId(item.activityId);
-          props.navigation.navigate('Details');
-        }}
-        style={[styles.tileContainer, { marginTop: index === 0 ? 8 : 0 }]}
-      >
-        <View style={styles.tileLogoContainer}>
-          <Image
-            style={styles.tileLogo}
-            source={require('../../../assets/images/tileLogoExample.png')}
-          />
-        </View>
-        <View style={styles.tileInfoContainer}>
-          <Text style={styles.infoCompany}>{item.name}</Text>
-          <Text style={styles.infoTitle}>{item.name}</Text>
-          <View style={styles.infoBottomSection}>
-            <View style={{ flexDirection: 'row' }}>
-              <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#{item.id}</Text>
-                <Text style={styles.infoBottomText}>
-                  {`${item.address_1}, ${item.city}, ${item.state}`}
-                </Text>
-              </View>
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-              <Text style={styles.infoBottomText}>Due {moment(item.date_1).format('DD/MM/YY')}</Text>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const renderTile = (item, index) => (
+    <OrderListTile
+      index={index}
+      item={item}
+      setItemId={props.setItemId}
+      setActivityId={props.setActivityId}
+      navigation={props.navigation}
+    />
+  );
 
   return (
     <View style={styles.container}>
@@ -91,22 +57,18 @@ export default function WorkOrderScreen(props) {
                 const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', props.token);
                 const result = [];
                 await data.data.forEach((activity) => {
-                  if (activity.items.length > 0) {
-                    activity.items.forEach(async (item) => {
-                      console.log(item);
-                      result.push({
-                        ...item,
-                        address_1: activity.address_1,
-                        city: activity.city,
-                        state: activity.state,
-                      });
-                    });
+                  if (activity.items.length > 0
+                    && activity.status !== 'Partial'
+                    && activity.status !== 'Failed'
+                    && activity.status !== 'Complete'
+                  ) {
+                    result.push(activity);
                   }
                 });
                 props.setOrderList(result);
               }}
               data={props.orderList}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item.activityId}
               renderItem={({ item, index }) => renderTile(item, index)}
             />
           )

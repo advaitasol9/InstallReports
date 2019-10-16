@@ -8,16 +8,17 @@ import FA from 'react-native-vector-icons/FontAwesome5';
 
 import { colors } from '../styles';
 
-const PartialModal = (props) => {
+const FilterItem = (props) => {
   return (
     <TouchableOpacity
       style={styles.accordionHeader}
       onPress={() => {
-        console.log(props);
         if (!props.checked) {
           const arr = props.filter;
-          arr.push(props.title);
-          console.log(arr);
+          arr.push({
+            title: props.title,
+            id: props.id,
+          });
           props.setFilters(arr);
         } else {
           const arr = props.filter;
@@ -26,7 +27,6 @@ const PartialModal = (props) => {
               arr.splice(index, 1);
             }
           });
-          console.log(arr);
           props.setFilters(arr);
         }
         props.setChecked(!props.checked);
@@ -43,7 +43,7 @@ const PartialModal = (props) => {
         <FA name="check" color={colors.white} style={{ fontSize: 10 }} />
       </View>
       <Text style={{ marginLeft: 8 }}>
-        {props.title} ({props.numOfOrders})
+        {props.title}
       </Text>
     </TouchableOpacity>
   );
@@ -79,4 +79,4 @@ export default compose(
       });
     },
   }),
-)(PartialModal);
+)(FilterItem);

@@ -13,11 +13,19 @@ import {
   ActivityInfoSection,
   ActivityTitle,
   ActivityStatus,
+  IncompleteModal,
 } from '../../../components';
 import { apiChangeStatus } from '../../../core/api';
 
 export default function WorkOrderManagerView(props) {
-  console.log(props);
+  if (props.isLoading === true) {
+    return (
+      <View style={styles.backgroundActivity}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={colors.lightGray} />
@@ -30,14 +38,8 @@ export default function WorkOrderManagerView(props) {
           navigation={props.navigation}
           activityData={props.activityData}
         />
-        {
-          props.status !== 'Open' && (
-            <React.Fragment>
-              <ActivityStatus status={props.activityData.status} />
-              <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
-            </React.Fragment>
-          )
-        }
+        <ActivityStatus status={props.activityData.status} />
+        <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
         <ActivityTitle title="Manager on Duty Feedback" />
         <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
           <View style={[styles.scrollContainer, { paddingBottom: 8 }]}>
@@ -131,6 +133,7 @@ export default function WorkOrderManagerView(props) {
         </View>
       </ScrollView>
       <ManagerModal />
+      <IncompleteModal />
     </View>
   );
 }
@@ -198,5 +201,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+  },
+  backgroundActivity: {
+    backgroundColor: 'white',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

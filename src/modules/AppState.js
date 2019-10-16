@@ -4,6 +4,7 @@ type AppStateType = {
   isConnected: boolean,
   isPartModal: boolean,
   isManagerModal: boolean,
+  isIncompleteModal: boolean,
 };
 
 type ActionType = {
@@ -16,7 +17,7 @@ export const initialState: AppStateType = {
   isConnected: false,
   isPartModal: false,
   isManagerModal: false,
-
+  isIncompleteModal: false,
 };
 
 export const LOG_IN = 'AppState/LOG_IN';
@@ -25,6 +26,7 @@ export const IS_CONNECTED = 'AppState/IS_CONNECTED';
 export const IS_PART_MODAL = 'AppState/IS_PART_MODAL';
 export const IS_FAILED_MODAL = 'AppState/IS_FAILED_MODAL';
 export const IS_MANAGER_MODAL = 'AppState/IS_MANAGER_MODAL';
+export const IS_INCOMPLETE_MODAL = 'AppState/IS_INCOMPLETE_MODAL';
 
 export function logIn(): ActionType {
   return {
@@ -66,6 +68,13 @@ export function setManagerModalVisible(payload): ActionType {
   };
 }
 
+export function setIncompleteModalVisible(payload): ActionType {
+  return {
+    type: IS_INCOMPLETE_MODAL,
+    payload,
+  };
+}
+
 export default function AppStateReducer(
   state: AppStateType = initialState,
   action: ActionType,
@@ -100,6 +109,11 @@ export default function AppStateReducer(
       return {
         ...state,
         isManagerModal: action.payload,
+      };
+    case IS_INCOMPLETE_MODAL:
+      return {
+        ...state,
+        isIncompleteModal: action.payload,
       };
     default:
       return state;

@@ -1,4 +1,6 @@
 // ## Generator Components Imports
+import IncompleteModal from './IncompleteModal';
+import OrderListTile from './OrderListTile';
 import FailedModal from './FailedModal';
 import ActivityTitle from './ActivityTitle';
 import ActivityStatus from './ActivityStatus';
@@ -21,6 +23,8 @@ import Loading from './Loading';
 
 export {
   // ## Generator Components Exports
+  IncompleteModal,
+  OrderListTile,
   FailedModal,
   ActivityTitle,
   ActivityStatus,

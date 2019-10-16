@@ -1,6 +1,6 @@
 import { compose, lifecycle, withState } from 'recompose';
 import { connect } from 'react-redux';
-import { setOrderList, setActivityId } from './WorkOrderState';
+import { setOrderList, setActivityId, setItemId } from './WorkOrderState';
 import { apiGetJson } from '../../core/api';
 
 import WorkOrderScreen from './WorkOrderView';
@@ -16,6 +16,7 @@ export default compose(
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
       setActivityId: id => dispatch(setActivityId(id)),
+      setItemId: id => dispatch(setItemId(id)),
     }),
   ),
   withState('changesInOffline', 'setChangesInOffline', 0),
@@ -23,20 +24,14 @@ export default compose(
     async componentWillMount() {
       if (this.props.connectionStatus) {
         const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', this.props.token);
-        console.log(data);
         const result = [];
         await data.data.forEach((activity) => {
-          if (activity.items.length > 0) {
-            activity.items.forEach(async (item) => {
-              console.log(item);
-              result.push({
-                ...item,
-                address_1: activity.address_1,
-                city: activity.city,
-                state: activity.state,
-                activityId: activity.id,
-              });
-            });
+          if (activity.items.length > 0
+            && activity.status !== 'Partial'
+            && activity.status !== 'Failed'
+            && activity.status !== 'Complete'
+          ) {
+            result.push(activity);
           }
         });
         this.props.setOrderList(result);

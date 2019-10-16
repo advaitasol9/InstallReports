@@ -33,14 +33,17 @@ const options = {
 };
 
 export default function WorkOrderQuestionsView(props) {
-  console.log(props);
+  const renderPhoto = photo => (
+    <Image source={{ uri: photo }} style={styles.photoBlock} />
+  );
 
-  const renderPhoto = (photo) => {
-    console.log(photo);
+  if (props.isLoading === true) {
     return (
-      <Image source={{ uri: photo }} style={styles.photoBlock} />
+      <View style={styles.backgroundActivity}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
     );
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -54,14 +57,8 @@ export default function WorkOrderQuestionsView(props) {
           navigation={props.navigation}
           activityData={props.activityData}
         />
-        {
-          props.status !== 'Open' && (
-            <React.Fragment>
-              <ActivityStatus status={props.activityData.status} />
-              <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
-            </React.Fragment>
-          )
-        }
+        <ActivityStatus status={props.activityData.status} />
+        <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
         <ActivityTitle title="Manager on Duty Feedback" />
         <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
           <View style={styles.scrollContainer}>
@@ -84,9 +81,11 @@ export default function WorkOrderQuestionsView(props) {
                         onPress: () => {
                           ImagePicker.launchImageLibrary(options, (response) => {
                             const { photos } = props;
-                            photos.push(response.uri);
-                            props.addPhoto(photos);
-                            props.setChangesInOffline(props.changesInOffline);
+                            if (!response.didCancel) {
+                              photos.push(response.uri);
+                              props.addPhoto(photos);
+                              props.setNumOfChanges(props.numOfChanges);
+                            }
                           });
                         },
                       },
@@ -182,5 +181,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
+  },
+  backgroundActivity: {
+    backgroundColor: 'white',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -13,6 +13,7 @@ import DetailPartialView from './DetailPartialView';
 export default compose(
   connect(
     state => ({
+      accountId: state.profile.user.id,
       changes: state.workOrder.changesInOffline,
       activityId: state.workOrder.activityId,
       connectionStatus: state.app.isConnected,
@@ -26,15 +27,24 @@ export default compose(
       addPhoto: arr => dispatch(addPartialPhoto(arr)),
     }),
   ),
-  withState('changesInOffline', 'setChangesInOffline', 0),
+  withState('numOfChanges', 'setNumOfChanges', 0),
   withState('activityData', 'setActivityData', {}),
   withState('name', 'setName', ''),
   withState('signature', 'setSignature', []),
+  withState('pathes', 'setPathes', []),
   withState('comment', 'setComment', ''),
   lifecycle({
-    componentDidMount() {
+    componentWillMount() {
       console.log(this.props);
-      this.props.setChangesInOffline(this.props.changes.length);
+      this.props.setNumOfChanges(this.props.changes.length);
+
+      if (this.props.navigation.state.params) {
+        console.log(this.props.navigation.state.params);
+        this.props.setComment(this.props.navigation.state.params.screenData.text);
+        this.props.setName(this.props.navigation.state.params.screenData.name);
+        this.props.setSignature(this.props.navigation.state.params.screenData.signature);
+      }
+
       apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
         .then((response) => {
           this.props.setActivityData(response.data);

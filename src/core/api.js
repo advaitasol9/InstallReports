@@ -1,3 +1,5 @@
+import { Alert } from 'react-native';
+
 import { API_PATH } from './config';
 
 export const apiPost = (method, body, token) => {
@@ -11,7 +13,18 @@ export const apiPost = (method, body, token) => {
       'Content-Type': 'multipart/form-data',
       'security-token': token,
     },
-  });
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response;
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };
 
 export const apiPostComment = (method, body, token) => {
@@ -25,10 +38,21 @@ export const apiPostComment = (method, body, token) => {
       'Content-Type': 'application/x-www-form-urlencoded',
       'security-token': token,
     },
-  }).then(response => response)
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response;
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
     .then((res) => {
       console.log(res);
       return (res.json());
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
     });
 };
 
@@ -42,12 +66,22 @@ export const apiChangeStatus = (status, activityId, token) => {
       'Content-Type': 'application/json',
       'security-token': token,
     },
-  });
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response;
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };
 
 export const apiGetJson = (method, token, contentType = 'application/json') => {
   const url = `${API_PATH}/${method}`;
-
   return fetch(url, {
     method: 'GET',
     mode: 'cors',
@@ -55,15 +89,18 @@ export const apiGetJson = (method, token, contentType = 'application/json') => {
       'Content-Type': contentType,
       'security-token': token,
     },
-  }).then((response) => {
-    // eslint-disable-next-line
-    if (response && (response.status === 200 || response.status === 201)) {
-      return response.json();
-    }
-    return {
-      errorCode: response.status,
-    };
-  });
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };
 
 export const apiGet = (method, token, contentType = 'application/json') => {
@@ -76,15 +113,19 @@ export const apiGet = (method, token, contentType = 'application/json') => {
       'Content-Type': contentType,
       'security-token': token,
     },
-  }).then((response) => {
-    // eslint-disable-next-line
-    if (response && (response.status === 200 || response.status === 201)) {
-      return response.json();
-    }
-    return {
-      errorCode: response.status,
-    };
-  });
+  })
+    .then((response) => {
+      // eslint-disable-next-line
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };
 
 
@@ -97,19 +138,19 @@ export const auth = (method, body) => {
       'Content-Type': 'multipart/form-data',
     },
     body,
-  }).then((response) => {
-    console.log(response);
-    if (response && (response.status === 200 || response.status === 201)) {
-      console.log(response);
-      return response.json();
-    }
-    if (response.ok === false) {
-      return {
-        errorCode: 'user-not-found',
-      };
-    }
-    return {};
-  });
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        console.log(response);
+        return response.json();
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };
 
 export const logout = (method, token) => {
@@ -122,18 +163,18 @@ export const logout = (method, token) => {
       'Content-Type': 'multipart/form-data',
       'security-token': token,
     },
-  }).then((response) => {
-    console.log(response);
-    if (response && (response.status === 200 || response.status === 201)) {
-      return response.json();
-    }
-    if (response.status === 401) {
-      return {
-        errorCode: 'invalid_security_token',
-      };
-    }
-    return {};
-  });
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };
 
 export const apiPostImage = (method, body, token) => {
@@ -146,10 +187,18 @@ export const apiPostImage = (method, body, token) => {
       'Content-Type': 'multipart/form-data',
       'security-token': token,
     },
-  }).then((response) => {
-    console.log(response);
-    return response.json();
-  });
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };
 
 export const apiPatchImage = (method, body, token) => {
@@ -165,7 +214,6 @@ export const apiPatchImage = (method, body, token) => {
   })
     .then((response) => {
       console.log(response);
-      return response.json();
     })
     .catch((error) => {
       console.log(`There has been a problem with your fetch operation: ${error.message}`);
@@ -184,7 +232,16 @@ export const apiPut = (method, token, body) => {
       'security-token': token,
     },
     body,
-  }, 15000).then((response) => {
-    console.log('apiPut then', { url, body, response });
-  });
+  }, 15000)
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
 };

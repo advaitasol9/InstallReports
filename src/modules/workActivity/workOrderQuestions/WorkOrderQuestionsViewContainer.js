@@ -13,6 +13,8 @@ export default compose(
       token: state.profile.security_token.token,
       activityId: state.workOrder.activityId,
       photos: state.workOrderQuestion.photos,
+      connectionStatus: state.app.isConnected,
+      orderList: state.workOrder.orderList,
     }),
     dispatch => ({
       setActivityId: id => dispatch(setActivityId(id)),
@@ -20,18 +22,25 @@ export default compose(
       setChanges: arr => dispatch(setChanges(arr)),
     }),
   ),
-  withState('changesInOffline', 'setChangesInOffline', 0),
+  withState('numOfChanges', 'setNumOfChanges', 0),
   withState('inProgress', 'setInProgress', false),
   withState('activityData', 'setActivityData', {}),
   withState('isLoading', 'setIsloading', true),
   lifecycle({
-    componentDidMount() {
-      this.props.setChangesInOffline(this.props.changes.length);
-      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-        .then(async (response) => {
-          await this.props.setActivityData(response.data);
-          this.props.setIsloading(false);
-        });
+    componentWillMount() {
+      console.log(this.props)
+      if (this.props.connectionStatus) {
+        apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
+          .then(async (response) => {
+            await this.props.setActivityData(response.data);
+            this.props.setIsloading(false);
+          });
+      } else {
+        this.props.setActivityData(
+          this.props.orderList.filter(order => order.id === this.props.activityId)[0],
+        );
+        this.props.setIsloading(false);
+      }
     },
   }),
 )(WorkOrderQuestionsView);
