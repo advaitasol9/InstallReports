@@ -1,6 +1,7 @@
 import React from 'react';
 import { compose } from 'recompose';
 import { connect } from 'react-redux';
+import { withNavigation } from 'react-navigation';
 import {
   View, Dimensions, StyleSheet, Text, Modal,
 } from 'react-native';
@@ -15,7 +16,6 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 const ManagerModal = (props) => {
-  console.log(props);
   if (props.isModalVisible) {
     return (
       <Modal
@@ -49,6 +49,7 @@ const ManagerModal = (props) => {
       </Modal>
     );
   }
+
   return null;
 };
 
@@ -95,6 +96,7 @@ const styles = StyleSheet.create({
   },
 });
 
+
 export default compose(
   connect(
     state => ({
@@ -105,4 +107,4 @@ export default compose(
       setModalVisible: payload => dispatch(setManagerModalVisible(payload)),
     }),
   ),
-)(ManagerModal);
+)(withNavigation(ManagerModal));

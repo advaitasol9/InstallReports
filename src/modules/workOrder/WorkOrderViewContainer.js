@@ -23,7 +23,8 @@ export default compose(
   lifecycle({
     async componentWillMount() {
       if (this.props.connectionStatus) {
-        const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', this.props.token);
+        const data = await apiGetJson('test-app-1/activities?with=["items","accounts"]', this.props.token);
+        console.log(data);
         const result = [];
         await data.data.forEach((activity) => {
           if (activity.items.length > 0
@@ -34,6 +35,7 @@ export default compose(
             result.push(activity);
           }
         });
+        console.log(data);
         this.props.setOrderList(result);
       }
     },

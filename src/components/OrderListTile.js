@@ -9,8 +9,6 @@ import {
 } from 'react-native';
 import moment from 'moment';
 
-import { colors } from '../styles';
-
 export default props => (
   <TouchableOpacity
     onPress={() => {
@@ -51,7 +49,7 @@ export default props => (
         <View style={{ flexDirection: 'row' }}>
           <Text style={styles.infoBottomText}>
             {props.item.date_2 && (
-              `Due ${moment(props.item.date_2).format('DD/MM/YY')}`
+              `Due ${moment(props.item.date_2).format('MM/DD/YY')}`
             )}
           </Text>
         </View>

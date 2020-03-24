@@ -108,7 +108,14 @@ export function Camera(props) {
             onPress={() => {
               CameraRoll.saveToCameraRoll(props.photoUri);
               const { photos } = props;
-              photos.push(props.photoUri);
+              if (props.backRoute === 'Manager' || props.backRoute === 'Questions') {
+                photos.push({
+                  uri: props.photoUri,
+                  order: props.order,
+                });
+              } else {
+                photos.push(props.photoUri);
+              }
               props.navigation.state.params.addPhoto(photos);
               props.setPhotoModal(false);
             }}
@@ -183,9 +190,7 @@ export function Camera(props) {
           onPress={() => {
             props.navigation.navigate(
               props.backRoute,
-              {
-                screenData: props.navigation.state.params.screenData,
-              },
+              { screenData: props.navigation.state.params.screenData },
             );
           }}
         >

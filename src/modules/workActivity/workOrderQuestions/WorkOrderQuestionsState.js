@@ -1,9 +1,11 @@
 
 const initialState = {
-  photos: [],
+  questionsPhotos: [],
+  managerPhotos: [],
 };
 
 export const ADD_QUESTIONS_PHOTO = 'ADD_QUESTIONS_PHOTO';
+export const ADD_MANAGER_PHOTO = 'ADD_MANAGER_PHOTO';
 
 export function addQuestionPhoto(payload) {
   return {
@@ -12,13 +14,24 @@ export function addQuestionPhoto(payload) {
   };
 }
 
+export function addManagerPhoto(payload) {
+  return {
+    type: ADD_MANAGER_PHOTO,
+    payload,
+  };
+}
+
 export default function AppStateReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_QUESTIONS_PHOTO:
-      console.log(action);
       return {
         ...state,
-        photos: action.payload,
+        questionsPhotos: action.payload,
+      };
+    case ADD_MANAGER_PHOTO:
+      return {
+        ...state,
+        managerPhotos: action.payload,
       };
     default:
       return state;

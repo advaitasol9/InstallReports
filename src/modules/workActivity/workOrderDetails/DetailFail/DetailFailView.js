@@ -19,7 +19,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 import { colors } from '../../../../styles';
 import { Button, FailedModal, Header } from '../../../../components';
 import {
-  apiChangeStatus, apiGet, apiPostImage, apiPatchImage, apiPostComment,
+  apiChangeStatus, apiGet, apiPostImage, apiPostComment,
 } from '../../../../core/api';
 import setChangesInOffline from '../../../../core/setChanges';
 

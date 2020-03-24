@@ -141,10 +141,9 @@ export const auth = (method, body) => {
   })
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
-        console.log(response);
         return response.json();
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+      return Alert.alert('Invalid Login');
     })
     .catch((error) => {
       console.log(`There has been a problem with your fetch operation: ${error.message}`);
@@ -242,6 +241,24 @@ export const apiPut = (method, token, body) => {
     .catch((error) => {
       console.log(`There has been a problem with your fetch operation: ${error.message}`);
       Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
+};
+
+export const apiPatchAnswers = (method, body, token) => {
+  const url = `${API_PATH}/${method}`;
+  return fetch(url, {
+    method: 'PATCH',
+    body,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'security-token': token,
+    },
+  })
+    .then(response => response)
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      // ADD THIS THROW error
       throw error;
     });
 };

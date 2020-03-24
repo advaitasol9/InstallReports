@@ -7,7 +7,7 @@ import {
 import FA from 'react-native-vector-icons/FontAwesome5';
 
 import { apiGetJson } from '../core/api';
-import FilterItem from './FilterItem';
+import CheckBox from './CheckBox';
 
 const Accordion = (props) => {
   const filterTitle = (item) => {
@@ -35,12 +35,13 @@ const Accordion = (props) => {
         props.isOpen && (
           <View style={{ width: '100%' }}>
             {
-              props.data.map((item, index) => (
-                <FilterItem
+              props.data.map(item => (
+                <CheckBox
                   id={item.id}
                   title={filterTitle(item.columns)}
                   setFilters={props.setFilters}
                   filter={props.filter}
+                  date={props.title === 'Due Date'}
                 />
               ))
             }
@@ -71,25 +72,65 @@ export default compose(
   withState('data', 'setData', []),
   lifecycle({
     async componentWillMount() {
-      const response = await apiGetJson(`test-app-1/activities/uniques?entity=${this.props.entity}&columns=["${this.props.column}"]`, this.props.token);
+      const response = await apiGetJson(`test-app-1/${this.props.entity}/uniques?columns=["${this.props.column}"]`, this.props.token);
       const filterItems = [];
+      const { orderList } = this.props;
       await response.data.forEach(async (item, index) => {
-        if (item[Object.keys(item)[0]] !== null) {
-          await apiGetJson(
-            `test-app-1/activities?search={"${Object.keys(item)[0]}":"${item[Object.keys(item)[0]]}"}`,
-            this.props.token,
-          ).then(async (res) => {
-            if (res.data.filter(order => order.status === 'Open' || order.status === 'In_Progress').length > 0) {
+        if (this.props.title === 'Location') {
+          if (item[Object.keys(item)[0]] !== null && item[Object.keys(item)[1]] !== null) {
+            if (
+              orderList.filter(order => order.city === item[Object.keys(item)[0]]).length > 0
+              && orderList.filter(order => order.state === item[Object.keys(item)[1]]).length > 0
+            ) {
               await filterItems.push({
                 columns: item,
                 id: index,
               });
               await this.props.setData(filterItems);
             }
-          });
+          }
+        } else if (this.props.title === 'Due Date') {
+          if (item[Object.keys(item)[0]] !== null) {
+            if (
+              orderList.filter(order => order.date_2 === item[Object.keys(item)[0]]).length > 0
+            ) {
+              await filterItems.push({
+                columns: item,
+                id: index,
+              });
+              await this.props.setData(filterItems);
+            }
+          }
+        } else if (this.props.title === 'Project') {
+          if (item[Object.keys(item)[0]] !== null) {
+            if (
+              orderList.filter(
+                order => order.items[0].name === item[Object.keys(item)[0]],
+              ).length > 0
+            ) {
+              await filterItems.push({
+                columns: item,
+                id: index,
+              });
+              await this.props.setData(filterItems);
+            }
+          }
+        } else if (this.props.title === 'Client') {
+          if (item[Object.keys(item)[0]] !== null) {
+            if (
+              orderList.filter(
+                order => order.accounts[0].name === item[Object.keys(item)[0]],
+              ).length > 0
+            ) {
+              await filterItems.push({
+                columns: item,
+                id: index,
+              });
+              await this.props.setData(filterItems);
+            }
+          }
         }
       });
-      console.log(this.props.data);
     },
   }),
 )(Accordion);

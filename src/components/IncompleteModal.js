@@ -15,44 +15,38 @@ const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
 export const screenWidth = width;
 
-const ManagerModal = (props) => {
-  console.log(props);
-  if (props.isModalVisible) {
-    return (
-      <Modal
-        animationType="fade"
-        transparent
-        visible
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.background} />
-          <View style={styles.modalForm}>
-            <Text style={styles.modalTitle}>Work Order Incomplete</Text>
-            <Text style={styles.modalText}>
-              All Installer Questions must be answered completely before you can
-              access this section. Please review and be sure all requested indormation and photos
-              heve been provided.
-            </Text>
-            <View style={styles.buttonRow}>
-              <Button
-                bgColor={colors.green}
-                style={{ width: '100%' }}
-                onPress={() => {
-                  props.setModalVisible(false);
-                  props.navigation.navigate('Questions');
-                }}
-                textColor={colors.white}
-                caption="OK"
-                textStyle={{ fontSize: 20 }}
-              />
-            </View>
-          </View>
+const ManagerModal = props => (
+  <Modal
+    animationType="fade"
+    transparent
+    visible
+  >
+    <View style={styles.modalContainer}>
+      <View style={styles.background} />
+      <View style={styles.modalForm}>
+        <Text style={styles.modalTitle}>Work Order Incomplete</Text>
+        <Text style={styles.modalText}>
+          All Installer Questions must be answered completely before you can
+          access this section. Please review and be sure all requested indormation and photos
+          heve been provided.
+        </Text>
+        <View style={styles.buttonRow}>
+          <Button
+            bgColor={colors.green}
+            style={{ width: '100%' }}
+            onPress={() => {
+              props.setModalVisible(false);
+              props.navigation.navigate('Questions');
+            }}
+            textColor={colors.white}
+            caption="OK"
+            textStyle={{ fontSize: 20 }}
+          />
         </View>
-      </Modal>
-    );
-  }
-  return null;
-};
+      </View>
+    </View>
+  </Modal>
+);
 
 const styles = StyleSheet.create({
   modalContainer: {

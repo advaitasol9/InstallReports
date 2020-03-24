@@ -1,9 +1,16 @@
 import React from 'react';
 import {
-  StyleSheet, View, Text, StatusBar, ScrollView, TextInput, ActivityIndicator,
+  StyleSheet,
+  View,
+  StatusBar,
+  ScrollView,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from 'react-native';
-import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
-import { Dropdown } from 'react-native-material-dropdown';
+import { NavigationEvents } from 'react-navigation';
+import RNFetchBlob from 'rn-fetch-blob';
 
 import { colors } from '../../../styles';
 import {
@@ -14,8 +21,13 @@ import {
   ActivityTitle,
   ActivityStatus,
   IncompleteModal,
+  QuestionsList,
 } from '../../../components';
-import { apiChangeStatus } from '../../../core/api';
+import {
+  apiPatchAnswers, apiGet, apiPostImage, apiChangeStatus,
+} from '../../../core/api';
+
+const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : '';
 
 export default function WorkOrderManagerView(props) {
   if (props.isLoading === true) {
@@ -25,10 +37,27 @@ export default function WorkOrderManagerView(props) {
       </View>
     );
   }
+  if (installerAnswers &&
+    installerAnswers.filter(answer => answer !== null).length === installerAnswers.length) {
+    props.setIsIncompleteOpen(false);
+  }
+  const installerAnswers = props.activityData.installer_questions_answers;
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={keyboardBehavior}
+      style={styles.container}
+    >
       <StatusBar backgroundColor={colors.lightGray} />
+      <NavigationEvents
+        onWillFocus={() => {
+          if (installerAnswers === null ||
+            installerAnswers.filter(answer => answer !== null).length < installerAnswers.length) {
+            props.setIsIncompleteOpen(true);
+          }
+        }}
+        onWillBlur={() => props.setIsIncompleteOpen(false)}
+      />
       <Header
         navigation={props.navigation}
         sideBar
@@ -42,88 +71,76 @@ export default function WorkOrderManagerView(props) {
         <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
         <ActivityTitle title="Manager on Duty Feedback" />
         <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
-          <View style={[styles.scrollContainer, { paddingBottom: 8 }]}>
-            <Text>Was the installer friendly and professional?</Text>
-            <Dropdown
-              label=""
-              data={[
-                {
-                  value: 'Yes',
-                }, {
-                  value: 'No',
-                },
-              ]}
-            />
-          </View>
-          <View style={[styles.scrollContainer, { paddingBottom: 8 }]}>
-            <Text>Are you satisfied with installation?</Text>
-            <Dropdown
-              label=""
-              data={[
-                {
-                  value: 'Yes',
-                }, {
-                  value: 'No',
-                },
-              ]}
-            />
-          </View>
-          <View style={styles.scrollContainer}>
-            <Text>Comments</Text>
-            <TextInput
-              multiline
-              placeholder="Placeholder..."
-              style={[styles.inputStyle, { height: 160 }]}
-            />
-          </View>
-          <View style={styles.scrollContainer}>
-            <Text>Manager on Duty Signature</Text>
-            <RNSketchCanvas
-              containerStyle={[
-                styles.inputStyle,
-                {
-                  height: 200,
-                  paddingHorizontal: 0,
-                  paddingVertical: 0,
-                },
-              ]}
-              canvasStyle={{ backgroundColor: 'transparent', flex: 1 }}
-              defaultStrokeIndex={0}
-              defaultStrokeWidth={5}
-              strokeColor={colors.primary}
-              clearComponent={(
-                <View style={styles.functionButton}>
-                  <Text style={{ color: colors.primary }}>
-                    Clear
-                  </Text>
-                </View>
-              )}
-              onStrokeEnd={(path) => {
-                const { signature } = props;
-                signature.push(path.path.data);
-                props.setSignature(signature);
-              }}
-            />
-          </View>
           <View style={[styles.scrollContainer, { borderBottomWidth: 0 }]}>
-            <Text>Manager on Duty Typed Name</Text>
-            <TextInput
-              placeholder="Name"
-              style={styles.inputStyle}
+            <QuestionsList
+              questions={props.activityData.manager_questions_answers}
+              photos={props.photos}
+              addPhoto={props.addPhoto}
+              screen="Manager"
+              setUpdate={props.setUpdate}
+              update={props.update}
             />
-          </View>
-          <View style={[styles.scrollContainer, { borderBottomWidth: 0 }]}>
             <Button
               bgColor={colors.green}
-              onPress={() => {
-                apiChangeStatus('Complete', props.activityId, props.token)
+              onPress={async () => {
+                if (props.photos.length > 0) {
+                  props.photos.forEach((item) => {
+                    apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
+                      RNFetchBlob.fetch('PUT', res.data.url, {
+                        'security-token': props.token,
+                        'Content-Type': 'application/octet-stream',
+                      }, RNFetchBlob.wrap(item.uri.replace('file://', '')))
+                        .then(() => {
+                          RNFetchBlob.fs.stat(item.uri.replace('file://', ''))
+                            .then((stats) => {
+                              const formData = new FormData();
+                              formData.append('file_type', 'image/jpeg');
+                              formData.append('name', stats.filename);
+                              formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                              formData.append('size', stats.size);
+                              apiPostImage(
+                                'http://142.93.1.107:9001/test-app-1/files',
+                                formData,
+                                props.token,
+                              ).then(() => {
+                                props.activityData.installer_questions_answers
+                                  .forEach((question, index) => {
+                                    if (question.order === item.order) {
+                                      props.activityData.installer_questions_answers[index].photo.push(res.data.id);
+                                    }
+                                  });
+                              });
+                            });
+                        })
+                        .catch((err) => {
+                          console.log(err);
+                        });
+                    });
+                  });
+                }
+                await apiPatchAnswers(
+                  `test-app-1/activities/${props.activityData.id}`,
+                  `installer_manager_answers=${JSON.stringify(props.activityData.installer_questions_answers)}`,
+                  props.token,
+                ).then((response) => {
+                  if (response.status === 200) {
+                    Alert.alert(
+                      'Success',
+                      'Your answer was added',
+                      [
+                        { text: 'Ok' },
+                      ],
+                    );
+                  }
+                });
+                await apiChangeStatus('Complete', props.activityId, props.token)
                   .then((response) => {
                     const res = response.json();
                     if (res.data === null) {
                       props.navigation.navigate('Work Order');
                     }
                   });
-                props.setModalVisible(true);
+                await props.setModalVisible(true);
               }}
               textColor={colors.white}
               textStyle={{ fontSize: 20 }}
@@ -133,8 +150,10 @@ export default function WorkOrderManagerView(props) {
         </View>
       </ScrollView>
       <ManagerModal />
-      <IncompleteModal />
-    </View>
+      {props.isIncompleteOpen &&
+        <IncompleteModal close={() => props.setIsIncompleteOpen(false)} />
+      }
+    </KeyboardAvoidingView>
   );
 }
 
@@ -169,15 +188,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     textAlignVertical: 'top',
   },
-  requiredBlock: {
-    width: '100%',
-    alignItems: 'flex-end',
-  },
-  requiredText: {
-    fontSize: 12,
-    marginTop: 8,
-    color: colors.darkGray,
-  },
   strokeColorButton: {
     marginHorizontal: 2.5,
     marginVertical: 8,
@@ -207,5 +217,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  sketchContainer: {
+    height: 200,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
 });

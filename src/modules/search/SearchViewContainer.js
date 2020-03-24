@@ -24,11 +24,12 @@ export default compose(
   withState('filtersOpen', 'setFiltersOpen', false),
   withState('datesFilter', 'setDatesFilter', []),
   withState('citiesFilter', 'setCitiesFilter', []),
-  withState('statesFilter', 'setStatesFilter', []),
+  withState('itemsFilter', 'setItemsFilter', []),
+  withState('clientsFilter', 'setClientsFilter', []),
   lifecycle({
     async componentWillMount() {
       if (this.props.connectionStatus) {
-        const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', this.props.token);
+        const data = await apiGetJson('test-app-1/activities?with=["items","accounts"]', this.props.token);
         const result = [];
         await data.data.forEach((activity) => {
           if (activity.items.length > 0

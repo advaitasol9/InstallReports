@@ -28,22 +28,15 @@ export default compose(
     }),
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
-  withState('activityData', 'setActivityData', {}),
   withState('comment', 'setComment', ''),
   lifecycle({
     componentDidMount() {
-      console.log(this.props);
       this.props.setNumOfChanges(this.props.changes.length);
 
       if (this.props.navigation.state.params
         && this.props.navigation.state.params.screenData.text) {
         this.props.setComment(this.props.navigation.state.params.screenData.text);
       }
-
-      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-        .then((response) => {
-          this.props.setActivityData(response.data);
-        });
     },
   }),
 )(DetailFailView);

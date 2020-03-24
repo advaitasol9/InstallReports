@@ -162,226 +162,106 @@ export default function DetailMainView(props) {
         <ActivityTitle title="Details" />
         <View style={{ backgroundColor: colors.lightGray, paddingVertical: 24 }}>
           <View style={styles.scrollContainer}>
-            {(props.details !== undefined) && (
+            {
               <View style={{ width: '100%' }}>
                 {
-                  props.activityData.scope_of_work_app_active && (
+                  props.activityData.scope_of_work_app_active === 'true' && (
                     <View>
                       <Text>Scope of Work</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.scope_of_work}
+                          {props.activityData.scope_of_work}
                         </Text>
                       </View>
                     </View>
                   )
                 }
                 {
-                  props.activityData.special_instructions_app_active && (
+                  props.activityData.special_instructions_app_active === 'true' && (
                     <View>
                       <Text>Special Instructions</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.special_instructions}
+                          {props.activityData.special_instructions}
                         </Text>
                       </View>
                     </View>
                   )
                 }
                 {
-                  props.activityData.installation_hours_app_active && (
+                  props.activityData.installation_hours_app_active === 'true' && (
                     <View>
                       <Text>Hours of Installation</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.installation_hours}
+                          {props.activityData.installation_hours}
                         </Text>
                       </View>
                     </View>
                   )
                 }
                 {
-                  props.activityData.union_reqs_app_active && (
+                  props.activityData.union_reqs_app_active === 'true' && (
                     <View>
                       <Text>Union Requirements</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.union_reqs}
+                          {props.activityData.union_reqs}
                         </Text>
                       </View>
                     </View>
                   )
                 }
                 {
-                  props.activityData.disposal_reqs_app_active && (
+                  props.activityData.disposal_reqs_app_active === 'true' && (
                     <View>
                       <Text>Disposal Requirements</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.disposal_reqs}
+                          {props.activityData.disposal_reqs}
                         </Text>
                       </View>
                     </View>
                   )
                 }
                 {
-                  props.activityData.material_delivery_shipping_app_active && (
+                  props.activityData.material_delivery_shipping_app_active === 'true' && (
                     <View>
                       <Text>Material Delivery / Shipping</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.material_delivery_shipping}
+                          {props.activityData.material_delivery_shipping}
                         </Text>
                       </View>
                     </View>
                   )
                 }
                 {
-                  props.activityData.specialty_trades_req_app_active && (
+                  props.activityData.specialty_trades_req_app_active === 'true' && (
                     <View>
                       <Text>Specialty Trades Required</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.specialty_trades_req}
+                          {props.activityData.specialty_trades_req}
                         </Text>
                       </View>
                     </View>
                   )
                 }
                 {
-                  props.activityData.client_onsite_app_active && (
+                  props.activityData.client_onsite_app_active === 'true' && (
                     <View>
                       <Text>Client Onsite?</Text>
                       <View style={styles.detailDescription}>
                         <Text>
-                          {props.details.client_onsite}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f1 && (
-                    <View>
-                      <Text>f1</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f1}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f2 && (
-                    <View>
-                      <Text>f2</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f2}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f3 && (
-                    <View>
-                      <Text>f3</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f3}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f4 && (
-                    <View>
-                      <Text>f4</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f4}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f5 && (
-                    <View>
-                      <Text>f5</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f5}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f6 && (
-                    <View>
-                      <Text>f6</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f6}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f7 && (
-                    <View>
-                      <Text>f7</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f7}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f8 && (
-                    <View>
-                      <Text>f8</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f8}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f9 && (
-                    <View>
-                      <Text>f9</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f9}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                }
-                {
-                  props.details.f10 && (
-                    <View>
-                      <Text>f10</Text>
-                      <View style={styles.detailDescription}>
-                        <Text>
-                          {props.details.f10}
+                          {props.activityData.client_onsite}
                         </Text>
                       </View>
                     </View>
                   )
                 }
               </View>
-            )}
+            }
             {
                 props.activityData.status === 'Open'
                 || props.activityData.status === 'Open_Rejecte'

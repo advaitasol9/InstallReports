@@ -1,3 +1,5 @@
+import { Alert } from 'react-native';
+
 const changesInOffline = async (
   changes,
   setChanges,
@@ -22,6 +24,7 @@ const changesInOffline = async (
         },
       ],
     });
+    Alert.alert('No Internet connection', 'You\'re now working offline');
   } else {
     await changesCopy.forEach((item) => {
       if (item.id === activityId) {

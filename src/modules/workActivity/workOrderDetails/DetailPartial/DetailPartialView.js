@@ -18,7 +18,7 @@ import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
 import RNFetchBlob from 'rn-fetch-blob';
 
 import {
-  apiChangeStatus, apiGet, apiPostImage, apiPatchImage, apiPostComment,
+  apiChangeStatus, apiGet, apiPostImage, apiPostComment,
 } from '../../../../core/api';
 import setChangesInOffline from '../../../../core/setChanges';
 import { colors } from '../../../../styles';

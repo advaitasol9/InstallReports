@@ -22,9 +22,19 @@ const ActivityStatus = props => (
       },
     ]}
   >
-    <Text style={styles.statusText}>
-      Work Order - {props.status.replace(/_/g, ' ')}
-    </Text>
+    {
+      props.status === null
+        ? (
+          <Text style={styles.statusText}>
+            Work Order
+          </Text>
+        )
+        : (
+          <Text style={styles.statusText}>
+            Work Order - {props.status.replace(/_/g, ' ')}
+          </Text>
+        )
+    }
   </View>
 );
 

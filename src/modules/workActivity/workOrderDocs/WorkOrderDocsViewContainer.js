@@ -24,6 +24,8 @@ export default compose(
   withState('activityData', 'setActivityData', {}),
   withState('docs', 'setDocs', []),
   withState('isLoading', 'setIsloading', true),
+  withState('imageURL', 'setImageURL', ''),
+  withState('imageModal', 'setImageModal', false),
   lifecycle({
     componentDidMount() {
       if (this.props.connectionStatus) {

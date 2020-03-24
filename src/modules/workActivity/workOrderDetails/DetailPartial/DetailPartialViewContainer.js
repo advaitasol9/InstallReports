@@ -28,7 +28,6 @@ export default compose(
     }),
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
-  withState('activityData', 'setActivityData', {}),
   withState('name', 'setName', ''),
   withState('signature', 'setSignature', []),
   withState('pathes', 'setPathes', []),
@@ -44,11 +43,6 @@ export default compose(
         this.props.setName(this.props.navigation.state.params.screenData.name);
         this.props.setSignature(this.props.navigation.state.params.screenData.signature);
       }
-
-      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-        .then((response) => {
-          this.props.setActivityData(response.data);
-        });
     },
   }),
 )(DetailPartialView);

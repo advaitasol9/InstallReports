@@ -8,7 +8,10 @@ import {
   StatusBar,
   Image,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
+import IO from 'react-native-vector-icons/Ionicons';
+
 import { colors, width } from '../../../styles';
 import {
   Header,
@@ -23,6 +26,36 @@ export default function WorkOrderDocsView(props) {
       <View style={styles.backgroundActivity}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
+    );
+  }
+
+  if (props.imageModal) {
+    return (
+      <Modal
+        animationType="fade"
+        transparent
+        visible
+      >
+        <View style={{ flex: 1, backgroundColor: colors.black }}>
+          <StatusBar hidden />
+          <TouchableOpacity
+            style={styles.delPhoto}
+            onPress={() => props.setImageModal(!props.imageModal)}
+          >
+            <IO
+              style={styles.delIcon}
+              name="md-close"
+            />
+          </TouchableOpacity>
+          <Image
+            source={{ uri: props.imageURL }}
+            style={{
+              flex: 1,
+              resizeMode: 'cover',
+            }}
+          />
+        </View>
+      </Modal>
     );
   }
 
@@ -45,7 +78,7 @@ export default function WorkOrderDocsView(props) {
           <View style={styles.scrollContainer}>
             {
               props.docs.length > 0
-                ? <Text style={{ width: '100%', textAlign: 'left' }}>Click document to view</Text>
+                ? <Text style={{ width: '100%', textAlign: 'left', paddingLeft: 24 }}>Click document to view</Text>
                 : null
             }
             <View
@@ -67,7 +100,13 @@ export default function WorkOrderDocsView(props) {
                 props.connectionStatus && props.docs.length > 0 && props.docs.map((item) => {
                   if (item.file_type === 'image/jpeg') {
                     return (
-                      <View style={styles.documentContainer}>
+                      <TouchableOpacity
+                        style={styles.documentContainer}
+                        onPress={() => {
+                          props.setImageURL(item.s3_location);
+                          props.setImageModal(!props.imageModal);
+                        }}
+                      >
                         <Image
                           source={{ uri: item.s3_location }}
                           style={{
@@ -83,7 +122,7 @@ export default function WorkOrderDocsView(props) {
                         >
                           {item.name}
                         </Text>
-                      </View>
+                      </TouchableOpacity>
                     );
                   }
                   return (
@@ -123,7 +162,6 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     width,
-    paddingHorizontal: 24,
     paddingBottom: 40,
   },
   documentContainer: {
@@ -136,5 +174,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  delPhoto: {
+    position: 'absolute',
+    top: 8,
+    right: 16,
+    zIndex: 10,
+    alignItems: 'center',
+  },
+  delIcon: {
+    color: colors.white,
+    fontSize: 40,
   },
 });

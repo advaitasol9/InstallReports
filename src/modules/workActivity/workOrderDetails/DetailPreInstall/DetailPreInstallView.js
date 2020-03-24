@@ -20,7 +20,7 @@ import { colors } from '../../../../styles';
 import { Button, Header } from '../../../../components';
 import setChangesInOffline from '../../../../core/setChanges';
 import {
-  apiChangeStatus, apiGet, apiPostImage, apiPatchImage, apiPostComment,
+  apiChangeStatus, apiGet, apiPostImage, apiPostComment,
 } from '../../../../core/api';
 
 const { height, width } = Dimensions.get('window');
@@ -98,10 +98,7 @@ export default function DetailPartialView(props) {
             multiline
             placeholder="Placeholder..."
             style={[styles.inputStyle, { height: 160 }]}
-            onChangeText={(text) => {
-              console.log(text);
-              props.setComment(text);
-            }}
+            onChangeText={text => props.setComment(text)}
             value={props.comment}
           />
           <View style={{ marginTop: 24 }}>

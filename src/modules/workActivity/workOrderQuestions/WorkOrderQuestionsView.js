@@ -2,41 +2,31 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   StatusBar,
   ScrollView,
-  TextInput,
-  Alert,
-  Image,
-  TouchableOpacity,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
-import IO from 'react-native-vector-icons/Ionicons';
+import RNFetchBlob from 'rn-fetch-blob';
 
 import { colors } from '../../../styles';
 import {
   Header,
-  Button,
   ActivityInfoSection,
   ActivityTitle,
   ActivityStatus,
+  QuestionsList,
+  Button,
 } from '../../../components';
+import {
+  apiPatchAnswers, apiGet, apiPostImage,
+} from '../../../core/api';
 
-const options = {
-  quality: 1.0,
-  maxWidth: 500,
-  maxHeight: 500,
-  storageOptions: {
-    skipBackup: true,
-  },
-};
+const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : '';
 
 export default function WorkOrderQuestionsView(props) {
-  const renderPhoto = photo => (
-    <Image source={{ uri: photo }} style={styles.photoBlock} />
-  );
-
   if (props.isLoading === true) {
     return (
       <View style={styles.backgroundActivity}>
@@ -46,7 +36,10 @@ export default function WorkOrderQuestionsView(props) {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={keyboardBehavior}
+      style={styles.container}
+    >
       <StatusBar backgroundColor={colors.lightGray} />
       <Header
         navigation={props.navigation}
@@ -62,86 +55,78 @@ export default function WorkOrderQuestionsView(props) {
         <ActivityTitle title="Manager on Duty Feedback" />
         <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
           <View style={styles.scrollContainer}>
-            <Text>1. Did you take BEFORE picture? If NO please answer why</Text>
-            <TextInput
-              multiline
-              placeholder="Placeholder..."
-              style={[styles.inputStyle, { height: 160 }]}
+            <QuestionsList
+              questions={props.activityData.installer_questions_answers}
+              photos={props.photos}
+              addPhoto={props.addPhoto}
+              screen="Questions"
+              setUpdate={props.setUpdate}
+              update={props.update}
             />
             <View style={{ marginTop: 24 }}>
               <Button
-                bgColor={colors.blue}
-                onPress={() => {
-                  Alert.alert(
-                    'Add photo',
-                    '',
-                    [
-                      {
-                        text: 'Choose from gallery',
-                        onPress: () => {
-                          ImagePicker.launchImageLibrary(options, (response) => {
-                            const { photos } = props;
-                            if (!response.didCancel) {
-                              photos.push(response.uri);
-                              props.addPhoto(photos);
-                              props.setNumOfChanges(props.numOfChanges);
-                            }
+                bgColor={colors.green}
+                onPress={async () => {
+                  if (props.photos.length > 0) {
+                    props.photos.forEach((item) => {
+                      apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
+                        RNFetchBlob.fetch('PUT', res.data.url, {
+                          'security-token': props.token,
+                          'Content-Type': 'application/octet-stream',
+                        }, RNFetchBlob.wrap(item.uri.replace('file://', '')))
+                          .then(() => {
+                            RNFetchBlob.fs.stat(item.uri.replace('file://', ''))
+                              .then((stats) => {
+                                const formData = new FormData();
+                                formData.append('file_type', 'image/jpeg');
+                                formData.append('name', stats.filename);
+                                formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                formData.append('size', stats.size);
+                                apiPostImage(
+                                  'http://142.93.1.107:9001/test-app-1/files',
+                                  formData,
+                                  props.token,
+                                ).then(() => {
+                                  props.activityData.installer_questions_answers
+                                    .forEach((question, index) => {
+                                      if (question.order === item.order) {
+                                        props.activityData.installer_questions_answers[index].photo.push(res.data.id);
+                                      }
+                                    });
+                                });
+                              });
+                          })
+                          .catch((err) => {
+                            console.log(err);
                           });
-                        },
-                      },
-                      {
-                        text: 'Take a photo',
-                        onPress: () => {
-                          props.navigation.navigate(
-                            'Camera',
-                            {
-                              photos: props.photos,
-                              addPhoto: arr => props.addPhoto(arr),
-                              screen: 'Questions',
-                            },
-                          );
-                        },
-                      },
-                      {
-                        text: 'Cancel',
-                        style: 'cancel',
-                      },
-                    ],
-                    { cancelable: true },
-                  );
+                      });
+                    });
+                  }
+                  await apiPatchAnswers(
+                    `test-app-1/activities/${props.activityData.id}`,
+                    `installer_questions_answers=${JSON.stringify(props.activityData.installer_questions_answers)}`,
+                    props.token,
+                  ).then((response) => {
+                    if (response.status === 200) {
+                      Alert.alert(
+                        'Success',
+                        'Your answer was added',
+                        [
+                          { text: 'Ok' },
+                        ],
+                      );
+                    }
+                  });
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
-                caption="Add Photo(s)"
+                caption="Submit"
               />
             </View>
-            <View style={styles.photoSection}>
-              { props.photos.map(photo => renderPhoto(photo)) }
-            </View>
-            <TouchableOpacity
-              style={{
-                display: props.photos.length === 0 ? 'none' : 'flex',
-                alignItems: 'center',
-                width: '100%',
-              }}
-              onPress={() => {
-                console.log('to tuta');
-                props.addPhoto([]);
-              }}
-            >
-              <IO
-                style={{
-                  color: colors.red,
-                  fontSize: 48,
-                  marginTop: 16,
-                }}
-                name="md-close-circle"
-              />
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -165,15 +150,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
   },
-  inputStyle: {
-    fontSize: 14,
-    marginTop: 32,
-    backgroundColor: colors.white,
-    color: colors.black,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    textAlignVertical: 'top',
-  },
   photoBlock: {
     width: '100%',
     height: 400,
@@ -187,5 +163,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  circle: {
+    color: colors.red,
+    fontSize: 48,
+    marginTop: 16,
   },
 });

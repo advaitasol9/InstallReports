@@ -54,18 +54,20 @@ export default function WorkOrderScreen(props) {
               scrollEventThrottle={16}
               refreshing={false}
               onRefresh={async () => {
-                const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', props.token);
-                const result = [];
-                await data.data.forEach((activity) => {
-                  if (activity.items.length > 0
-                    && activity.status !== 'Partial'
-                    && activity.status !== 'Failed'
-                    && activity.status !== 'Complete'
-                  ) {
-                    result.push(activity);
-                  }
-                });
-                props.setOrderList(result);
+                if (props.connectionStatus) {
+                  const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', props.token);
+                  const result = [];
+                  await data.data.forEach((activity) => {
+                    if (activity.items.length > 0
+                      && activity.status !== 'Partial'
+                      && activity.status !== 'Failed'
+                      && activity.status !== 'Complete'
+                    ) {
+                      result.push(activity);
+                    }
+                  });
+                  props.setOrderList(result);
+                }
               }}
               data={props.orderList}
               keyExtractor={item => item.activityId}

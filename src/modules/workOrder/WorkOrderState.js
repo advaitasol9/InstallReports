@@ -1,4 +1,3 @@
-
 const initialState = {
   changesInOffline: [],
   orderList: [],

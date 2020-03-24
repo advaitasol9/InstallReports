@@ -139,31 +139,62 @@ const SearchSideFilter = props => (
               bgColor={colors.blue}
               onPress={async () => {
                 const activities = new Set();
+                const locationActivities = new Set();
+                const dateActivities = new Set();
                 if (props.citiesFilter.length > 0) {
                   props.citiesFilter.forEach(async (item) => {
-                    await apiGetJson(
+                    const byCity = await apiGetJson(
                       `test-app-1/activities?search={"city":"${item.title.split(', ', 1)[0]}"}`,
                       props.token,
-                    ).then((res) => {
-                      const byCity = res.data.filter(order => order.status === 'Open' || order.status === 'In_Progress');
-                      byCity.forEach((cityOrder) => {
-                        activities.add(cityOrder.id);
-                      });
-                    });
-                    await apiGetJson(
-                      `test-app-1/activities?search={"state":"${item.title.slice(item.title.indexOf(' ') + 1, item.title.length)}"}`,
+                    );
+                    const byState = await apiGetJson(
+                      `test-app-1/activities?search={"state":"${item.title.slice(item.title.indexOf(',') + 2, item.title.length)}"}`,
                       props.token,
-                    ).then((response) => {
-                      const byState = response.data.filter(order => order.status === 'Open' || order.status === 'In_Progress');
-                      byState.forEach((stateOrder) => {
-                        activities.add(stateOrder.id);
+                    );
+                    if (byCity.data.length > 0 && byState.data.length) {
+                      byCity.data.forEach((orderCity) => {
+                        if (orderCity.status === 'In_Progress' || orderCity.status === 'Open') {
+                          byState.data.forEach((orderState) => {
+                            if (orderCity.id === orderState.id) {
+                              locationActivities.add(orderCity.id);
+                            }
+                          });
+                        }
                       });
+                    }
+                  });
+                }
+                if (props.datesFilter.length > 0) {
+                  props.datesFilter.forEach(async (item) => {
+                    const byDates = await props.orderList.filter(activity => activity.date_2 === item.title);
+                    byDates.forEach((dateOrder) => {
+                      dateActivities.add(dateOrder.id);
                     });
                   });
                 }
-                const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', props.token);
+                const filtersActivities = [];
                 const searchResult = [];
+                if (props.datesFilter.length > 0) {
+                  await filtersActivities.push(dateActivities);
+                }
                 if (props.citiesFilter.length > 0) {
+                  await filtersActivities.push(locationActivities);
+                }
+                const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', props.token);
+                if (filtersActivities > 0) {
+                  filtersActivities[0].forEach((id) => {
+                    const counter = filtersActivities.reduce((accumulator, currentValue, index) => {
+                      if (filtersActivities[index].has(id)) {
+                        return accumulator + 1;
+                      }
+                      return accumulator;
+                    }, 0);
+                    if (counter === filtersActivities.length) {
+                      activities.add(id);
+                    }
+                  });
+                }
+                if (activities > 0) {
                   activities.forEach((activityId) => {
                     data.data.forEach((item) => {
                       if (activityId === item.id) {
@@ -171,17 +202,6 @@ const SearchSideFilter = props => (
                         props.setSearchResult(searchResult);
                       }
                     });
-                  });
-                } else {
-                  data.data.forEach((activity) => {
-                    if (activity.items.length > 0
-                      && activity.status !== 'Partial'
-                      && activity.status !== 'Failed'
-                      && activity.status !== 'Complete'
-                    ) {
-                      searchResult.push(activity);
-                      props.setSearchResult(searchResult);
-                    }
                   });
                 }
                 // props.setSearchResult(response.data);
@@ -198,38 +218,33 @@ const SearchSideFilter = props => (
             setFilters={props.setCitiesFilter}
             filter={props.citiesFilter}
             column="city&#34;, &#34;state"
+            orderList={props.orderList}
             entity="activities"
           />
-          {/*
-            <Accordion
-              title="Due Date"
-              setFilters={props.setDatesFilter}
-              filter={props.datesFilter}
-              column="date_2"
-              entity="activities"
-            />
-            <Accordion
-              title="Location"
-              setFilters={props.setCitiesFilter}
-              filter={props.citiesFilter}
-              column="city&#34;, &#34;state"
-              entity="activities"
-            />
-            <Accordion
-              title="Client"
-              setFilters={props.setStatesFilter}
-              filter={props.statesFilter}
-              column="account.name"
-              entity="contacts"
-            />
-            <Accordion
-              title="Project"
-              setFilters={props.setStatesFilter}
-              filter={props.statesFilter}
-              column="item.name"
-              entity="items"
-            />
-          */}
+          <Accordion
+            title="Due Date"
+            setFilters={props.setDatesFilter}
+            filter={props.datesFilter}
+            column="date_2"
+            orderList={props.orderList}
+            entity="activities"
+          />
+          <Accordion
+            title="Project"
+            setFilters={props.setItemsFilter}
+            filter={props.itemsFilter}
+            column="name"
+            entity="items"
+            orderList={props.orderList}
+          />
+          <Accordion
+            title="Client"
+            setFilters={props.setClientsFilter}
+            filter={props.clientsFilter}
+            column="name"
+            orderList={props.orderList}
+            entity="accounts"
+          />
         </ScrollView>
       </View>
     </View>
@@ -275,22 +290,24 @@ export default function WorkOrderScreen(props) {
                 scrollEventThrottle={16}
                 refreshing={false}
                 onRefresh={async () => {
-                  const data = await apiGetJson(
-                    'test-app-1/activities?with=[%22items%22]', props.token,
-                  );
-                  const result = [];
-                  await data.data.forEach((activity) => {
-                    if (activity.items.length > 0
-                      && activity.status !== 'Partial'
-                      && activity.status !== 'Failed'
-                      && activity.status !== 'Complete'
-                    ) {
-                      result.push(activity);
-                    }
-                  });
-                  props.setSearchText('');
-                  props.setSearchResult(result);
-                  props.setOrderList(result);
+                  if (props.connectionStatus) {
+                    const data = await apiGetJson(
+                      'test-app-1/activities?with=[%22items%22]', props.token,
+                    );
+                    const result = [];
+                    await data.data.forEach((activity) => {
+                      if (activity.items.length > 0
+                        && activity.status !== 'Partial'
+                        && activity.status !== 'Failed'
+                        && activity.status !== 'Complete'
+                      ) {
+                        result.push(activity);
+                      }
+                    });
+                    props.setSearchText('');
+                    props.setSearchResult(result);
+                    props.setOrderList(result);
+                  }
                 }}
                 data={props.searchResult}
                 keyExtractor={item => item.activityId}

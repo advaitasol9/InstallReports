@@ -46,7 +46,7 @@ export default class AuthScreen extends React.Component {
 
   setFormData(password, email) {
     if (!this.props.connectionStatus) {
-      Alert.alert('There is no connection.');
+      Alert.alert('No Internet Connection');
     } else {
       const formData = new FormData();
       formData.append('email', email);
@@ -109,7 +109,7 @@ export default class AuthScreen extends React.Component {
               position: 'absolute', right: 32, top: 24, color: 'black', fontSize: 12,
             }}
           >
-            v 0.5
+            v 0.7
           </Text>
           <View style={[styles.section, { paddingTop: 30 }]}>
             <Animated.Image
@@ -135,7 +135,6 @@ export default class AuthScreen extends React.Component {
               onChangeText={text => this.props.setEmail(text)}
               value={this.props.email}
             />
-
             <TextInput
               placeholder="Password"
               secureTextEntry
@@ -143,7 +142,6 @@ export default class AuthScreen extends React.Component {
               onChangeText={text => this.props.setPassword(text)}
               value={this.props.password}
             />
-
             <Animated.View
               style={[styles.section, styles.bottom, this.fadeIn(700, -20)]}
             >

@@ -12,7 +12,7 @@ export default compose(
       changes: state.workOrder.changesInOffline,
       token: state.profile.security_token.token,
       activityId: state.workOrder.activityId,
-      photos: state.workOrderQuestion.photos,
+      photos: state.workOrderQuestion.questionsPhotos,
       connectionStatus: state.app.isConnected,
       orderList: state.workOrder.orderList,
     }),
@@ -23,16 +23,19 @@ export default compose(
     }),
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
-  withState('inProgress', 'setInProgress', false),
   withState('activityData', 'setActivityData', {}),
   withState('isLoading', 'setIsloading', true),
+  withState('update', 'setUpdate', true),
   lifecycle({
     componentWillMount() {
-      console.log(this.props)
       if (this.props.connectionStatus) {
         apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
-          .then(async (response) => {
-            await this.props.setActivityData(response.data);
+          .then((response) => {
+            this.props.setActivityData({
+              ...response.data,
+              installer_questions_answers: JSON.parse(response.data.installer_questions_answers),
+            });
+            console.log(this.props.activityData);
             this.props.setIsloading(false);
           });
       } else {
