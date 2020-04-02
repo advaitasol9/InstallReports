@@ -1,0 +1,20 @@
+{
+  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true
+  },
+  "rules": {
+    "react/jsx-filename-extension": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "operator-linebreak": "off",
+    "import/no-extraneous-dependencies": "off",
+    "react/destructuring-assignment": "off",
+    "linebreak-style": "off",
+    "no-use-before-define": "off",
+    "react/prop-types": "off",
+    "global-require": "off",
+    "no-underscore-dangle": "off",
+    "no-restricted-syntax": "off"
+  }
+}
