@@ -91,17 +91,23 @@ export default class DetailMainView extends Component {
                 Work Order #{this.props.activityData.id}
               </Text>
               <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
-                Project: {this.props.activityData.name}
+                Project: {this.props.activityData.items[0].name}
               </Text>
               <Text style={{ paddingTop: 8 }}>
-                {this.props.activityData.notes && (
-                  `${this.props.activityData.notes}`
+                {this.props.activityData.location && (
+                  `${this.props.activityData.location}`
                 )}
-                {this.props.activityData.city && (
-                  ` - ${this.props.activityData.city}`
+                {this.props.activityData.store_name && (
+                  ` - ${this.props.activityData.store_name}`
+                )}
+                {this.props.activityData.store_id && (
+                  ` #${this.props.activityData.store_id}`
                 )}
               </Text>
               <Text style={{ paddingTop: 8 }}>
+                {this.props.activityData.address_1 && (
+                  `${this.props.activityData.address_1}, `
+                )}
                 {this.props.activityData.address_2 && (
                   `${this.props.activityData.address_2}, `
                 )}
@@ -109,7 +115,7 @@ export default class DetailMainView extends Component {
                   `${this.props.activityData.city}, `
                 )}
                 {this.props.activityData.state && (
-                  `${this.props.activityData.state}, `
+                  `${this.props.activityData.state} `
                 )}
                 {this.props.activityData.zip && (
                   `${this.props.activityData.zip}`

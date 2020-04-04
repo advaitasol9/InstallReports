@@ -15,7 +15,7 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 export default function Header({
-  connectionStatus, changesNum, navigation, sortAndFilter, sideBar, indicator,
+  connectionStatus, changesNum, navigation, sortAndFilter, sideBar, indicator,title
 }) {
   return (
     <View style={styles.header}>
@@ -27,7 +27,7 @@ export default function Header({
       </View>
       <View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-          <Text>My Work Orders</Text>
+          <Text>{title}</Text>
           {indicator && (
             <View
               style={[

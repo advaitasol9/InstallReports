@@ -78,7 +78,20 @@ buck-out/
 
 */fastlane/report.xml
 */fastlane/Preview.html
+
 */fastlane/screenshots
 
 # Bundle artifact
 *.jsbundle
+
+#vscode
+
+.vscode/
+
+android/.project
+android/.settings/
+android/app/.classpath
+android/app/.project
+android/app/.settings/
+ios/assets/
+
