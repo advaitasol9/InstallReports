@@ -23,7 +23,7 @@ export default compose(
   lifecycle({
     async componentWillMount() {
       if (this.props.connectionStatus) {
-        const data = await apiGetJson('test-app-1/activities?with=["items","accounts"]', this.props.token);
+        const data = await apiGetJson('test-app-1/spectrum/activities?with=["items","accounts"]', this.props.token);
         console.log(data);
         const result = [];
         await data.data.forEach((activity) => {
