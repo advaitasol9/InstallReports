@@ -29,7 +29,7 @@ export default compose(
   lifecycle({
     componentDidMount() {
       if (this.props.connectionStatus) {
-        apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
+        apiGetJson(`test-app-1/activities/${this.props.activityId}?with=["items"]`, this.props.token)
           .then(async (response) => {
             await this.props.setActivityData(response.data);
             this.props.setIsloading(false);

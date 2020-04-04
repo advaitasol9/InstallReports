@@ -18,17 +18,23 @@ const ActivityInfoSection = props => (
         Work Order #{props.activityData.id}
       </Text>
       <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
-        Project: {props.activityData.notes}
+        Project: {props.activityData.items[0].name}
       </Text>
       <Text style={{ paddingTop: 8 }}>
-        {props.activityData.notes && (
-          `${props.activityData.notes}`
+        {props.activityData.location && (
+          `${props.activityData.location}`
         )}
-        {props.activityData.city && (
-          ` - ${props.activityData.city}`
+        {props.activityData.store_name && (
+          ` - ${props.activityData.store_name}`
+        )}
+        {props.activityData.store_id && (
+          ` #${props.activityData.store_id}`
         )}
       </Text>
       <Text style={{ paddingTop: 8 }}>
+        {props.activityData.address_1 && (
+          `${props.activityData.address_1}, `
+        )}
         {props.activityData.address_2 && (
           `${props.activityData.address_2}, `
         )}
@@ -36,7 +42,7 @@ const ActivityInfoSection = props => (
           `${props.activityData.city}, `
         )}
         {props.activityData.state && (
-          `${props.activityData.state}, `
+          `${props.activityData.state} `
         )}
         {props.activityData.zip && (
           `${props.activityData.zip}`

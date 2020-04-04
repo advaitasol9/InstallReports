@@ -25,14 +25,27 @@ export default props => (
       />
     </View>
     <View style={styles.tileInfoContainer}>
-      <Text style={styles.infoCompany}>{props.item.items[0].name}</Text>
-      <Text style={styles.infoTitle}>{props.item.name}</Text>
+      {(props.item.accounts).length > 0 ?
+        <Text style={styles.infoCompany}>{props.item.accounts[0].name}</Text> : null}
+      <Text style={styles.infoTitle}>{props.item.items[0].name}</Text>
+      <View style={styles.infoBottomSection}>
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={[styles.infoBottomText, { marginRight: 20 }]}>
+            #{props.item.id}
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={styles.infoBottomText}>
+            {props.item.date_2 && (
+              `Due ${moment(props.item.date_2).format('MM/DD/YY')}`
+            )}
+          </Text>
+        </View>
+      </View>
       <View style={styles.infoBottomSection}>
         <View style={{ flexDirection: 'row' }}>
           <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={[styles.infoBottomText, { marginRight: 20 }]}>
-              #{props.item.id}
-            </Text>
+
             <Text style={styles.infoBottomText}>
               {props.item.address_1 && (
                 `${props.item.address_1}, `
@@ -46,16 +59,9 @@ export default props => (
             </Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={styles.infoBottomText}>
-            {props.item.date_2 && (
-              `Due ${moment(props.item.date_2).format('MM/DD/YY')}`
-            )}
-          </Text>
-        </View>
       </View>
     </View>
-  </TouchableOpacity>
+  </TouchableOpacity >
 );
 
 const styles = StyleSheet.create({

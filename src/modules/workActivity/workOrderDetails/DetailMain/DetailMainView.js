@@ -61,17 +61,23 @@ export default function DetailMainView(props) {
               Work Order #{props.activityData.id}
             </Text>
             <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
-              Project: {props.activityData.name}
+              Project: {props.activityData.items[0].name}
             </Text>
             <Text style={{ paddingTop: 8 }}>
-              {props.activityData.notes && (
-                `${props.activityData.notes}`
+              {props.activityData.location && (
+                `${props.activityData.location}`
               )}
-              {props.activityData.city && (
-                ` - ${props.activityData.city}`
+              {props.activityData.store_name && (
+                ` - ${props.activityData.store_name}`
+              )}
+              {props.activityData.store_id && (
+                ` #${props.activityData.store_id}`
               )}
             </Text>
             <Text style={{ paddingTop: 8 }}>
+              {props.activityData.address_1 && (
+                `${props.activityData.address_1}, `
+              )}
               {props.activityData.address_2 && (
                 `${props.activityData.address_2}, `
               )}
@@ -79,7 +85,7 @@ export default function DetailMainView(props) {
                 `${props.activityData.city}, `
               )}
               {props.activityData.state && (
-                `${props.activityData.state}, `
+                `${props.activityData.state} `
               )}
               {props.activityData.zip && (
                 `${props.activityData.zip}`
@@ -128,26 +134,26 @@ export default function DetailMainView(props) {
               </Text>
             </TouchableOpacity>
             {
-                props.activityData.status === 'Open'
+              props.activityData.status === 'Open'
                 || props.activityData.status === 'Open_Rejecte'
                 || props.activityData.status === 'Open_Partial'
-                  ? (
-                    <View style={{ paddingTop: 32, alignItems: 'center' }}>
-                      <Button
-                        bgColor={colors.green}
-                        style={{ width: '80%' }}
-                        onPress={() => {
-                          props.navigation.navigate('DetailsPreInstall');
-                        }}
-                        textColor={colors.white}
-                        textStyle={{ fontSize: 20 }}
-                        caption="Begin Work Order"
-                      />
-                    </View>
-                  )
-                  : (
-                    null
-                  )
+                ? (
+                  <View style={{ paddingTop: 32, alignItems: 'center' }}>
+                    <Button
+                      bgColor={colors.green}
+                      style={{ width: '80%' }}
+                      onPress={() => {
+                        props.navigation.navigate('DetailsPreInstall');
+                      }}
+                      textColor={colors.white}
+                      textStyle={{ fontSize: 20 }}
+                      caption="Begin Work Order"
+                    />
+                  </View>
+                )
+                : (
+                  null
+                )
             }
           </View>
         </View>
@@ -263,32 +269,32 @@ export default function DetailMainView(props) {
               </View>
             }
             {
-                props.activityData.status === 'Open'
+              props.activityData.status === 'Open'
                 || props.activityData.status === 'Open_Rejecte'
                 || props.activityData.status === 'Open_Partial'
                 || props.activityData.status === 'Partial'
                 || props.activityData.status === 'Failed'
-                  ? (
-                    null
-                  )
-                  : (
-                    <View>
-                      <Button
-                        primary
-                        onPress={() => props.navigation.navigate('DetailsPartial')}
-                        bgColor={colors.blue}
-                        textColor="white"
-                        caption="Partial Installation"
-                      />
-                      <Button
-                        style={{ marginTop: 24 }}
-                        bgColor={colors.blue}
-                        onPress={() => props.navigation.navigate('DetailsFail')}
-                        textColor="white"
-                        caption="Failed Installation"
-                      />
-                    </View>
-                  )
+                ? (
+                  null
+                )
+                : (
+                  <View>
+                    <Button
+                      primary
+                      onPress={() => props.navigation.navigate('DetailsPartial')}
+                      bgColor={colors.blue}
+                      textColor="white"
+                      caption="Partial Installation"
+                    />
+                    <Button
+                      style={{ marginTop: 24 }}
+                      bgColor={colors.blue}
+                      onPress={() => props.navigation.navigate('DetailsFail')}
+                      textColor="white"
+                      caption="Failed Installation"
+                    />
+                  </View>
+                )
             }
           </View>
         </View>

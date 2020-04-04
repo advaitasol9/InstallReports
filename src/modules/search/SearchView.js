@@ -28,81 +28,81 @@ const SearhHeader = ({
   searchText,
   setSearchText,
 }) => (
-  <View style={styles.headerContainer}>
-    <View style={styles.headerTop}>
-      <View style={styles.headerInputContainer}>
-        <FA
-          style={{ fontSize: 16, marginRight: 12 }}
-          name="search"
-          backgroundColor="transparent"
-          color={colors.grey}
-        />
-        <TextInput
-          placeholder="Enter activity name"
-          value={searchText}
-          style={{
-            width: '90%',
-            fontSize: 16,
-            color: colors.grey,
-            padding: 0,
+    <View style={styles.headerContainer}>
+      <View style={styles.headerTop}>
+        <View style={styles.headerInputContainer}>
+          <FA
+            style={{ fontSize: 16, marginRight: 12 }}
+            name="search"
+            backgroundColor="transparent"
+            color={colors.grey}
+          />
+          <TextInput
+            placeholder="Enter activity name"
+            value={searchText}
+            style={{
+              width: '90%',
+              fontSize: 16,
+              color: colors.grey,
+              padding: 0,
+            }}
+            onChangeText={async (text) => {
+              setSearchText(text);
+              if (text === '') {
+                const response = await apiGetJson('test-app-1/activities?with=[%22items%22,%22accounts%22]', token);
+                const result = [];
+                await response.data.forEach((activity) => {
+                  if (activity.items.length > 0
+                    && activity.status !== 'Partial'
+                    && activity.status !== 'Failed'
+                    && activity.status !== 'Complete'
+                  ) {
+                    result.push(activity);
+                  }
+                });
+                setSearchResult(result);
+              } else if (connectionStatus) {
+                const response = await apiGetJson(`test-app-1/activities?with=[%22items%22,%22accounts%22]&&search={"name":"${text}"}`, token);
+                const result = [];
+                await response.data.forEach((activity) => {
+                  if (activity.items.length > 0
+                    && activity.status !== 'Partial'
+                    && activity.status !== 'Failed'
+                    && activity.status !== 'Complete'
+                  ) {
+                    result.push(activity);
+                  }
+                });
+                console.log(result);
+                setSearchResult(result);
+              } else if (orderList !== [] && !connectionStatus) {
+                const newResult = [];
+                orderList.forEach((item) => {
+                  const n = item.notes.search(text);
+                  if (n !== -1) {
+                    newResult.push(item);
+                  }
+                });
+                setSearchResult(newResult);
+              }
+            }}
+          />
+        </View>
+      </View>
+      <View style={styles.headerBottom}>
+        <Text>{searchResult.length} Results</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setFiltersOpen(!filtersOpen);
           }}
-          onChangeText={async (text) => {
-            setSearchText(text);
-            if (text === '') {
-              const response = await apiGetJson('test-app-1/activities?with=[%22items%22]', token);
-              const result = [];
-              await response.data.forEach((activity) => {
-                if (activity.items.length > 0
-                  && activity.status !== 'Partial'
-                  && activity.status !== 'Failed'
-                  && activity.status !== 'Complete'
-                ) {
-                  result.push(activity);
-                }
-              });
-              setSearchResult(result);
-            } else if (connectionStatus) {
-              const response = await apiGetJson(`test-app-1/activities?with=[%22items%22]&&search={"name":"${text}"}`, token);
-              const result = [];
-              await response.data.forEach((activity) => {
-                if (activity.items.length > 0
-                  && activity.status !== 'Partial'
-                  && activity.status !== 'Failed'
-                  && activity.status !== 'Complete'
-                ) {
-                  result.push(activity);
-                }
-              });
-              console.log(result);
-              setSearchResult(result);
-            } else if (orderList !== [] && !connectionStatus) {
-              const newResult = [];
-              orderList.forEach((item) => {
-                const n = item.notes.search(text);
-                if (n !== -1) {
-                  newResult.push(item);
-                }
-              });
-              setSearchResult(newResult);
-            }
-          }}
-        />
+        >
+          <Text style={{ textAlign: 'right', color: colors.primary }}>
+            SORT & FILTER
+        </Text>
+        </TouchableOpacity>
       </View>
     </View>
-    <View style={styles.headerBottom}>
-      <Text>{searchResult.length} Results</Text>
-      <TouchableOpacity
-        onPress={() => {
-          setFiltersOpen(!filtersOpen);
-        }}
-      >
-        <Text style={{ textAlign: 'right', color: colors.primary }}>
-          SORT & FILTER
-        </Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
+  );
 
 const SearchSideFilter = props => (
   <Modal
@@ -180,7 +180,7 @@ const SearchSideFilter = props => (
                 if (props.citiesFilter.length > 0) {
                   await filtersActivities.push(locationActivities);
                 }
-                const data = await apiGetJson('test-app-1/activities?with=[%22items%22]', props.token);
+                const data = await apiGetJson('test-app-1/activities?with=[%22items%22,%22accounts%22]', props.token);
                 if (filtersActivities > 0) {
                   filtersActivities[0].forEach((id) => {
                     const counter = filtersActivities.reduce((accumulator, currentValue, index) => {
@@ -292,7 +292,7 @@ export default function WorkOrderScreen(props) {
                 onRefresh={async () => {
                   if (props.connectionStatus) {
                     const data = await apiGetJson(
-                      'test-app-1/activities?with=[%22items%22]', props.token,
+                      'test-app-1/activities?with=[%22items%22,%22accounts%22]', props.token,
                     );
                     const result = [];
                     await data.data.forEach((activity) => {
