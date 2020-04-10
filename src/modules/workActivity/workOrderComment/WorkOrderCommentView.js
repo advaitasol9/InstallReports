@@ -27,6 +27,7 @@ import setChangesInOffline from '../../../core/setChanges';
 import {
   apiGet, apiPostImage, apiPostComment, apiGetJson,
 } from '../../../core/api';
+import moment from 'moment';
 
 const options = {
   quality: 1.0,
@@ -94,7 +95,7 @@ export default function WorkOrderCommentView(props) {
           <View style={styles.scrollContainer}>
             <TextInput
               multiline
-              placeholder="Placeholder..."
+              placeholder="Add Comment..."
               style={[styles.inputStyle, { height: 160 }]}
               onChangeText={text => props.setComment(text)}
               value={props.comment}
@@ -150,7 +151,7 @@ export default function WorkOrderCommentView(props) {
               />
             </View>
             <View style={styles.photoSection}>
-              { props.photos.map((photo, index) => renderPhoto(photo, index)) }
+              {props.photos.map((photo, index) => renderPhoto(photo, index))}
             </View>
             <View style={{ marginTop: 24 }}>
               <Button
@@ -177,11 +178,9 @@ export default function WorkOrderCommentView(props) {
                   } else {
                     const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
                     await apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
-                      console.log(resPostText);
                       if (props.photos.length > 0) {
                         props.photos.forEach((item) => {
                           apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
-                            console.log(res);
                             RNFetchBlob.fetch('PUT', res.data.url, {
                               'security-token': props.token,
                               'Content-Type': 'application/octet-stream',
@@ -195,7 +194,6 @@ export default function WorkOrderCommentView(props) {
                                     formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                     formData.append('size', stats.size);
                                     apiPostImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
-                                      console.log(postRes);
                                       apiGetJson(`test-app-1/activities/${props.activityId}/comments`, props.token)
                                         .then((response) => {
                                           props.setData(response.data);
@@ -211,7 +209,6 @@ export default function WorkOrderCommentView(props) {
                       } else {
                         apiGetJson(`test-app-1/activities/${props.activityId}/comments`, props.token)
                           .then((response) => {
-                            console.log(response.data);
                             props.setData(response.data);
                           });
                       }
@@ -228,8 +225,8 @@ export default function WorkOrderCommentView(props) {
             {!props.connectionStatus && (
               <Text>Cant load comments. There is no connection</Text>
             )}
-            {props.connectionStatus && props.data.map(item => (
-              <View
+            {props.connectionStatus && props.data.map((item, i) => (
+              <View key={i}
                 style={{
                   width: '100%',
                   marginTop: 32,
@@ -243,13 +240,17 @@ export default function WorkOrderCommentView(props) {
                   </Text>
                 )}
                 <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>
-                  {item.created_at}
+                  {item.users[0].first_name + " " + item.users[0].last_name}
+                </Text>
+                <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>
+                  {moment(item.created_at).format('M/D/YY - hh:mmA')}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                  {item.files.map((photo) => {
+                  {item.files.map((photo, j) => {
                     if (photo.file_type === 'image/jpeg') {
                       return (
                         <Image
+                          key={j}
                           source={{ uri: photo.s3_location }}
                           style={{
                             width: 50,

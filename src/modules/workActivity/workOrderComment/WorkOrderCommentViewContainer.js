@@ -46,8 +46,7 @@ export default compose(
 
         apiGetJson(`test-app-1/activities/${this.props.activityId}/comments`, this.props.token)
           .then((response) => {
-            console.log(response.data);
-            this.props.setData(response.data);
+            this.props.setData(response.data.reverse());
           });
       } else {
         this.props.setActivityData(
