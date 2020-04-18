@@ -1,5 +1,5 @@
 // @flow
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, Component } from 'react';
 import {
   StyleSheet,
   View,
@@ -15,14 +15,11 @@ import {
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
 import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
-import RNFetchBlob from 'rn-fetch-blob';
 
-import {
-  apiChangeStatus, apiGet, apiPostImage, apiPostComment,
-} from '../../../../core/api';
-import setChangesInOffline from '../../../../core/setChanges';
 import { colors } from '../../../../styles';
 import { Button, PartialModal, Header } from '../../../../components';
+
+import RNFetchBlob from 'rn-fetch-blob';
 
 const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
@@ -37,259 +34,263 @@ const options = {
   },
 };
 
+import { BackHandler } from 'react-native';
 
-export default function DetailPartialView(props) {
-  let canvasRef = useRef(null);
-  useEffect(() => {
-    console.log(props.pathes);
-    if (props.pathes) {
-      props.pathes.map((item, index) => {
-        canvasRef.addPath(item);
-      });
-    }
-  }, []);
+export default class DetailPartialView extends Component {
+  constructor(props) {
+    super(props);
+    this.props.setModalVisible(false);
+    this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+  }
 
-  const Required = () => (
-    <View style={styles.requiredBlock}>
-      <Text style={styles.requiredText}>
-        required
+  handleBackButtonClick = () => {
+    this.props.addPhoto([]);
+    this.props.navigation.navigate('DetailsMain');
+    return true;
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+  }
+
+  componentWillMount() {
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+  }
+
+  render() {
+
+    const Required = () => (
+      <View style={styles.requiredBlock}>
+        <Text style={styles.requiredText}>
+          required
       </Text>
-    </View>
-  );
-
-  const renderPhoto = (photo, index) => {
-    const photosCopy = props.photos.slice();
-    return (
-      <View style={{ position: 'relative' }}>
-        <TouchableOpacity
-          style={styles.delPhoto}
-          onPress={async () => {
-            await photosCopy.splice(index, 1);
-            props.addPhoto(photosCopy);
-          }}
-        >
-          <View style={styles.whiteBackground} />
-          <IO
-            style={styles.delIcon}
-            name="md-close-circle"
-          />
-        </TouchableOpacity>
-        <Image source={{ uri: photo }} style={styles.photoBlock} />
       </View>
     );
-  };
 
-  return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor={colors.lightGray} />
-      <Header
-        connectionStatus={props.connectionStatus}
-        changesNum={props.changes.length}
-        navigation={props.navigation}
-        sideBar
-        indicator
-      />
-      <View style={styles.partialInstallationsHeader}>
-        <Text style={styles.partialInstallations}>Partial Installation</Text>
-      </View>
-      <ScrollView>
-        <View style={styles.scrollContainer}>
-          <Text style={{ fontSize: 16 }}>
-            A partial installation occurs when an installation cannot be comleted
-            due to circumstances outside of your control.
-          </Text>
-          <Text style={{ fontSize: 16, marginTop: 16 }}>
-            Please explain why the installationcannot be comleted. Take photos to document the
-            situation, including any incorrect or damaged materials.
-          </Text>
-          <TextInput
-            multiline
-            placeholder="Placeholder..."
-            style={[styles.inputStyle, { height: 160 }]}
-            onChangeText={text => props.setComment(text)}
-            value={props.comment}
-          />
-          <Required />
-          <View style={{ marginTop: 24 }}>
-            <Button
-              bgColor={colors.blue}
-              onPress={() => {
-                Alert.alert(
-                  'Add photo',
-                  '',
-                  [
-                    {
-                      text: 'Choose from gallery',
-                      onPress: () => {
-                        ImagePicker.launchImageLibrary(options, (response) => {
-                          console.log(response);
-                          const { photos } = props;
-                          if (!response.didCancel) {
-                            photos.push(response.uri);
-                            props.addPhoto(photos);
-                            props.setNumOfChanges(props.numOfChanges);
-                          }
-                        });
-                      },
-                    },
-                    {
-                      text: 'Take a photo',
-                      onPress: () => {
-                        props.navigation.navigate(
-                          'Camera',
-                          {
-                            photos: props.photos,
-                            addPhoto: arr => props.addPhoto(arr),
-                            screen: 'DetailsPartial',
-                            screenData: {
-                              text: props.comment,
-                              name: props.name,
-                              signature: props.pathes,
-                            },
-                          },
-                        );
-                      },
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                    },
-                  ],
-                  { cancelable: true },
-                );
-              }}
-              textColor={colors.white}
-              textStyle={{ fontSize: 20 }}
-              caption="Add Photo(s)"
-            />
-          </View>
-          <Required />
-          <View style={styles.photoSection}>
-            { props.photos.map((photo, index) => renderPhoto(photo, index)) }
-          </View>
-          <Text style={{ fontSize: 16, marginTop: 16 }}>
-            Manager on Duty Signeture:
-          </Text>
-          <RNSketchCanvas
-            ref={(c) => { canvasRef = c; }}
-            containerStyle={[
-              styles.inputStyle,
-              {
-                height: 200,
-                paddingHorizontal: 0,
-                paddingVertical: 0,
-              },
-            ]}
-            canvasStyle={{ backgroundColor: 'transparent', flex: 1 }}
-            defaultStrokeIndex={0}
-            defaultStrokeWidth={5}
-            strokeColor={colors.primary}
-            clearComponent={(
-              <View style={styles.functionButton}>
-                <Text style={{ color: colors.primary }}>
-                  Clear
-                </Text>
-              </View>
-            )}
-            onStrokeEnd={(path) => {
-              console.log(props);
-              const { signature, pathes } = props;
-              signature.push(path.path.data);
-              pathes.push(path);
-              props.setSignature(signature);
-              props.setPathes(pathes);
+    const renderPhoto = (photo, index) => {
+      const photosCopy = this.props.photos.slice();
+      return (
+        <View style={{ position: 'relative' }}
+          key={index}>
+          <TouchableOpacity
+            style={styles.delPhoto}
+            onPress={async () => {
+              await photosCopy.splice(index, 1);
+              this.props.addPhoto(photosCopy);
             }}
-          />
-          <Required />
-          <TextInput
-            placeholder="Enter name..."
-            style={styles.inputStyle}
-            onChangeText={text => props.setName(text)}
-            value={props.name}
-          />
-          <Required />
-          <View style={styles.buttonRow}>
-            <Button
-              bgColor={
-                (props.photos.length === 0 || props.name === '' || props.signature === '' || props.comment === '')
-                  ? '#b1cec1'
-                  : colors.green
-              }
-              disabled={props.photos.length === 0 || props.name === '' || props.signature === '' || props.comment === ''}
-              style={{ width: '45%' }}
-              onPress={async () => {
-                if (!props.connectionStatus) {
-                  setChangesInOffline(
-                    props.changes,
-                    props.setChanges,
-                    props.setNumOfChanges,
-                    props.comment,
-                    props.activityId,
-                    props.accountId,
-                    props.photos,
-                    'Partial',
+          >
+            <View style={styles.whiteBackground} />
+            <IO
+              style={styles.delIcon}
+              name="md-close-circle"
+            />
+          </TouchableOpacity>
+          <Image source={{ uri: photo }} style={styles.photoBlock} />
+        </View>
+      );
+    };
+
+    const onSave = async (success, path) => {
+      if (!success) return;
+      let imageUri;
+
+      try {
+        if (path == null) {
+          const images = await CameraRoll.getPhotos({ first: 1 });
+          if (images.length > 0) {
+            imageUri = [0].image.uri;
+          } else {
+            console.log('Image path missing and no images in camera roll')
+            return;
+          }
+
+        } else {
+          imageUri = path
+        }
+      } catch (e) {
+        console.log(e.message)
+      }
+
+      RNFetchBlob.fs.readFile(imageUri, 'base64')
+        .then((data) => {
+          this.props.setSignature([data]);
+          RNFetchBlob.fs
+            .unlink(imageUri)
+            .then(() => {
+            })
+            .catch(err => {
+            });
+        })
+    }
+
+    return (
+      <View style={styles.container}>
+        <StatusBar backgroundColor={colors.lightGray} />
+        <Header
+          connectionStatus={this.props.connectionStatus}
+          changesNum={this.props.changes.length}
+          navigation={this.props.navigation}
+          sideBar
+          indicator
+        />
+        <View style={styles.partialInstallationsHeader}>
+          <Text style={styles.partialInstallations}>Partial Installation</Text>
+        </View>
+        <ScrollView>
+          <View style={styles.scrollContainer}>
+            <Text style={{ fontSize: 16 }}>
+              A partial installation occurs when an installation cannot be completed
+              due to circumstances outside of your control.
+          </Text>
+            <Text style={{ fontSize: 16, marginTop: 16 }}>
+              Please explain why the installation cannot be completed. Take photos to document the
+              situation, including any incorrect or damaged materials.
+          </Text>
+            <TextInput
+              multiline
+              placeholder="Reason for partial installation"
+              style={[styles.inputStyle, { height: 160 }]}
+              onChangeText={text => this.props.setComment(text)}
+              value={this.props.comment}
+            />
+            <Required />
+            <View style={{ marginTop: 24 }}>
+              <Button
+                bgColor={colors.blue}
+                onPress={() => {
+                  Alert.alert(
+                    'Add photo',
+                    '',
+                    [
+                      {
+                        text: 'Choose from gallery',
+                        onPress: () => {
+                          ImagePicker.launchImageLibrary(options, (response) => {
+                            const { photos } = this.props;
+                            if (!response.didCancel) {
+                              photos.push(response.uri);
+                              this.props.addPhoto(photos);
+                              this.props.setNumOfChanges(this.props.numOfChanges);
+                            }
+                          });
+                        },
+                      },
+                      {
+                        text: 'Take a photo',
+                        onPress: () => {
+                          this.props.navigation.navigate(
+                            'Camera',
+                            {
+                              photos: this.props.photos,
+                              addPhoto: arr => this.props.addPhoto(arr),
+                              screen: 'DetailsPartial',
+                              screenData: {
+                                text: this.props.comment,
+                                name: this.props.name,
+                                signature: this.props.pathes,
+                              },
+                            },
+                          );
+                        },
+                      },
+                      {
+                        text: 'Cancel',
+                        style: 'cancel',
+                      },
+                    ],
+                    { cancelable: true },
                   );
-                  props.setModalVisible(true);
-                } else {
-                  await apiChangeStatus('Failed', props.activityId, props.token)
-                    .then((response) => {
-                      const res = response.json();
-                      console.log(response, res);
-                      props.setModalVisible(true);
-                    });
-                  const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
-                  apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
-                    if (props.photos.length > 0) {
-                      props.photos.forEach((item) => {
-                        apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
-                          RNFetchBlob.fetch('PUT', res.data.url, {
-                            'security-token': props.token,
-                            'Content-Type': 'application/octet-stream',
-                          }, RNFetchBlob.wrap(item.replace('file://', '')))
-                            .then(() => {
-                              RNFetchBlob.fs.stat(item.replace('file://', ''))
-                                .then((stats) => {
-                                  const formData = new FormData();
-                                  formData.append('file_type', 'image/jpeg');
-                                  formData.append('name', stats.filename);
-                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                  formData.append('size', stats.size);
-                                  apiPostImage(
-                                    `http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`,
-                                    formData, props.token,
-                                  );
-                                });
-                            })
-                            .catch((err) => {
-                              console.log(err);
-                            });
-                        });
-                      });
-                    }
-                  });
+                }}
+                textColor={colors.white}
+                textStyle={{ fontSize: 20 }}
+                caption="Add Photo(s)"
+              />
+            </View>
+            <Required />
+            <View style={styles.photoSection}>
+              {this.props.photos.map((photo, index) => renderPhoto(photo, index))}
+            </View>
+            <Text style={{ fontSize: 16, marginTop: 16 }}>
+              Manager on Duty Signature:
+          </Text>
+            <RNSketchCanvas
+              ref={ref => this.canvas = ref}
+              containerStyle={[
+                {
+                  height: 200,
+                  marginTop: 10,
+                  backgroundColor: colors.white,
+                },
+              ]}
+              canvasStyle={{ backgroundColor: 'transparent', flex: 1 }}
+              defaultStrokeIndex={0}
+              defaultStrokeWidth={5}
+              strokeColor={colors.primary}
+              clearComponent={(
+                <View style={styles.functionButton}>
+                  <Text style={{ color: colors.primary }}>
+                    Clear
+                </Text>
+                </View>
+              )}
+              onSketchSaved={(success, filePath) => {
+                onSave(success, filePath);
+              }}
+              savePreference={() => {
+                return {
+                  folder: 'RNSketchCanvas',
+                  filename: 'partial_sign',
+                  transparent: false,
+                  imageType: 'jpg'
                 }
               }}
-              textColor={colors.white}
-              textStyle={{ fontSize: 20 }}
-              caption="Submit"
-            />
-            <Button
-              bgColor={colors.red}
-              style={{ width: '45%' }}
-              onPress={() => {
-                props.addPhoto([]);
-                props.navigation.navigate('DetailsMain');
+              onStrokeEnd={(path) => {
+                this.canvas.save();
               }}
-              textColor={colors.white}
-              textStyle={{ fontSize: 20 }}
-              caption="Cancel"
             />
+            <Required />
+            <TextInput
+              placeholder="Enter name..."
+              style={styles.inputStyle}
+              onChangeText={text => this.props.setName(text)}
+              value={this.props.name}
+            />
+            <Required />
+            <View style={styles.buttonRow}>
+              <Button
+                bgColor={
+                  (this.props.photos.length === 0 || this.props.name === '' || this.props.signature === '' || this.props.comment === '')
+                    ? '#b1cec1'
+                    : colors.green
+                }
+                disabled={this.props.photos.length === 0 || this.props.name === '' || this.props.signature === '' || this.props.comment === ''}
+                style={{ width: '48%' }}
+                onPress={async () => {
+                  this.props.setModalVisible(true);
+                }}
+                textColor={colors.white}
+                textStyle={{ fontSize: 20 }}
+                caption="Submit"
+              />
+              <Button
+                bgColor={colors.red}
+                style={{ width: '48%' }}
+                onPress={() => {
+                  this.props.addPhoto([]);
+                  this.props.setSignature([]);
+                  this.props.navigation.navigate('DetailsMain');
+                }}
+                textColor={colors.white}
+                textStyle={{ fontSize: 20 }}
+                caption="Cancel"
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
-      <PartialModal />
-    </View>
-  );
+        </ScrollView>
+        <PartialModal mainProps={this.props} />
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -361,6 +362,8 @@ const styles = StyleSheet.create({
   },
   functionButton: {
     margin: 16,
+    marginBottom: 0,
+    marginTop: 5,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',

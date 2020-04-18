@@ -191,9 +191,12 @@ export const apiPostImage = (method, body, token) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
+      console.log(response);
+
       return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
     })
     .catch((error) => {
+      console.log(error);
       console.log(`There has been a problem with your fetch operation: ${error.message}`);
       Alert.alert('Error', `error message: ${error.message}`);
       throw error;
@@ -259,6 +262,30 @@ export const apiPatchAnswers = (method, body, token) => {
     .catch((error) => {
       console.log(`There has been a problem with your fetch operation: ${error.message}`);
       // ADD THIS THROW error
+      throw error;
+    });
+};
+
+export const apiPatch = (method, token, body) => {
+  const url = `${API_PATH}/${method}`;
+
+  return fetch(url, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'security-token': token,
+    },
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+      // return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      // console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      // Alert.alert('Error', `error message: ${error.message}`);
       throw error;
     });
 };
