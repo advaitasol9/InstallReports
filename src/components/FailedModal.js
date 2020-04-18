@@ -16,7 +16,6 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 const FailedModal = (props) => {
-  console.log(props);
   if (props.isPartModalVisible) {
     return (
       <Modal
