@@ -170,7 +170,7 @@ class ParialModalComponent extends Component {
                               .then(() => {
                                 const formData = new FormData();
                                 formData.append('file_type', 'image/jpeg');
-                                formData.append('name', 'Signature');
+                                formData.append('name', 'partial_sign.jpg');
                                 formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                 formData.append('size', this.props.mainProps.signature[0].length);
                                 apiPostImage(
