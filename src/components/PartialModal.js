@@ -118,18 +118,20 @@ class ParialModalComponent extends Component {
                       );
                       this.props.mainProps.setModalVisible(true);
                     } else {
-                      Promise.all([
-                        apiChangeStatus('Partial', this.props.mainProps.activityId, this.props.token),
-                        apiPatch(`test-app-1/activities/` + this.props.mainProps.activityId, this.props.token,
-                          { 'partial_installation_manager_name': this.props.mainProps.name }),
-                      ]).then(([items, contactlist, itemgroup]) => {
-
-                      }).catch((err) => {
-                        console.log(err);
-                      });
-
                       const data = `text=${this.props.mainProps.comment}&user_ids=%5B${this.props.mainProps.accountId}%5D&undefined=`;
                       await apiPostComment(`test-app-1/activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
+                        Promise.all([
+                          apiChangeStatus('Partial', this.props.mainProps.activityId, this.props.token),
+                          apiPatch(`test-app-1/activities/` + this.props.mainProps.activityId, this.props.token,
+                            {
+                              'partial_installation_manager_name': this.props.mainProps.name,
+                              'partial_installation_comment_id': resPostText.data.id,
+                            }),
+                        ]).then(() => {
+
+                        }).catch((err) => {
+                          console.log(err);
+                        });
                         if (this.props.mainProps.photos.length > 0) {
                           this.props.mainProps.photos.forEach((item, index) => {
                             apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {

@@ -239,7 +239,7 @@ export default class DetailPartialView extends Component {
               savePreference={() => {
                 return {
                   folder: 'RNSketchCanvas',
-                  filename: 'partial_sign',
+                  filename: 'partial_sign.jpg',
                   transparent: false,
                   imageType: 'jpg'
                 }
