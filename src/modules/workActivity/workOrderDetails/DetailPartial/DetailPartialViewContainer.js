@@ -34,11 +34,9 @@ export default compose(
   withState('comment', 'setComment', ''),
   lifecycle({
     componentWillMount() {
-      console.log(this.props);
       this.props.setNumOfChanges(this.props.changes.length);
 
       if (this.props.navigation.state.params) {
-        console.log(this.props.navigation.state.params);
         this.props.setComment(this.props.navigation.state.params.screenData.text);
         this.props.setName(this.props.navigation.state.params.screenData.name);
         this.props.setSignature(this.props.navigation.state.params.screenData.signature);

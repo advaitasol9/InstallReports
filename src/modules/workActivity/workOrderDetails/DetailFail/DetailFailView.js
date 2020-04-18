@@ -1,5 +1,5 @@
 // @flow
-import React from 'react';
+import React, { Component } from 'react';
 import {
   StyleSheet,
   View,
@@ -36,204 +36,219 @@ const options = {
   },
 };
 
-export default function DetailFailedView(props) {
-  const Required = () => (
-    <View style={styles.requiredBlock}>
-      <Text style={styles.requiredText}>
-        required
-      </Text>
-    </View>
-  );
+export default class DetailFailedView extends Component {
 
-  const renderPhoto = (photo, index) => {
-    const photosCopy = props.photos.slice();
-    return (
-      <View style={{ position: 'relative' }}>
-        <TouchableOpacity
-          style={styles.delPhoto}
-          onPress={async () => {
-            await photosCopy.splice(index, 1);
-            props.addPhoto(photosCopy);
-          }}
-        >
-          <View style={styles.whiteBackground} />
-          <IO
-            style={styles.delIcon}
-            name="md-close-circle"
-          />
-        </TouchableOpacity>
-        <Image source={{ uri: photo }} style={styles.photoBlock} />
+  constructor(props) {
+    super(props);
+    uploadedImagesCount = 0;
+    this.props.setModalVisible(false);
+  }
+
+  isLastImageUploaded() {
+    if (this.uploadedImagesCount == this.props.photos.length) {
+      this.props.addPhoto([]);
+      this.props.navigation.navigate('Work Order');
+    }
+  }
+
+  render() {
+    const Required = () => (
+      <View style={styles.requiredBlock}>
+        <Text style={styles.requiredText}>
+          required
+      </Text>
       </View>
     );
-  };
 
-  return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor={colors.lightGray} />
-      <Header
-        connectionStatus={props.connectionStatus}
-        changesNum={props.changes.length}
-        navigation={props.navigation}
-        sideBar
-        indicator
-      />
-      <View style={styles.partialInstallationsHeader}>
-        <Text style={styles.partialInstallations}>Failed Installation</Text>
-      </View>
-      <ScrollView>
-        <View style={styles.scrollContainer}>
-          <Text style={{ fontSize: 16 }}>
-            A failed installation occurs when an installation will never be comleted due
-            to circumstanceslike a closed or incorrect location.
+    const renderPhoto = (photo, index) => {
+      const photosCopy = this.props.photos.slice();
+      return (
+        <View style={{ position: 'relative' }}>
+          <TouchableOpacity
+            style={styles.delPhoto}
+            onPress={async () => {
+              await photosCopy.splice(index, 1);
+              this.props.addPhoto(photosCopy);
+            }}
+          >
+            <View style={styles.whiteBackground} />
+            <IO
+              style={styles.delIcon}
+              name="md-close-circle"
+            />
+          </TouchableOpacity>
+          <Image source={{ uri: photo }} style={styles.photoBlock} />
+        </View>
+      );
+    };
+
+    return (
+      <View style={styles.container}>
+        <StatusBar backgroundColor={colors.lightGray} />
+        <Header
+          connectionStatus={this.props.connectionStatus}
+          changesNum={this.props.changes.length}
+          navigation={this.props.navigation}
+          sideBar
+          indicator
+        />
+        <View style={styles.partialInstallationsHeader}>
+          <Text style={styles.partialInstallations}>Failed Installation</Text>
+        </View>
+        <ScrollView>
+          <View style={styles.scrollContainer}>
+            <Text style={{ fontSize: 16 }}>
+              A failed installation occurs when an installation will never be completed due
+              to circumstances like a closed or incorrect location.
           </Text>
-          <Text style={{ fontSize: 16, marginTop: 16 }}>
-            Please explain why the installation cannot be comleted.
-            Take photos to document the situation.
+            <Text style={{ fontSize: 16, marginTop: 16 }}>
+              Please explain why the installation cannot be comleted.
+              Take photos to document the situation.
           </Text>
-          <TextInput
-            multiline
-            placeholder="Placeholder..."
-            style={[styles.inputStyle, { height: 160 }]}
-            onChangeText={text => props.setComment(text)}
-            value={props.comment}
-          />
-          <Required />
-          <View style={{ marginTop: 24 }}>
-            <Button
-              bgColor={colors.blue}
-              onPress={() => {
-                Alert.alert(
-                  'Add photo',
-                  '',
-                  [
-                    {
-                      text: 'Choose from gallery',
-                      onPress: () => {
-                        ImagePicker.launchImageLibrary(options, (response) => {
-                          const { photos } = props;
-                          if (!response.didCancel) {
-                            photos.push(response.uri);
-                            props.addPhoto(photos);
-                            props.setNumOfChanges(props.numOfChanges);
+            <TextInput
+              multiline
+              placeholder="Reason for failed installation"
+              style={[styles.inputStyle, { height: 160 }]}
+              onChangeText={text => this.props.setComment(text)}
+              value={this.props.comment}
+            />
+            <Required />
+            <View style={{ marginTop: 24 }}>
+              <Button
+                bgColor={colors.blue}
+                onPress={() => {
+                  Alert.alert(
+                    'Add photo',
+                    '',
+                    [
+                      {
+                        text: 'Choose from gallery',
+                        onPress: () => {
+                          ImagePicker.launchImageLibrary(options, (response) => {
+                            const { photos } = this.props;
+                            if (!response.didCancel) {
+                              photos.push(response.uri);
+                              this.props.addPhoto(photos);
+                              this.props.setNumOfChanges(this.props.numOfChanges);
+                            }
+                          });
+                        },
+                      },
+                      {
+                        text: 'Take a photo',
+                        onPress: () => {
+                          this.props.navigation.navigate(
+                            'Camera',
+                            {
+                              photos: this.props.photos,
+                              addPhoto: arr => this.props.addPhoto(arr),
+                              screen: 'DetailsFail',
+                              screenData: {
+                                text: this.props.comment,
+                              },
+                            },
+                          );
+                        },
+                      },
+                      {
+                        text: 'Cancel',
+                        style: 'cancel',
+                      },
+                    ],
+                    { cancelable: true },
+                  );
+                }}
+                textColor={colors.white}
+                textStyle={{ fontSize: 20 }}
+                caption="Add Photo(s)"
+              />
+            </View>
+            <Required />
+            <View style={styles.photoSection}>
+              {this.props.photos.map((photo, index) => renderPhoto(photo, index))}
+            </View>
+            <View style={styles.buttonRow}>
+              <Button
+                bgColor={
+                  (this.props.photos.length === 0 || this.props.comment === '')
+                    ? '#b1cec1'
+                    : colors.green
+                }
+                disabled={this.props.photos.length === 0 || this.props.comment === ''}
+                style={{ width: '48%' }}
+                onPress={async () => {
+                  if (!this.props.connectionStatus) {
+                    setChangesInOffline(
+                      this.props.changes,
+                      this.props.setChanges,
+                      this.props.setNumOfChanges,
+                      this.props.comment,
+                      this.props.activityId,
+                      this.props.accountId,
+                      this.props.photos,
+                      'Failed',
+                    );
+                    this.props.setModalVisible(true);
+                  } else {
+                    await apiChangeStatus('Failed', this.props.activityId, this.props.token)
+                      .then((response) => {
+                        const data = `text=${this.props.comment}&user_id=${this.props.accountId}`;
+                        apiPostComment(`test-app-1/activities/${this.props.activityId}/comments`, data, this.props.token).then((resPostText) => {
+                          if (this.props.photos.length > 0) {
+                            this.props.photos.forEach((item, index) => {
+                              apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.token).then((res) => {
+                                RNFetchBlob.fetch('PUT', res.data.url, {
+                                  'security-token': this.props.token,
+                                  'Content-Type': 'application/octet-stream',
+                                }, RNFetchBlob.wrap(item.replace('file://', '')))
+                                  .then(() => {
+                                    RNFetchBlob.fs.stat(item.replace('file://', ''))
+                                      .then((stats) => {
+                                        const formData = new FormData();
+                                        formData.append('file_type', 'image/jpeg');
+                                        formData.append('name', stats.filename);
+                                        formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                        formData.append('size', stats.size);
+                                        apiPostImage(
+                                          `http://142.93.1.107:9001/test-app-1/activities/${this.props.activityId}/comments/${resPostText.data.id}/files`,
+                                          formData, this.props.token,
+                                        );
+                                        this.uploadedImagesCount = index + 1;
+                                        this.isLastImageUploaded();
+                                      });
+                                  })
+                                  .catch((err) => {
+                                    console.log(err);
+                                  });
+                              });
+                            });
                           }
                         });
-                      },
-                    },
-                    {
-                      text: 'Take a photo',
-                      onPress: () => {
-                        props.navigation.navigate(
-                          'Camera',
-                          {
-                            photos: props.photos,
-                            addPhoto: arr => props.addPhoto(arr),
-                            screen: 'DetailsFail',
-                            screenData: {
-                              text: props.comment,
-                            },
-                          },
-                        );
-                      },
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                    },
-                  ],
-                  { cancelable: true },
-                );
-              }}
-              textColor={colors.white}
-              textStyle={{ fontSize: 20 }}
-              caption="Add Photo(s)"
-            />
-          </View>
-          <Required />
-          <View style={styles.photoSection}>
-            { props.photos.map((photo, index) => renderPhoto(photo, index)) }
-          </View>
-          <View style={styles.buttonRow}>
-            <Button
-              bgColor={
-                (props.photos.length === 0 || props.comment === '')
-                  ? '#b1cec1'
-                  : colors.green
-              }
-              disabled={props.photos.length === 0 || props.comment === ''}
-              style={{ width: '45%' }}
-              onPress={async () => {
-                if (!props.connectionStatus) {
-                  setChangesInOffline(
-                    props.changes,
-                    props.setChanges,
-                    props.setNumOfChanges,
-                    props.comment,
-                    props.activityId,
-                    props.accountId,
-                    props.photos,
-                    'Failed',
-                  );
-                  props.setModalVisible(true);
-                } else {
-                  await apiChangeStatus('Failed', props.activityId, props.token)
-                    .then((response) => {
-                      const res = response.json();
-                      console.log(response, res);
-                      props.setModalVisible(true);
-                    });
-                  const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
-                  apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
-                    if (props.photos.length > 0) {
-                      props.photos.forEach((item) => {
-                        apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
-                          RNFetchBlob.fetch('PUT', res.data.url, {
-                            'security-token': props.token,
-                            'Content-Type': 'application/octet-stream',
-                          }, RNFetchBlob.wrap(item.replace('file://', '')))
-                            .then(() => {
-                              RNFetchBlob.fs.stat(item.replace('file://', ''))
-                                .then((stats) => {
-                                  const formData = new FormData();
-                                  formData.append('file_type', 'image/jpeg');
-                                  formData.append('name', stats.filename);
-                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                  formData.append('size', stats.size);
-                                  apiPostImage(
-                                    `http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`,
-                                    formData, props.token,
-                                  );
-                                });
-                            })
-                            .catch((err) => {
-                              console.log(err);
-                            });
-                        });
                       });
-                    }
-                  });
-                }
-              }}
-              textColor={colors.white}
-              textStyle={{ fontSize: 20 }}
-              caption="Submit"
-            />
-            <Button
-              bgColor={colors.red}
-              style={{ width: '45%' }}
-              onPress={() => {
-                props.addPhoto([]);
-                props.navigation.navigate('DetailsMain', { photo: props.photos });
-              }}
-              textColor={colors.white}
-              textStyle={{ fontSize: 20 }}
-              caption="Cancel"
-            />
+                  }
+                }}
+                textColor={colors.white}
+                textStyle={{ fontSize: 20 }}
+                caption="Submit"
+              />
+              <Button
+                bgColor={colors.red}
+                style={{ width: '48%' }}
+                onPress={() => {
+                  this.props.addPhoto([]);
+                  this.props.navigation.navigate('DetailsMain', { photo: this.props.photos });
+                }}
+                textColor={colors.white}
+                textStyle={{ fontSize: 20 }}
+                caption="Cancel"
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
-      <FailedModal />
-    </View>
-  );
+        </ScrollView>
+        <FailedModal />
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({

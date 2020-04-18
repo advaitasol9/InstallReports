@@ -161,17 +161,18 @@ export default class DetailMainView extends Component {
               >
                 <Text style={styles.linkButton}>
                   Directions
-              </Text>
+                </Text>
+                <Text style={styles.linkButton}>
+                </Text>
+
               </TouchableOpacity>
               {
-                this.props.activityData.status === 'Open'
-                  || this.props.activityData.status === 'Open_Rejecte'
-                  || this.props.activityData.status === 'Open_Partial'
+                this.props.activityData.status == 'Assigned'
                   ? (
                     <View style={{ paddingTop: 32, alignItems: 'center' }}>
                       <Button
                         bgColor={colors.green}
-                        style={{ width: '80%' }}
+                        style={{ width: 250 }}
                         onPress={() => {
                           this.props.navigation.navigate('DetailsPreInstall');
                         }}
@@ -187,21 +188,21 @@ export default class DetailMainView extends Component {
               }
             </View>
           </View>
-          {/* {
-            this.props.status !== 'Open' && (
+          {
+            this.props.activityData.status !== 'Assigned' && (
               <React.Fragment>
-                <ActivityStatus status={this.props.activityData.status} />
+                <ActivityStatus status="In_Progress" />
                 <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
               </React.Fragment>
             )
-          } */}
+          }
           <ActivityTitle title="Details" />
           <View style={{ backgroundColor: colors.lightGray, paddingVertical: 24 }}>
             <View style={styles.scrollContainer}>
               {
                 <View style={{ width: '100%' }}>
                   {
-                    this.props.activityData.scope_of_work_app_active === 'true' && (
+                    this.props.activityData.scope_of_work_app_active === '1' && (
                       <View>
                         <Text>Scope of Work</Text>
                         <View style={styles.detailDescription}>
@@ -213,7 +214,7 @@ export default class DetailMainView extends Component {
                     )
                   }
                   {
-                    this.props.activityData.special_instructions_app_active === 'true' && (
+                    this.props.activityData.special_instructions_app_active === '1' && (
                       <View>
                         <Text>Special Instructions</Text>
                         <View style={styles.detailDescription}>
@@ -225,7 +226,7 @@ export default class DetailMainView extends Component {
                     )
                   }
                   {
-                    this.props.activityData.installation_hours_app_active === 'true' && (
+                    this.props.activityData.installation_hours_app_active === '1' && (
                       <View>
                         <Text>Hours of Installation</Text>
                         <View style={styles.detailDescription}>
@@ -237,7 +238,7 @@ export default class DetailMainView extends Component {
                     )
                   }
                   {
-                    this.props.activityData.union_reqs_app_active === 'true' && (
+                    this.props.activityData.union_reqs_app_active === '1' && (
                       <View>
                         <Text>Union Requirements</Text>
                         <View style={styles.detailDescription}>
@@ -249,7 +250,7 @@ export default class DetailMainView extends Component {
                     )
                   }
                   {
-                    this.props.activityData.disposal_reqs_app_active === 'true' && (
+                    this.props.activityData.disposal_reqs_app_active === '1' && (
                       <View>
                         <Text>Disposal Requirements</Text>
                         <View style={styles.detailDescription}>
@@ -261,7 +262,7 @@ export default class DetailMainView extends Component {
                     )
                   }
                   {
-                    this.props.activityData.material_delivery_shipping_app_active === 'true' && (
+                    this.props.activityData.material_delivery_shipping_app_active === '1' && (
                       <View>
                         <Text>Material Delivery / Shipping</Text>
                         <View style={styles.detailDescription}>
@@ -273,7 +274,7 @@ export default class DetailMainView extends Component {
                     )
                   }
                   {
-                    this.props.activityData.specialty_trades_req_app_active === 'true' && (
+                    this.props.activityData.specialty_trades_req_app_active === '1' && (
                       <View>
                         <Text>Specialty Trades Required</Text>
                         <View style={styles.detailDescription}>
@@ -285,7 +286,7 @@ export default class DetailMainView extends Component {
                     )
                   }
                   {
-                    this.props.activityData.client_onsite_app_active === 'true' && (
+                    this.props.activityData.client_onsite_app_active === '1' && (
                       <View>
                         <Text>Client Onsite?</Text>
                         <View style={styles.detailDescription}>
@@ -299,37 +300,29 @@ export default class DetailMainView extends Component {
                 </View>
               }
               {
-                this.props.activityData.status === 'Open'
-                  || this.props.activityData.status === 'Open_Rejecte'
-                  || this.props.activityData.status === 'Open_Partial'
-                  || this.props.activityData.status === 'Partial'
-                  || this.props.activityData.status === 'Failed'
-                  ? (
-                    null
-                  )
-                  : (
-                    <View>
-                      <Button
-                        primary
-                        onPress={() => this.props.navigation.navigate('DetailsPartial')}
-                        bgColor={colors.blue}
-                        textColor="white"
-                        caption="Partial Installation"
-                      />
-                      <Button
-                        style={{ marginTop: 24 }}
-                        bgColor={colors.blue}
-                        onPress={() => this.props.navigation.navigate('DetailsFail')}
-                        textColor="white"
-                        caption="Failed Installation"
-                      />
-                    </View>
-                  )
+                this.props.activityData.status === 'In_Progress' &&
+                (
+                  <View>
+                    <Button
+                      primary
+                      onPress={() => this.props.navigation.navigate('DetailsPartial')}
+                      bgColor={colors.blue}
+                      textColor="white"
+                      caption="Partial Installation"
+                    />
+                    <Button
+                      style={{ marginTop: 24 }}
+                      bgColor={colors.blue}
+                      onPress={() => this.props.navigation.navigate('DetailsFail')}
+                      textColor="white"
+                      caption="Failed Installation"
+                    />
+                  </View>
+                )
               }
             </View>
           </View>
         </ScrollView>
-        <PartialModal />
       </View>
     )
   }

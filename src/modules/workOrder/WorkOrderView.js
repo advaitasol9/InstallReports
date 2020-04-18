@@ -71,6 +71,9 @@ export default function WorkOrderScreen(props) {
                     }
                   });
                   props.setOrderList(result);
+                  console.log(result);
+                  
+
                 }
               }}
               data={props.orderList}
