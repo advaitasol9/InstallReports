@@ -40,6 +40,8 @@ export const apiPostComment = (method, body, token) => {
     },
   })
     .then((response) => {
+      console.log(response);
+
       if (response && (response.status === 200 || response.status === 201)) {
         return response;
       }

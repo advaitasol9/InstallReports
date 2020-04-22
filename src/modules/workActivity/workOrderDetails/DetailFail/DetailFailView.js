@@ -14,14 +14,13 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
+
+import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
 import RNFetchBlob from 'rn-fetch-blob';
 
 import { colors } from '../../../../styles';
 import { Button, FailedModal, Header } from '../../../../components';
-import {
-  apiChangeStatus, apiGet, apiPostImage, apiPostComment,
-} from '../../../../core/api';
-import setChangesInOffline from '../../../../core/setChanges';
+import { BackHandler } from 'react-native';
 
 const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
@@ -40,17 +39,23 @@ export default class DetailFailedView extends Component {
 
   constructor(props) {
     super(props);
-    uploadedImagesCount = 0;
     this.props.setModalVisible(false);
+    this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
   }
 
-  isLastImageUploaded() {
-    if (this.uploadedImagesCount == this.props.photos.length) {
-      this.props.addPhoto([]);
-      this.props.navigation.navigate('Work Order');
-    }
+  handleBackButtonClick = () => {
+    this.props.addPhoto([]);
+    this.props.navigation.navigate('DetailsMain');
+    return true;
   }
 
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+  }
+
+  componentWillMount() {
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+  }
   render() {
     const Required = () => (
       <View style={styles.requiredBlock}>
@@ -63,7 +68,7 @@ export default class DetailFailedView extends Component {
     const renderPhoto = (photo, index) => {
       const photosCopy = this.props.photos.slice();
       return (
-        <View style={{ position: 'relative' }}>
+        <View style={{ position: 'relative' }} key={index}>
           <TouchableOpacity
             style={styles.delPhoto}
             onPress={async () => {
@@ -81,6 +86,39 @@ export default class DetailFailedView extends Component {
         </View>
       );
     };
+
+    const onSave = async (success, path) => {
+      if (!success) return;
+      let imageUri;
+
+      try {
+        if (path == null) {
+          const images = await CameraRoll.getPhotos({ first: 1 });
+          if (images.length > 0) {
+            imageUri = [0].image.uri;
+          } else {
+            console.log('Image path missing and no images in camera roll')
+            return;
+          }
+
+        } else {
+          imageUri = path
+        }
+      } catch (e) {
+        console.log(e.message)
+      }
+
+      RNFetchBlob.fs.readFile(imageUri, 'base64')
+        .then((data) => {
+          this.props.setSignature([data]);
+          RNFetchBlob.fs
+            .unlink(imageUri)
+            .then(() => {
+            })
+            .catch(err => {
+            });
+        })
+    }
 
     return (
       <View style={styles.container}>
@@ -167,6 +205,50 @@ export default class DetailFailedView extends Component {
             <View style={styles.photoSection}>
               {this.props.photos.map((photo, index) => renderPhoto(photo, index))}
             </View>
+            <Text style={{ fontSize: 16, marginTop: 16 }}>
+              Manager on Duty Signature:
+            </Text>
+            <RNSketchCanvas
+              ref={ref => this.canvas = ref}
+              containerStyle={[
+                {
+                  height: 200,
+                  marginTop: 10,
+                  backgroundColor: colors.white,
+                },
+              ]}
+              canvasStyle={{ backgroundColor: 'transparent', flex: 1 }}
+              defaultStrokeIndex={0}
+              defaultStrokeWidth={5}
+              strokeColor={colors.primary}
+              clearComponent={(
+                <View style={styles.functionButton}>
+                  <Text style={{ color: colors.primary }}>
+                    Clear
+                </Text>
+                </View>
+              )}
+              onSketchSaved={(success, filePath) => {
+                onSave(success, filePath);
+              }}
+              savePreference={() => {
+                return {
+                  folder: 'RNSketchCanvas',
+                  filename: 'fail_sign',
+                  transparent: false,
+                  imageType: 'jpg'
+                }
+              }}
+              onStrokeEnd={(path) => {
+                this.canvas.save();
+              }}
+            />
+            <TextInput
+              placeholder="Enter name..."
+              style={styles.inputStyle}
+              onChangeText={text => this.props.setName(text)}
+              value={this.props.name}
+            />
             <View style={styles.buttonRow}>
               <Button
                 bgColor={
@@ -177,55 +259,7 @@ export default class DetailFailedView extends Component {
                 disabled={this.props.photos.length === 0 || this.props.comment === ''}
                 style={{ width: '48%' }}
                 onPress={async () => {
-                  if (!this.props.connectionStatus) {
-                    setChangesInOffline(
-                      this.props.changes,
-                      this.props.setChanges,
-                      this.props.setNumOfChanges,
-                      this.props.comment,
-                      this.props.activityId,
-                      this.props.accountId,
-                      this.props.photos,
-                      'Failed',
-                    );
-                    this.props.setModalVisible(true);
-                  } else {
-                    await apiChangeStatus('Failed', this.props.activityId, this.props.token)
-                      .then((response) => {
-                        const data = `text=${this.props.comment}&user_id=${this.props.accountId}`;
-                        apiPostComment(`test-app-1/activities/${this.props.activityId}/comments`, data, this.props.token).then((resPostText) => {
-                          if (this.props.photos.length > 0) {
-                            this.props.photos.forEach((item, index) => {
-                              apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.token).then((res) => {
-                                RNFetchBlob.fetch('PUT', res.data.url, {
-                                  'security-token': this.props.token,
-                                  'Content-Type': 'application/octet-stream',
-                                }, RNFetchBlob.wrap(item.replace('file://', '')))
-                                  .then(() => {
-                                    RNFetchBlob.fs.stat(item.replace('file://', ''))
-                                      .then((stats) => {
-                                        const formData = new FormData();
-                                        formData.append('file_type', 'image/jpeg');
-                                        formData.append('name', stats.filename);
-                                        formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                        formData.append('size', stats.size);
-                                        apiPostImage(
-                                          `http://142.93.1.107:9001/test-app-1/activities/${this.props.activityId}/comments/${resPostText.data.id}/files`,
-                                          formData, this.props.token,
-                                        );
-                                        this.uploadedImagesCount = index + 1;
-                                        this.isLastImageUploaded();
-                                      });
-                                  })
-                                  .catch((err) => {
-                                    console.log(err);
-                                  });
-                              });
-                            });
-                          }
-                        });
-                      });
-                  }
+                  this.props.setModalVisible(true);
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
@@ -236,7 +270,8 @@ export default class DetailFailedView extends Component {
                 style={{ width: '48%' }}
                 onPress={() => {
                   this.props.addPhoto([]);
-                  this.props.navigation.navigate('DetailsMain', { photo: this.props.photos });
+                  this.props.setSignature([]);
+                  this.props.navigation.navigate('DetailsMain');
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
@@ -245,7 +280,7 @@ export default class DetailFailedView extends Component {
             </View>
           </View>
         </ScrollView>
-        <FailedModal />
+        <FailedModal mainProps={this.props} />
       </View>
     );
   }
@@ -336,5 +371,14 @@ const styles = StyleSheet.create({
     top: 10,
     borderRadius: 16,
     backgroundColor: 'white',
+  },
+  functionButton: {
+    margin: 16,
+    marginBottom: 0,
+    marginTop: 5,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
   },
 });
