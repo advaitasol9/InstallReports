@@ -85,7 +85,7 @@ export default function WorkOrderManagerView(props) {
               onPress={async () => {
                 if (props.photos.length > 0) {
                   props.photos.forEach((item) => {
-                    apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
+                    apiGet('aws-s3-presigned-urls', props.token).then((res) => {
                       RNFetchBlob.fetch('PUT', res.data.url, {
                         'security-token': props.token,
                         'Content-Type': 'application/octet-stream',
@@ -99,7 +99,7 @@ export default function WorkOrderManagerView(props) {
                               formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                               formData.append('size', stats.size);
                               apiPostImage(
-                                'http://142.93.1.107:9001/test-app-1/files',
+                                'files',
                                 formData,
                                 props.token,
                               ).then(() => {
@@ -119,7 +119,7 @@ export default function WorkOrderManagerView(props) {
                   });
                 }
                 await apiPatchAnswers(
-                  `test-app-1/activities/${props.activityData.id}`,
+                  `activities/${props.activityData.id}`,
                   `installer_manager_answers=${JSON.stringify(props.activityData.installer_questions_answers)}`,
                   props.token,
                 ).then((response) => {

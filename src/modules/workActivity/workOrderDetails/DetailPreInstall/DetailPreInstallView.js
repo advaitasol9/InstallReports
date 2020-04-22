@@ -205,9 +205,9 @@ export default class DetailPartialView extends Component {
                     this.props.navigation.navigate('DetailsMain');
                   } else {
                     await apiChangeStatus('In_Progress', this.props.activityId, this.props.token).then(() => {
-                      apiPostComment(`test-app-1/activities/${this.props.activityId}/comments`, data, this.props.token).then((resPostText) => {
+                      apiPostComment(`activities/${this.props.activityId}/comments`, data, this.props.token).then((resPostText) => {
                         this.props.photos.forEach((item, index) => {
-                          apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.token).then((res) => {
+                          apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
                             RNFetchBlob.fetch('PUT', res.data.url, {
                               'security-token': this.props.token,
                               'Content-Type': 'application/octet-stream',
@@ -222,7 +222,7 @@ export default class DetailPartialView extends Component {
                                     formData.append('size', stats.size);
 
                                     apiPostImage(
-                                      `http://142.93.1.107:9001/test-app-1/activities/${this.props.activityId}/comments/${resPostText.data.id}/files`,
+                                      `activities/${this.props.activityId}/comments/${resPostText.data.id}/files`,
                                       formData, this.props.token,
                                     );
                                     this.uploadedImagesCount = index + 1;

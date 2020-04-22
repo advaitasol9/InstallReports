@@ -56,7 +56,7 @@ export default function WorkOrderScreen(props) {
               refreshing={false}
               onRefresh={async () => {
                 if (props.connectionStatus) {
-                  const data = await apiGetJson('test-app-1/spectrum/activities?with=[%22items%22,%22accounts%22]', props.token);
+                  const data = await apiGetJson('spectrum/activities?with=[%22items%22,%22accounts%22]', props.token);
                   const result = [];
 
                   await data.data.forEach((activity) => {

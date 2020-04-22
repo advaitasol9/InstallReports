@@ -51,7 +51,7 @@ export default class AuthScreen extends React.Component {
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
-      auth('test-app-1/login/', formData).then((response) => {
+      auth('login/', formData).then((response) => {
         console.log(response);
         if (!this.props.connectionStatus) {
           Alert.alert('There is no connection');

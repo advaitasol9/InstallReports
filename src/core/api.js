@@ -59,7 +59,7 @@ export const apiPostComment = (method, body, token) => {
 };
 
 export const apiChangeStatus = (status, activityId, token) => {
-  const url = `${API_PATH}/test-app-1/spectrum/activities/${activityId}/status/${status}`;
+  const url = `${API_PATH}/spectrum/activities/${activityId}/status/${status}`;
   return fetch(url, {
     method: 'POST',
     followRedirects: true,
@@ -106,8 +106,7 @@ export const apiGetJson = (method, token, contentType = 'application/json') => {
 };
 
 export const apiGet = (method, token, contentType = 'application/json') => {
-  const url = method;
-  console.log(url);
+  const url = `${API_PATH}/${method}`;
   return fetch(url, {
     method: 'GET',
     mode: 'cors',
@@ -179,7 +178,7 @@ export const logout = (method, token) => {
 };
 
 export const apiPostImage = (method, body, token) => {
-  const url = method;
+  const url = `${API_PATH}/${method}`;
   console.log(url, body, token);
   return fetch(url, {
     method: 'POST',
@@ -206,7 +205,7 @@ export const apiPostImage = (method, body, token) => {
 };
 
 export const apiPatchImage = (method, body, token) => {
-  const url = method;
+  const url = `${API_PATH}/${method}`;
   console.log(url, body, token);
   return fetch(url, {
     method: 'PATCH',
@@ -227,8 +226,7 @@ export const apiPatchImage = (method, body, token) => {
 };
 
 export const apiPut = (method, token, body) => {
-  const url = method;
-
+  const url = `${API_PATH}/${method}`;
   return fetch(url, {
     method: 'PUT',
     headers: {

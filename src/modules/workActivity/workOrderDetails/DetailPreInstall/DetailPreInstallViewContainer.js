@@ -37,7 +37,7 @@ export default compose(
         this.props.setComment(this.props.navigation.state.params.screenData.text);
       }
 
-      apiGetJson(`test-app-1/activities/${this.props.activityId}`, this.props.token)
+      apiGetJson(`activities/${this.props.activityId}`, this.props.token)
         .then((response) => {
           this.props.setActivityData(response.data);
         });

@@ -72,7 +72,7 @@ export default compose(
   withState('data', 'setData', []),
   lifecycle({
     async componentWillMount() {
-      const response = await apiGetJson(`test-app-1/${this.props.entity}/uniques?columns=["${this.props.column}"]`, this.props.token);
+      const response = await apiGetJson(`${this.props.entity}/uniques?columns=["${this.props.column}"]`, this.props.token);
       const filterItems = [];
       const { orderList } = this.props;
       await response.data.forEach(async (item, index) => {

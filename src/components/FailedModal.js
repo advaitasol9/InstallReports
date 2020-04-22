@@ -113,10 +113,10 @@ class FailedModalComponent extends Component {
                       this.mainProps.props.setModalVisible(true);
                     } else {
                       const data = `text=${this.props.mainProps.comment}&user_id=${this.props.mainProps.accountId}`;
-                      apiPostComment(`test-app-1/activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
+                      apiPostComment(`activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
                         Promise.all([
                           apiChangeStatus('Failed', this.props.mainProps.activityId, this.props.token),
-                          apiPatch(`test-app-1/activities/` + this.props.mainProps.activityId, this.props.token,
+                          apiPatch(`activities/` + this.props.mainProps.activityId, this.props.token,
                             {
                               'failed_installation_manager_name': this.props.mainProps.name,
                               'failed_installation_comment_id': resPostText.data.id,
@@ -128,7 +128,7 @@ class FailedModalComponent extends Component {
                         });
                         if (this.props.mainProps.photos.length > 0) {
                           this.props.mainProps.photos.forEach((item, index) => {
-                            apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
+                            apiGet('aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
                               RNFetchBlob.fetch('PUT', res.data.url, {
                                 'security-token': this.props.mainProps.token,
                                 'Content-Type': 'application/octet-stream',
@@ -142,7 +142,7 @@ class FailedModalComponent extends Component {
                                       formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                       formData.append('size', stats.size);
                                       apiPostImage(
-                                        `http://142.93.1.107:9001/test-app-1/activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
+                                        `activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
                                         formData, this.props.mainProps.token,
                                       );
                                       this.uploadedImagesCount = index + 1;
@@ -156,7 +156,7 @@ class FailedModalComponent extends Component {
                           });
                         }
                         if (this.props.mainProps.signature.length == 1) {
-                          apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
+                          apiGet('aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
                             RNFetchBlob.fetch('PUT', res.data.url, {
                               'security-token': this.props.mainProps.token,
                               'Content-Type': 'application/octet-stream',
@@ -168,7 +168,7 @@ class FailedModalComponent extends Component {
                                 formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                 formData.append('size', this.props.mainProps.signature[0].length);
                                 apiPostImage(
-                                  `http://142.93.1.107:9001/test-app-1/activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
+                                  `activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
                                   formData, this.props.mainProps.token,
                                 );
                                 this.isSignatureUploaded = true;

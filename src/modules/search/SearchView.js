@@ -49,7 +49,7 @@ const SearhHeader = ({
             onChangeText={async (text) => {
               setSearchText(text);
               if (text === '') {
-                const response = await apiGetJson('test-app-1/activities?with=[%22items%22,%22accounts%22]', token);
+                const response = await apiGetJson('activities?with=[%22items%22,%22accounts%22]', token);
                 const result = [];
                 await response.data.forEach((activity) => {
                   if (activity.items.length > 0
@@ -62,7 +62,7 @@ const SearhHeader = ({
                 });
                 setSearchResult(result);
               } else if (connectionStatus) {
-                const response = await apiGetJson(`test-app-1/activities?with=[%22items%22,%22accounts%22]&&search={"name":"${text}"}`, token);
+                const response = await apiGetJson(`activities?with=[%22items%22,%22accounts%22]&&search={"name":"${text}"}`, token);
                 const result = [];
                 await response.data.forEach((activity) => {
                   if (activity.items.length > 0
@@ -144,11 +144,11 @@ const SearchSideFilter = props => (
                 if (props.citiesFilter.length > 0) {
                   props.citiesFilter.forEach(async (item) => {
                     const byCity = await apiGetJson(
-                      `test-app-1/activities?search={"city":"${item.title.split(', ', 1)[0]}"}`,
+                      `activities?search={"city":"${item.title.split(', ', 1)[0]}"}`,
                       props.token,
                     );
                     const byState = await apiGetJson(
-                      `test-app-1/activities?search={"state":"${item.title.slice(item.title.indexOf(',') + 2, item.title.length)}"}`,
+                      `activities?search={"state":"${item.title.slice(item.title.indexOf(',') + 2, item.title.length)}"}`,
                       props.token,
                     );
                     if (byCity.data.length > 0 && byState.data.length) {
@@ -180,7 +180,7 @@ const SearchSideFilter = props => (
                 if (props.citiesFilter.length > 0) {
                   await filtersActivities.push(locationActivities);
                 }
-                const data = await apiGetJson('test-app-1/activities?with=[%22items%22,%22accounts%22]', props.token);
+                const data = await apiGetJson('activities?with=[%22items%22,%22accounts%22]', props.token);
                 if (filtersActivities > 0) {
                   filtersActivities[0].forEach((id) => {
                     const counter = filtersActivities.reduce((accumulator, currentValue, index) => {
@@ -292,7 +292,7 @@ export default function WorkOrderScreen(props) {
                 onRefresh={async () => {
                   if (props.connectionStatus) {
                     const data = await apiGetJson(
-                      'test-app-1/activities?with=[%22items%22,%22accounts%22]', props.token,
+                      'activities?with=[%22items%22,%22accounts%22]', props.token,
                     );
                     const result = [];
                     await data.data.forEach((activity) => {

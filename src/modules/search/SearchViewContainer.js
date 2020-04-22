@@ -29,7 +29,7 @@ export default compose(
   lifecycle({
     async componentWillMount() {
       if (this.props.connectionStatus) {
-        const data = await apiGetJson('test-app-1/activities?with=["items","accounts"]', this.props.token);
+        const data = await apiGetJson('activities?with=["items","accounts"]', this.props.token);
         const result = [];
         await data.data.forEach((activity) => {
           if (activity.items.length > 0

@@ -34,7 +34,7 @@ export default compose(
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
-        apiGetJson(`test-app-1/activities/${this.props.activityId}?with=["items"]`, this.props.token)
+        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
           .then(async (response) => {
             const installerAnswers = JSON.parse(response.data.installer_questions_answers);
             await this.props.setActivityData({
