@@ -29,6 +29,8 @@ export default compose(
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
   withState('comment', 'setComment', ''),
+  withState('signature', 'setSignature', []),
+  withState('name', 'setName', ''),
   lifecycle({
     componentDidMount() {
       this.props.setNumOfChanges(this.props.changes.length);

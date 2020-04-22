@@ -196,9 +196,7 @@ class ParialModalComponent extends Component {
                   bgColor={colors.red}
                   style={{ width: '48%' }}
                   onPress={() => {
-                    this.props.mainProps.addPhoto([]);
-                    this.props.mainProps.setSignature([]);
-                    this.props.mainProps.navigation.navigate('DetailsMain');
+                    this.props.mainProps.setModalVisible(false);
                   }}
                   textColor={colors.white}
                   textStyle={{ fontSize: 20 }}
