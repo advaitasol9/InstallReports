@@ -35,7 +35,7 @@ export default compose(
             this.props.setIsloading(false);
           });
 
-        apiGetJson(`items/${this.props.itemId}/files`, this.props.token)
+        apiGetJson(`activities/${this.props.activityId}/files`, this.props.token)
           .then((response) => {
             this.props.setDocs(response.data);
           });

@@ -95,6 +95,8 @@ export const apiGetJson = (method, token, contentType = 'application/json') => {
     },
   })
     .then((response) => {
+      console.log(response);
+
       if (response && (response.status === 200 || response.status === 201)) {
         console.log(response.headers.get('app-content-full-count'));
 
