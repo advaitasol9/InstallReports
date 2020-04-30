@@ -35,7 +35,6 @@ export default compose(
               ...response.data,
               installer_questions_answers: JSON.parse(response.data.installer_questions_answers),
             });
-            console.log(this.props.activityData);
             this.props.setIsloading(false);
           });
       } else {

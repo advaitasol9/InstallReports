@@ -15,7 +15,6 @@ export function addFailPhoto(payload) {
 export default function AppStateReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_FAILURE_PHOTO:
-      console.log(action);
       return {
         ...state,
         photos: action.payload,

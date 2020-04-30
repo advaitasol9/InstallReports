@@ -34,7 +34,6 @@ export default compose(
       if (this.props.connectionStatus) {
         await apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
           .then((response) => {
-            console.log(response);
             this.props.setActivityData(response.data);
             this.props.setIsloading(false);
           });

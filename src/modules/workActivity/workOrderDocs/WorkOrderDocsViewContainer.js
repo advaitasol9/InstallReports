@@ -37,8 +37,6 @@ export default compose(
 
         apiGetJson(`items/${this.props.itemId}/files`, this.props.token)
           .then((response) => {
-            console.log(this.props.docs);
-            console.log(response);
             this.props.setDocs(response.data);
           });
       } else {

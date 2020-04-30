@@ -30,7 +30,6 @@ export default compose(
   withState('comment', 'setComment', ''),
   lifecycle({
     componentWillMount() {
-      console.log(this.props);
       this.props.setNumOfChanges(this.props.changes.length);
 
       if (this.props.navigation.state.params) {

@@ -39,7 +39,6 @@ const Required = () => (
 const QuestionsList = (props) => {
   const renderPhoto = (photo, index, order) => {
     const photosCopy = props.photos.slice();
-    console.log(photosCopy);
     if (photo.order === order) {
       return (
         <View style={{ position: 'relative' }}>
@@ -47,7 +46,6 @@ const QuestionsList = (props) => {
             style={styles.delPhoto}
             onPress={() => {
               photosCopy.splice(index, 1);
-              console.log(photosCopy);
               props.addPhoto(photosCopy);
             }}
           >

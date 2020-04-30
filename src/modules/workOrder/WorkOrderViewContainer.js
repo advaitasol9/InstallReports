@@ -1,8 +1,11 @@
 import { compose, lifecycle, withState } from 'recompose';
 import { connect } from 'react-redux';
-import { setOrderList, setActivityId, setItemId } from './WorkOrderState';
-import { apiGetJson } from '../../core/api';
+import { setOrderList, setActivityId, setItemId, setWorkOrdersFullCount } from './WorkOrderState';
+import { apiGetActivities } from '../../core/api';
 
+import {
+  Image,
+} from 'react-native';
 import WorkOrderScreen from './WorkOrderView';
 
 export default compose(
@@ -12,31 +15,26 @@ export default compose(
       connectionStatus: state.app.isConnected,
       changes: state.workOrder.changesInOffline,
       orderList: state.workOrder.orderList,
+      workOrdersFullCount: state.workOrder.workOrdersFullCount,
     }),
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
       setActivityId: id => dispatch(setActivityId(id)),
       setItemId: id => dispatch(setItemId(id)),
+      setWorkOrdersFullCount: id => dispatch(setWorkOrdersFullCount(id)),
     }),
   ),
   withState('changesInOffline', 'setChangesInOffline', 0),
+  withState('isLoaded', 'setLoaded', false),
   lifecycle({
     async componentWillMount() {
+      this.props.setOrderList([]);
       if (this.props.connectionStatus) {
-        const data = await apiGetJson('spectrum/activities?with=["items","accounts"]', this.props.token);
-        console.log(data);
-        const result = [];
-        await data.data.forEach((activity) => {
-          if (activity.items.length > 0
-            && activity.status !== 'Partial'
-            && activity.status !== 'Failed'
-            && activity.status !== 'Complete'
-          ) {
-            result.push(activity);
-          }
-        });
-        console.log(data);
+        const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+        const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=1&count=10' + statuses, this.props.token);
         this.props.setOrderList(result);
+        this.props.setWorkOrdersFullCount(data.appContentFullCount);
+        this.props.setLoaded(true);
       }
     },
     async componentDidMount() {

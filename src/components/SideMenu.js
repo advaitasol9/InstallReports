@@ -8,7 +8,6 @@ import { colors } from '../styles';
 
 function SideMenu(props) {
   const navigateToScreen = (route, params) => () => {
-    console.log(route, params);
     const navigateAction = NavigationActions.navigate({
       routeName: route,
       params,

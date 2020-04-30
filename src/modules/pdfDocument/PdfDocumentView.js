@@ -15,7 +15,6 @@ const FixedHeader = ({ navigation }) => (
   <View style={styles.headerCourse}>
     <TouchableOpacity
       onPress={() => {
-        console.log(navigation);
         navigation.navigate('Docs');
       }}
     >

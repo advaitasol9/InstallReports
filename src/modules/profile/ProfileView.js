@@ -8,16 +8,6 @@ import { colors } from '../../styles';
 import { Text } from '../../components/StyledText';
 
 export default function ProfileScreen() {
-  // const rnsUrl = 'https://reactnativestarter.com';
-  // const handleClick = () => {
-  //   Linking.canOpenURL(rnsUrl).then(supported => {
-  //     if (supported) {
-  //       Linking.openURL(rnsUrl);
-  //     } else {
-  //       console.log(`Don't know how to open URI: ${rnsUrl}`);
-  //     }
-  //   });
-  // };
 
   return (
     <View style={styles.container}>

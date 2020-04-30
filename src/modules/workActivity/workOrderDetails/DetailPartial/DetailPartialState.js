@@ -15,7 +15,6 @@ export function addPartialPhoto(payload) {
 export default function AppStateReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_PARTIAL_PHOTO:
-      console.log(action);
       return {
         ...state,
         photos: action.payload,

@@ -1,91 +1,112 @@
-import React from 'react';
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import {
-  StyleSheet, View, FlatList, StatusBar,
+  StyleSheet, View, FlatList, StatusBar, Image
 } from 'react-native';
-import { apiGetJson } from '../../core/api';
+import { apiGetJson, apiGetActivities } from '../../core/api';
 
 
 import { Text } from '../../components/StyledText';
 import { Header, OrderListTile } from '../../components';
 import { colors } from '../../styles';
 
-export default function WorkOrderScreen(props) {
-  // const rnsUrl = 'https://reactnativestarter.com';
-  // const handleClick = () => {
-  //   Linking.canOpenURL(rnsUrl).then(supported => {
-  //     if (supported) {
-  //       Linking.openURL(rnsUrl);
-  //     } else {
-  //       console.log(`Don't know how to open URI: ${rnsUrl}`);
-  //     }
-  //   });
-  // };
+export default class WorkOrderScreen extends Component {
 
-  const renderTile = (item, index) => (
-    <OrderListTile
-      index={index}
-      item={item}
-      setItemId={props.setItemId}
-      setActivityId={props.setActivityId}
-      navigation={props.navigation}
-    />
-  );
+  constructor(props) {
+    super(props);
+    this.page = 1;
+  }
 
-  return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor={colors.lightGray} barStyle="dark-content" />
-      <Header
-        connectionStatus={props.connectionStatus}
-        changesNum={props.changes.length}
-        navigation={props.navigation}
-        sortAndFilter
-        indicator
-        title="My Work Orders"
+  render() {
+    const renderTile = (item, index) => (
+      <OrderListTile
+        index={index}
+        item={item}
+        setItemId={this.props.setItemId}
+        setActivityId={this.props.setActivityId}
+        navigation={this.props.navigation}
       />
-      {
-        props.orderList === [] && props.connectionStatus
-          ? (
-            <View style={styles.containerIndicator}>
-              <Text>There is no connection</Text>
-            </View>
-          )
-          : (
-            <FlatList
-              ListHeaderComponent={null}
-              scrollEventThrottle={16}
-              refreshing={false}
-              onRefresh={async () => {
-                if (props.connectionStatus) {
-                  const data = await apiGetJson('spectrum/activities?with=[%22items%22,%22accounts%22]', props.token);
-                  const result = [];
+    );
 
-                  await data.data.forEach((activity) => {
-                    console.log(activity);
+    const loadMoreWorkOrders = async () => {
+      this.page += 1;
+      const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+      const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=' + this.page + '&count=10&sort_by=id&sort_order=asc'
+        + statuses,
+        this.props.token);
 
-                    if (activity.items.length > 0
-                      && activity.status !== 'Partial'
-                      && activity.status !== 'Failed'
-                      && activity.status !== 'Complete'
-                    ) {
-                      result.push(activity);
-                    }
-                  });
-                  props.setOrderList(result);
-                  console.log(result);
-                  
+      const result = this.props.orderList;
 
-                }
-              }}
-              data={props.orderList}
-              keyExtractor={item => item.activityId}
-              renderItem={({ item, index }) => renderTile(item, index)}
-            />
-          )
+      if (data.data.data.length > 0) {
+        await data.data.data.forEach(activity => {
+          result.push(activity);
+        });
+        this.props.setOrderList(result);
       }
-    </View>
-  );
-}
+    }
 
+    return (
+      <View style={styles.container} >
+        <StatusBar backgroundColor={colors.lightGray} barStyle="dark-content" />
+        <Header
+          connectionStatus={this.props.connectionStatus}
+          changesNum={this.props.changes.length}
+          navigation={this.props.navigation}
+          sortAndFilter
+          indicator
+          title="My Work Orders"
+        />
+        {
+          this.props.orderList === [] && this.props.connectionStatus
+            ? (
+              <View style={styles.containerIndicator}>
+                <Text>There is no connection</Text>
+              </View>
+            )
+            : (
+              <View style={{ flex: 1, width: '100%' }}>
+                {
+                  this.props.isLoaded === true ?
+                    <FlatList
+                      ListHeaderComponent={null}
+                      scrollEventThrottle={16}
+                      refreshing={false}
+                      onRefresh={async () => {
+                        this.props.setLoaded(false);
+                        if (this.props.connectionStatus) {
+                          const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+                          const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=1&count=10' + statuses,
+                            this.props.token);
+
+                          const result = [];
+
+                          if (data.data.data.length > 0) {
+                            await data.data.data.forEach(activity => {
+                              result.push(activity);
+                            });
+                            this.props.setOrderList(result);
+                          }
+                          this.props.setLoaded(true);
+                        }
+                      }}
+                      data={this.props.orderList}
+                      keyExtractor={(item, index) => {
+                        return index.toString();
+                      }}
+                      renderItem={({ item, index }) => renderTile(item, index)}
+                      onEndReached={loadMoreWorkOrders}
+                      onEndReachedThreshold={1}
+                    />
+                    :
+                    <Image style={{ height: '100%', width: '100%' }} source={require('../../../assets/images/loading.gif')} />
+                }
+              </View >
+            )
+        }
+      </View>
+    );
+  }
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

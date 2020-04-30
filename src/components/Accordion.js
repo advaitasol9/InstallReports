@@ -38,6 +38,7 @@ const Accordion = (props) => {
               props.data.map(item => (
                 <CheckBox
                   id={item.id}
+                  key={item.id}
                   title={filterTitle(item.columns)}
                   setFilters={props.setFilters}
                   filter={props.filter}
@@ -72,7 +73,15 @@ export default compose(
   withState('data', 'setData', []),
   lifecycle({
     async componentWillMount() {
-      const response = await apiGetJson(`${this.props.entity}/uniques?columns=["${this.props.column}"]`, this.props.token);
+
+      let response;
+      if (this.props.entity == "items" || this.props.entity == "accounts") {
+        response = await apiGetJson(`spectrum/activities/${this.props.entity}/uniques?columns=["${this.props.column}"]`, this.props.token);
+      } else {
+        response = await apiGetJson(`${this.props.entity}/uniques?search={"fields":[{"operator":"is_in","value":["Assigned","In_progress"],"field":"status"}]}'+
+        '&columns=["${this.props.column}"]`, this.props.token);
+      }
+
       const filterItems = [];
       const { orderList } = this.props;
       await response.data.forEach(async (item, index) => {
@@ -90,9 +99,12 @@ export default compose(
             }
           }
         } else if (this.props.title === 'Due Date') {
-          if (item[Object.keys(item)[0]] !== null) {
+          const date = item[Object.keys(item)[0]].split(" ")[0];
+
+          if (date !== null) {
             if (
-              orderList.filter(order => order.date_2 === item[Object.keys(item)[0]]).length > 0
+              orderList.filter(order => (order.date_2).split(" ")[0] === date).length > 0
+              && (filterItems.filter(i => (i.columns.date_2).split(" ")[0] == date).length == 0)
             ) {
               await filterItems.push({
                 columns: item,
@@ -105,7 +117,7 @@ export default compose(
           if (item[Object.keys(item)[0]] !== null) {
             if (
               orderList.filter(
-                order => order.items[0].name === item[Object.keys(item)[0]],
+                order => order.items[0].name == item[Object.keys(item)[0]],
               ).length > 0
             ) {
               await filterItems.push({

@@ -84,6 +84,8 @@ export const apiChangeStatus = (status, activityId, token) => {
 
 export const apiGetJson = (method, token, contentType = 'application/json') => {
   const url = `${API_PATH}/${method}`;
+  console.log(url);
+
   return fetch(url, {
     method: 'GET',
     mode: 'cors',
@@ -94,6 +96,8 @@ export const apiGetJson = (method, token, contentType = 'application/json') => {
   })
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
+        console.log(response.headers.get('app-content-full-count'));
+
         return response.json();
       }
       return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
@@ -119,6 +123,37 @@ export const apiGet = (method, token, contentType = 'application/json') => {
       // eslint-disable-next-line
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
+      }
+      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+    })
+    .catch((error) => {
+      console.log(`There has been a problem with your fetch operation: ${error.message}`);
+      Alert.alert('Error', `error message: ${error.message}`);
+      throw error;
+    });
+};
+
+export const apiGetActivities = (method, token, contentType = 'application/json') => {
+  const url = `${API_PATH}/${method}`;
+  console.log(url);
+  console.log(token);
+
+  return fetch(url, {
+    method: 'GET',
+    mode: 'cors',
+    headers: {
+      'Content-Type': contentType,
+      'security-token': token,
+    },
+  })
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json().then(function (json) {
+          return {
+            "data": json,
+            "appContentFullCount": response.headers.get('app-content-full-count'),
+          };
+        });
       }
       return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
     })
