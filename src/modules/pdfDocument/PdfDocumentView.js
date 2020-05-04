@@ -69,21 +69,31 @@ export default class PdfContainer extends Component {
             style={{ width: '50%' }}
             onPress={async () => {
               if (await requestLocationPermission()) {
-                let dirs = RNFetchBlob.fs.dirs.DownloadDir
+                const item = this.props.navigation.state.params;
+                const { dirs } = RNFetchBlob.fs;
+                const dirToSave = Platform.select({
+                  ios: dirs.DownloadDir,
+                  android: dirs.DownloadDir
+                });
+                const filePath = dirToSave + '/' + item.name;
                 RNFetchBlob
                   .config({
                     fileCache: true,
-                    path: dirs + '/' + this.props.navigation.state.params.name
+                    addAndroidDownloads: {
+                      useDownloadManager: true,
+                      notification: true,
+                      path: filePath
+                    },
                   })
-                  .fetch('GET', this.props.navigation.state.params.uri, {
-                  })
+                  .fetch('GET', item.uri, {})
                   .then((res) => {
+                    RNFetchBlob.fs.writeFile(filePath, res.data, 'base64');
                     if (Platform.OS === 'ios') {
-                      RNFetchBlob.ios.openDocument(res.path());
-                    } else {
-                      const android = RNFetchBlob.android;
-                      android.actionViewIntent(res.path(), 'application/pdf');
+                      RNFetchBlob.ios.previewDocument(filePath);
                     }
+                  })
+                  .catch((errorMessage, statusCode) => {
+                    console.log('error')
                   });
               }
             }}

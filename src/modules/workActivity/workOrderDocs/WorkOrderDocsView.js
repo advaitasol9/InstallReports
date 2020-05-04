@@ -50,6 +50,34 @@ export default class WorkOrderDocsView extends Component {
       }
     }
 
+    const downloadFile = (item) => {
+      const { dirs } = RNFetchBlob.fs;
+      const dirToSave = Platform.select({
+        ios: dirs.DownloadDir,
+        android: dirs.DownloadDir
+      });
+      const filePath = dirToSave + '/' + item.name;
+      RNFetchBlob
+        .config({
+          fileCache: true,
+          addAndroidDownloads: {
+            useDownloadManager: true,
+            notification: true,
+            path: filePath
+          },
+        })
+        .fetch('GET', item.s3_location, {})
+        .then((res) => {
+          RNFetchBlob.fs.writeFile(filePath, res.data, 'base64');
+          if (Platform.OS === 'ios') {
+            RNFetchBlob.ios.previewDocument(filePath);
+          }
+        })
+        .catch((errorMessage, statusCode) => {
+          console.log('error')
+        });
+    }
+
     if (this.props.isLoading === true) {
       return (
         <View style={styles.backgroundActivity}>
@@ -120,10 +148,11 @@ export default class WorkOrderDocsView extends Component {
                   <Text style={{ textAlign: 'left', paddingLeft: 25 }}>There are no documents for this work order</Text>
                 )}
                 {
-                  this.props.connectionStatus && this.props.docs.length > 0 && this.props.docs.map((item) => {
+                  this.props.connectionStatus && this.props.docs.length > 0 && this.props.docs.map((item, index) => {
                     if (item.file_type === 'image/jpeg') {
                       return (
                         <TouchableOpacity
+                          key={index}
                           style={styles.documentContainer}
                           onPress={() => {
                             this.props.setImageURL(item.s3_location);
@@ -151,20 +180,11 @@ export default class WorkOrderDocsView extends Component {
                     } else if (item.file_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
                       return (
                         <TouchableOpacity
+                          key={index}
                           style={styles.documentContainer}
                           onPress={async () => {
                             if (await requestLocationPermission()) {
-                              let dirs = RNFetchBlob.fs.dirs.DownloadDir
-                              RNFetchBlob
-                                .config({
-                                  fileCache: true,
-                                  path: dirs + '/' + item.name
-                                })
-                                .fetch('GET', item.s3_location, {
-                                })
-                                .then((res) => {
-                                  Alert.alert(`Success`, item.name);
-                                });
+                              downloadFile(item);
                             }
                           }}
                         >
@@ -182,22 +202,14 @@ export default class WorkOrderDocsView extends Component {
                     } else if (item.file_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                       return (
                         <TouchableOpacity
+                          key={index}
                           style={styles.documentContainer}
                           onPress={async () => {
                             if (await requestLocationPermission()) {
-                              let dirs = RNFetchBlob.fs.dirs.DownloadDir;
-                              RNFetchBlob
-                                .config({
-                                  fileCache: true,
-                                  path: dirs + '/' + item.name
-                                })
-                                .fetch('GET', item.s3_location, {
-                                })
-                                .then((res) => {
-                                  Alert.alert(`Success`, item.name);
-                                });
+                              downloadFile(item);
                             }
-                          }}
+                          }
+                          }
                         >
                           <Image
                             style={{
@@ -213,6 +225,7 @@ export default class WorkOrderDocsView extends Component {
                     } else {
                       return (
                         <TouchableOpacity
+                          key={index}
                           style={styles.documentContainer}
                           onPress={() => {
                             this.props.navigation.navigate('PdfDoc', { uri: item.s3_location, name: item.name });
