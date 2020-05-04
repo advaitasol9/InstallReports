@@ -44,11 +44,17 @@ export default class DetailPartialView extends Component {
   constructor(props) {
     super(props);
     uploadedImagesCount = 0;
+    this.state = {
+      isLoading: false
+    };
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
   }
 
   isLastImageUploaded() {
     if (this.uploadedImagesCount == this.props.photos.length) {
+      this.setState({
+        isLoading: false
+      });
       this.props.addPhoto([]);
       this.props.navigation.navigate('DetailsMain');
     }
@@ -81,7 +87,8 @@ export default class DetailPartialView extends Component {
     const renderPhoto = (photo, index) => {
       const photosCopy = this.props.photos.slice();
       return (
-        <View style={{ position: 'relative' }}>
+        <View style={{ position: 'relative' }}
+          key={index}>
           <TouchableOpacity
             style={styles.delPhoto}
             onPress={async () => {
@@ -190,6 +197,9 @@ export default class DetailPartialView extends Component {
                 disabled={this.props.photos.length === 0 || this.props.comment === ''}
 
                 onPress={async () => {
+                  this.setState({
+                    isLoading: true
+                  });
                   const data = `text=PRE INSTALL NOTES - ${this.props.comment}&user_id=${this.props.accountId}`;
                   if (!this.props.connectionStatus) {
                     setChangesInOffline(
@@ -202,6 +212,9 @@ export default class DetailPartialView extends Component {
                       this.props.photos,
                       'In_Progress',
                     );
+                    this.setState({
+                      isLoading: false
+                    });
                     this.props.navigation.navigate('DetailsMain');
                   } else {
                     await apiChangeStatus('In_Progress', this.props.activityId, this.props.token).then(() => {
@@ -230,10 +243,25 @@ export default class DetailPartialView extends Component {
                                   });
                               })
                               .catch((err) => {
+                                this.setState({
+                                  isLoading: false
+                                });
                                 console.log(err);
                               });
+                          }).catch(err => {
+                            this.setState({
+                              isLoading: false
+                            });
                           });
                         });
+                      }).catch(err => {
+                        this.setState({
+                          isLoading: false
+                        });
+                      });
+                    }).catch(err => {
+                      this.setState({
+                        isLoading: false
                       });
                     });
                   }
@@ -241,6 +269,7 @@ export default class DetailPartialView extends Component {
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
                 caption="Submit"
+                isLoading={this.state.isLoading}
               />
               <Button
                 bgColor={colors.red}

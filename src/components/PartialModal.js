@@ -72,10 +72,16 @@ class ParialModalComponent extends Component {
     super(props);
     uploadedImagesCount = 0;
     isSignatureUploaded = false;
+    this.state = {
+      isLoading: false
+    };
   }
 
   isLastImageUploaded() {
     if (this.uploadedImagesCount == this.props.mainProps.photos.length && this.isSignatureUploaded) {
+      this.setState({
+        isLoading: false
+      });
       this.props.mainProps.addPhoto([]);
       this.props.mainProps.setSignature([]);
       this.props.mainProps.navigation.navigate('Work Order');
@@ -105,6 +111,9 @@ class ParialModalComponent extends Component {
                   bgColor={colors.green}
                   style={{ width: '48%' }}
                   onPress={async () => {
+                    this.setState({
+                      isLoading: true
+                    });
                     if (!this.props.mainProps.connectionStatus) {
                       setChangesInOffline(
                         this.props.mainProps.changes,
@@ -117,8 +126,11 @@ class ParialModalComponent extends Component {
                         'Partial',
                       );
                       this.props.mainProps.setModalVisible(true);
+                      this.setState({
+                        isLoading: false
+                      });
                     } else {
-                      const data = `text=${this.props.mainProps.comment}&user_ids=%5B${this.props.mainProps.accountId}%5D&undefined=`;
+                      const data = `text=${this.props.mainProps.comment}&user_ids=[${this.props.mainProps.accountId}]`;
                       await apiPostComment(`activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
                         Promise.all([
                           apiChangeStatus('Partial', this.props.mainProps.activityId, this.props.token),
@@ -127,8 +139,7 @@ class ParialModalComponent extends Component {
                               'partial_installation_manager_name': this.props.mainProps.name,
                               'partial_installation_comment_id': resPostText.data.id,
                             }),
-                        ]).then(() => {
-
+                        ]).then((res) => {
                         }).catch((err) => {
                           console.log(err);
                         });
@@ -156,8 +167,15 @@ class ParialModalComponent extends Component {
                                     });
                                 })
                                 .catch((err) => {
+                                  this.setState({
+                                    isLoading: false
+                                  });
                                   console.log(err);
                                 });
+                            }).catch((error) => {
+                              this.setState({
+                                isLoading: false
+                              });
                             });
                           });
                         }
@@ -181,6 +199,9 @@ class ParialModalComponent extends Component {
                                 this.isLastImageUploaded();
                               })
                               .catch((err) => {
+                                this.setState({
+                                  isLoading: false
+                                });
                                 console.log(err);
                               });
                           });
@@ -190,6 +211,7 @@ class ParialModalComponent extends Component {
                   }}
                   textColor={colors.white}
                   caption="Submit"
+                  isLoading={this.state.isLoading}
                   textStyle={{ fontSize: 20 }}
                 />
                 <Button

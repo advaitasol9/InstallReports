@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   Text,
+  ActivityIndicator
 } from 'react-native';
 
 import { colors } from '../styles';
@@ -83,7 +84,12 @@ export default function RNSButton(props) {
         ]}
       >
         {icon && <View>{icon}</View>}
-        <Text style={[textStyle, props.textStyle]}>{props.caption}</Text>
+        <Text style={[textStyle, props.textStyle]}>{props.caption} </Text>
+        {
+          props.isLoading == true
+            ? <ActivityIndicator animating={true} size="small" color="white" />
+            : null
+        }
       </View>
     </TouchableOpacity>
   );

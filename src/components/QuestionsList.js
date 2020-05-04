@@ -14,6 +14,7 @@ import IO from 'react-native-vector-icons/Ionicons';
 import ImagePicker from 'react-native-image-picker';
 import { withNavigation } from 'react-navigation';
 import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
+import RNFetchBlob from 'rn-fetch-blob';
 
 import Button from './Button';
 import CheckBox from './CheckBox';
@@ -41,12 +42,15 @@ const QuestionsList = (props) => {
     const photosCopy = props.photos.slice();
     if (photo.order === order) {
       return (
-        <View style={{ position: 'relative' }}>
+        <View style={{ position: 'relative' }}
+          key={index}
+        >
           <TouchableOpacity
             style={styles.delPhoto}
-            onPress={() => {
-              photosCopy.splice(index, 1);
+            onPress={async () => {
+              await photosCopy.splice(index, 1);
               props.addPhoto(photosCopy);
+              props.updateAnswers();
             }}
           >
             <View style={styles.whiteBackground} />
@@ -84,6 +88,7 @@ const QuestionsList = (props) => {
                       });
                       props.setUpdate(!props.update);
                       props.addPhoto(photos);
+                      props.updateAnswers();
                     }
                   });
                 },
@@ -95,7 +100,10 @@ const QuestionsList = (props) => {
                     'Camera',
                     {
                       photos: props.photos,
-                      addPhoto: arr => props.addPhoto(arr),
+                      addPhoto: (arr) => {
+                        props.addPhoto(arr);
+                        props.updateAnswers();
+                      },
                       order,
                       screen: props.screen,
                     },
@@ -118,31 +126,43 @@ const QuestionsList = (props) => {
   );
 
   const renderChecklist = (item) => {
-    const answer = new Set(item.answer);
+    const answer = new Set(item.answers);
+    let data = [];
+    Object.keys(item.values).forEach(key => {
+      data.push({ "key": key, "value": item.values[key] });
+    });
     return (
-      <View style={{ width: '100%' }}>
+      <View style={{ width: '100%' }}
+        key={item.order}
+      >
         <Text>{item.order}. {item.text}</Text>
-        {item.values.map((val, index) => (
-          <CheckBox
-            id={index}
-            title={val}
-            setAnswer={(isChecked) => {
-              if (!isChecked) {
-                answer.add(val);
-                item.answer = Array.from(answer);
-              } else {
-                answer.delete(val);
-                item.answer = Array.from(answer);
-              }
-            }}
-            filter={item.answer || []}
-            forQuestionList
-          />
-        ))}
+        {
+          data.map((question) => {
+            return (
+              <CheckBox
+                id={question.key}
+                key={question.key}
+                title={question.value}
+                setAnswer={(isChecked) => {
+                  if (!isChecked) {
+                    answer.add(question.key);
+                    item.answers = Array.from(answer);
+                  } else {
+                    answer.delete(question.key);
+                    item.answers = Array.from(answer);
+                  }
+                  props.updateAnswers();
+                }}
+                filter={item.answers || []}
+                forQuestionList
+              />
+            )
+          })
+        }
         {item.allow_photos && renderAddPhotoButton(item.order)}
         {item.allow_photos && (
           <View style={styles.photoSection}>
-            { props.photos.map((photo, index) => renderPhoto(photo, index, item.order)) }
+            {props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}
           </View>
         )}
         {item.required && <Required />}
@@ -151,13 +171,17 @@ const QuestionsList = (props) => {
   };
 
   const renderFreeform = item => (
-    <View style={{ width: '100%' }}>
+    <View style={{ width: '100%' }}
+      key={item.order}
+    >
       <Text style={{ marginTop: 12, paddingBottom: 12 }}>{item.order}. {item.text}</Text>
       <TextInput
         multiline
         placeholder="Enter the answer"
+        value={item.answers}
         onChangeText={(text) => {
-          item.answer = text;
+          item.answers = text;
+          props.updateAnswers();
           return true;
         }}
         style={[styles.inputStyle, { height: 160 }]}
@@ -165,79 +189,38 @@ const QuestionsList = (props) => {
       {item.allow_photos && renderAddPhotoButton(item.order)}
       {item.allow_photos && (
         <View style={styles.photoSection}>
-          { props.photos.map((photo, index) => renderPhoto(photo, index, item.order)) }
+          {props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}
         </View>
       )}
       {item.required && <Required />}
-      {/*
-        <View style={{ marginTop: 24 }}>
-          <Button
-            bgColor={colors.blue}
-            onPress={() => {
-              Alert.alert(
-                'Add photo',
-                '',
-                [
-                  {
-                    text: 'Choose from gallery',
-                    onPress: () => {
-                      ImagePicker.launchImageLibrary(options, (response) => {
-                        const { photos } = props;
-                        if (!response.didCancel) {
-                          photos.push(response.uri);
-                          props.addPhoto(photos);
-                          props.setNumOfChanges(props.numOfChanges);
-                        }
-                      });
-                    },
-                  },
-                  {
-                    text: 'Take a photo',
-                    onPress: () => {
-                      props.navigation.navigate(
-                        'Camera',
-                        {
-                          photos: props.photos,
-                          addPhoto: arr => props.addPhoto(arr),
-                          screen: 'Questions',
-                        },
-                      );
-                    },
-                  },
-                  {
-                    text: 'Cancel',
-                    style: 'cancel',
-                  },
-                ],
-                { cancelable: true },
-              );
-            }}
-            textColor={colors.white}
-            textStyle={{ fontSize: 20 }}
-            caption="Add Photo(s)"
-          />
-        </View>
-      */}
     </View>
   );
 
   const renderDropdown = (item) => {
-    const data = item.values.reduce((currentVal, value) => [...currentVal, { value }], []);
+    let data = [];
+    Object.keys(item.values).forEach(key => {
+      data.push({ "key": key, "value": item.values[key] });
+    });
     return (
-      <View style={{ width: '100%' }}>
+      <View style={{ width: '100%' }}
+        key={item.order}
+      >
         <Text style={{ marginTop: 12 }}>{item.order}. {item.text}</Text>
         <Dropdown
           label="Сhoose option"
           data={data}
+          value={item.answers == undefined ? "" : item.answers}
           onChangeText={(text) => {
-            item.answer = text;
+            const selectedItem = data.filter(answer => answer.value == text)[0];
+            item.answers = selectedItem.key;
+            props.updateAnswers();
             return true;
           }}
         />
         {item.allow_photos && renderAddPhotoButton(item.order)}
         {item.allow_photos && (
           <View style={styles.photoSection}>
-            { props.photos.map((photo, index) => renderPhoto(photo, index, item.order)) }
+            {props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}
           </View>
         )}
         {item.required && <Required />}
@@ -245,13 +228,56 @@ const QuestionsList = (props) => {
     );
   };
 
+  const onSave = async (success, path) => {
+    if (!success) return;
+    let imageUri;
+
+    try {
+      if (path == null) {
+        const images = await CameraRoll.getPhotos({ first: 1 });
+        if (images.length > 0) {
+          imageUri = [0].image.uri;
+        } else {
+          console.log('Image path missing and no images in camera roll')
+          return;
+        }
+
+      } else {
+        imageUri = path
+      }
+    } catch (e) {
+      console.log(e.message)
+    }
+
+    RNFetchBlob.fs.readFile(imageUri, 'base64')
+      .then((data) => {
+        props.setSignature([data]);
+        props.updateAnswers();
+        RNFetchBlob.fs
+          .unlink(imageUri)
+          .then(() => {
+          })
+          .catch(err => {
+          });
+      })
+  }
+
   const renderSignature = (item) => {
     const signature = [];
     return (
-      <View style={{ width: '100%' }}>
+      <View style={{ width: '100%' }}
+        key={item.order}
+      >
         <Text style={{ marginTop: 12, paddingBottom: 12 }}>{item.order}. {item.text}</Text>
         <RNSketchCanvas
-          containerStyle={[styles.inputStyle, styles.sketchContainer]}
+          ref={ref => this.canvas = ref}
+          containerStyle={[
+            {
+              height: 200,
+              marginTop: 10,
+              backgroundColor: colors.white,
+            },
+          ]}
           canvasStyle={{ backgroundColor: 'transparent', flex: 1 }}
           defaultStrokeIndex={0}
           defaultStrokeWidth={5}
@@ -260,21 +286,32 @@ const QuestionsList = (props) => {
             <View style={styles.functionButton}>
               <Text style={{ color: colors.primary }}>
                 Clear
-              </Text>
+                </Text>
             </View>
           )}
           onClearPressed={() => {
-            item.answer = [];
+            props.setSignature([]);
+            props.updateAnswers();
+          }}
+          onSketchSaved={(success, filePath) => {
+            onSave(success, filePath);
+          }}
+          savePreference={() => {
+            return {
+              folder: 'RNSketchCanvas',
+              filename: item.text,
+              transparent: false,
+              imageType: 'jpg'
+            }
           }}
           onStrokeEnd={(path) => {
-            signature.push(path.path.data);
-            item.answer = signature;
+            this.canvas.save();
           }}
         />
         {item.allow_photos && renderAddPhotoButton(item.order)}
         {item.allow_photos && (
           <View style={styles.photoSection}>
-            { props.photos.map((photo, index) => renderPhoto(photo, index, item.order)) }
+            {props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}
           </View>
         )}
         {item.required && <Required />}
@@ -282,18 +319,22 @@ const QuestionsList = (props) => {
     );
   };
 
-  const renderPhotoQuestion = item => (
-    <View style={{ width: '100%' }}>
-      <Text style={{ marginTop: 12, paddingBottom: 12 }}>{item.order}. {item.text}</Text>
-      {renderAddPhotoButton(item.order)}
-      {item.allow_photos && (
-        <View style={styles.photoSection}>
-          { props.photos.map((photo, index) => renderPhoto(photo, index, item.order)) }
-        </View>
-      )}
-      {item.required && <Required />}
-    </View>
-  );
+  const renderPhotoQuestion = (item) => {
+    return (
+      <View style={{ width: '100%' }}
+        key={item.order}
+      >
+        <Text style={{ marginTop: 12, paddingBottom: 12 }}>{item.order}. {item.text}</Text>
+        {renderAddPhotoButton(item.order)}
+        {
+          <View style={styles.photoSection}>
+            {props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}
+          </View>
+        }
+        {item.required && <Required />}
+      </View>
+    );
+  };
 
   return (
     <View>
@@ -344,6 +385,8 @@ const styles = StyleSheet.create({
   },
   functionButton: {
     margin: 16,
+    marginBottom: 0,
+    marginTop: 5,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',

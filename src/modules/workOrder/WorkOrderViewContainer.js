@@ -32,16 +32,6 @@ export default compose(
       if (this.props.connectionStatus) {
         const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
         const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=1&count=10' + statuses, this.props.token);
-        // console.log(data.data);
-        // let results = [];
-        // data.data.data.forEach(order => {
-        //   if (order.accounts.length == 1) {
-        //     results.push(order);
-        //   }
-        // });
-        // console.log(results);
-        console.log(data.data.data);
-
         this.props.setOrderList(data.data.data);
         this.props.setWorkOrdersFullCount(data.appContentFullCount);
         this.props.setLoaded(true);

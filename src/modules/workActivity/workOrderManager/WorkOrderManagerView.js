@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import {
   StyleSheet,
   View,
@@ -29,132 +29,256 @@ import {
 
 const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : '';
 
-export default function WorkOrderManagerView(props) {
-  if (props.isLoading === true) {
-    return (
-      <View style={styles.backgroundActivity}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-  if (installerAnswers &&
-    installerAnswers.filter(answer => answer !== null).length === installerAnswers.length) {
-    props.setIsIncompleteOpen(false);
-  }
-  const installerAnswers = props.activityData.installer_questions_answers;
+export default class WorkOrderManagerView extends Component {
 
-  return (
-    <KeyboardAvoidingView
-      behavior={keyboardBehavior}
-      style={styles.container}
-    >
-      <StatusBar backgroundColor={colors.lightGray} />
-      <NavigationEvents
-        onWillFocus={() => {
-          if (installerAnswers === null ||
-            installerAnswers.filter(answer => answer !== null).length < installerAnswers.length) {
-            props.setIsIncompleteOpen(true);
+  constructor(props) {
+    super(props);
+    uploadedImagesCount = 0;
+    isSignatureUploaded = false;
+    this.state = {
+      isSubmitBtnDisabled: true,
+      isLoading: false
+    };
+  }
+
+  updateAnswers = () => {
+    let isAllRequiredQuestionsAnswered = true;
+    const managerQuestions = this.props.activityData.manager_questions_answers;
+    managerQuestions.forEach(question => {
+      if (question.required) {
+        if (question.type === "signature" && this.props.signature.length == 0) {
+          isAllRequiredQuestionsAnswered = false;
+        } else if (question.allow_photos && this.props.photos.filter(photo => photo.order == question.order).length == 0) {
+          isAllRequiredQuestionsAnswered = false;
+        }
+        else if (question.type === "photo" && this.props.photos.filter(photo => photo.order == question.order).length == 0) {
+          isAllRequiredQuestionsAnswered = false;
+        }
+        if (["checklist", "freeform", "dropdown"].includes(question.type)) {
+          if ((!question.answers || (question.answers == "" || question.answers.length == 0))) {
+            isAllRequiredQuestionsAnswered = false;
+          } else if (question.allow_photos && this.props.photos.filter(photo => photo.order == question.order).length == 0) {
+            isAllRequiredQuestionsAnswered = false;
           }
-        }}
-        onWillBlur={() => props.setIsIncompleteOpen(false)}
-      />
-      <Header
-        navigation={props.navigation}
-        sideBar
-      />
-      <ScrollView style={{ width: '100%' }}>
-        <ActivityInfoSection
-          navigation={props.navigation}
-          activityData={props.activityData}
-        />
-        <ActivityStatus status={props.activityData.status} />
-        <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
-        <ActivityTitle title="Manager on Duty Feedback" />
-        <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
-          <View style={[styles.scrollContainer, { borderBottomWidth: 0 }]}>
-            <QuestionsList
-              questions={props.activityData.manager_questions_answers}
-              photos={props.photos}
-              addPhoto={props.addPhoto}
-              screen="Manager"
-              setUpdate={props.setUpdate}
-              update={props.update}
+        }
+      }
+    });
+    this.setState({
+      isSubmitBtnDisabled: !isAllRequiredQuestionsAnswered
+    })
+  }
+
+
+  saveManagerQuestionAnswers = async () => {
+    if (this.uploadedImagesCount == this.props.photos.length && this.isSignatureUploaded) {
+      await apiPatchAnswers(
+        `activities/${this.props.activityData.id}`,
+        `manager_questions_answers=${JSON.stringify(this.props.activityData.manager_questions_answers)}`,
+        this.props.token,
+      ).then((response) => {
+        apiChangeStatus('Complete', this.props.activityId, this.props.token)
+          .then((response) => {
+            this.setState({
+              isLoading: false
+            });
+            this.props.setModalVisible(true);
+          }).catch(err => {
+            this.setState({
+              isLoading: false
+            });
+          });
+      });
+    }
+  }
+
+  render() {
+    if (this.props.isLoading === false) {
+      return (
+        <KeyboardAvoidingView
+          behavior={keyboardBehavior}
+          style={styles.container}
+        >
+          <StatusBar backgroundColor={colors.lightGray} />
+          <NavigationEvents
+            onWillFocus={() => {
+              console.log(this.props);
+              let installerQuestions = [];
+              try {
+                installerQuestions = JSON.parse(this.props.activityData.installer_questions_answers);
+              } catch (e) {
+                installerQuestions = this.props.activityData.installer_questions_answers;
+              }
+              if (installerQuestions.length == 0 ||
+                installerQuestions.filter(answer => (answer.answers !== "") || (answer.answers.length > 0)).length < installerQuestions.length) {
+                this.props.setIsIncompleteOpen(true);
+              }
+            }}
+            onWillBlur={() => this.props.setIsIncompleteOpen(false)}
+          />
+          <Header
+            navigation={this.props.navigation}
+            sideBar
+          />
+          <ScrollView style={{ width: '100%' }}>
+            <ActivityInfoSection
+              navigation={this.props.navigation}
+              activityData={this.props.activityData}
             />
-            <Button
-              bgColor={colors.green}
-              onPress={async () => {
-                if (props.photos.length > 0) {
-                  props.photos.forEach((item) => {
-                    apiGet('aws-s3-presigned-urls', props.token).then((res) => {
-                      RNFetchBlob.fetch('PUT', res.data.url, {
-                        'security-token': props.token,
-                        'Content-Type': 'application/octet-stream',
-                      }, RNFetchBlob.wrap(item.uri.replace('file://', '')))
-                        .then(() => {
-                          RNFetchBlob.fs.stat(item.uri.replace('file://', ''))
-                            .then((stats) => {
+            <ActivityStatus status={this.props.activityData.status} />
+            <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
+            <ActivityTitle title="Manager on Duty Feedback" />
+            <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
+              <View style={[styles.scrollContainer, { borderBottomWidth: 0 }]}>
+                <QuestionsList
+                  questions={this.props.activityData.manager_questions_answers}
+                  photos={this.props.photos}
+                  addPhoto={this.props.addPhoto}
+                  screen="Manager"
+                  setUpdate={this.props.setUpdate}
+                  update={this.props.update}
+                  updateAnswers={this.updateAnswers}
+                  setSignature={this.props.setSignature}
+                />
+                <Button
+                  bgColor={colors.green}
+                  onPress={async () => {
+                    this.setState({
+                      isLoading: true
+                    });
+                    this.uploadedImagesCount = 0;
+                    if (this.props.photos.length > 0) {
+                      this.props.photos.forEach((item) => {
+                        apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
+                          RNFetchBlob.fetch('PUT', res.data.url, {
+                            'security-token': this.props.token,
+                            'Content-Type': 'application/octet-stream',
+                          }, RNFetchBlob.wrap(item.uri.replace('file://', '')))
+                            .then(() => {
+                              RNFetchBlob.fs.stat(item.uri.replace('file://', ''))
+                                .then((stats) => {
+                                  const formData = new FormData();
+                                  formData.append('file_type', 'image/jpeg');
+                                  formData.append('name', stats.filename);
+                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                  formData.append('size', stats.size);
+                                  apiPostImage(
+                                    'files',
+                                    formData,
+                                    this.props.token,
+                                  ).then((fileRes) => {
+                                    this.props.activityData.manager_questions_answers
+                                      .forEach((question, index) => {
+                                        if (question.order === item.order) {
+                                          if (question.type == "photo") {
+                                            if (this.props.activityData.manager_questions_answers[index].answers == undefined) {
+                                              this.props.activityData.manager_questions_answers[index].answers = [fileRes.data.id];
+                                            } else {
+                                              this.props.activityData.manager_questions_answers[index].answers.push(fileRes.data.id);
+                                            }
+                                          } else {
+                                            if (this.props.activityData.manager_questions_answers[index].photo == undefined) {
+                                              this.props.activityData.manager_questions_answers[index].photo = [fileRes.data.id];
+                                            } else {
+                                              this.props.activityData.manager_questions_answers[index].photo.push(fileRes.data.id);
+                                            }
+                                          }
+                                        }
+                                      });
+                                    this.uploadedImagesCount = photoIndex + 1;
+                                    this.saveManagerQuestionAnswers();
+                                  }).catch(err => {
+                                    this.setState({
+                                      isLoading: false
+                                    });
+                                  });
+                                });
+                            })
+                            .catch((err) => {
+                              this.setState({
+                                isLoading: false
+                              });
+                              console.log(err);
+                            });
+                        }).catch(err => {
+                          this.setState({
+                            isLoading: false
+                          });
+                        });
+                      });
+                    }
+                    if (this.props.signature.length == 1) {
+                      let signatureQuestionIndex = this.props.activityData.manager_questions_answers.findIndex(question => question.type == "signature");
+                      let signatureQuestion = this.props.activityData.manager_questions_answers[signatureQuestionIndex];
+                      if (signatureQuestionIndex != -1) {
+                        apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
+                          RNFetchBlob.fetch('PUT', res.data.url, {
+                            'security-token': this.props.token,
+                            'Content-Type': 'application/octet-stream',
+                          }, this.props.signature[0])
+                            .then(() => {
                               const formData = new FormData();
                               formData.append('file_type', 'image/jpeg');
-                              formData.append('name', stats.filename);
+                              formData.append('name', signatureQuestion.text);
                               formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                              formData.append('size', stats.size);
+                              formData.append('size', this.props.signature[0].length);
                               apiPostImage(
-                                'files',
-                                formData,
-                                props.token,
-                              ).then(() => {
-                                props.activityData.installer_questions_answers
-                                  .forEach((question, index) => {
-                                    if (question.order === item.order) {
-                                      props.activityData.installer_questions_answers[index].photo.push(res.data.id);
-                                    }
-                                  });
+                                `files`,
+                                formData, this.props.token,
+                              ).then(fileRes => {
+                                signatureQuestion.answers = fileRes.data.id;
+                                this.isSignatureUploaded = true;
+                                this.saveManagerQuestionAnswers();
+                              }).catch(err => {
+                                this.setState({
+                                  isLoading: false
+                                });
                               });
+                            })
+                            .catch((err) => {
+                              this.setState({
+                                isLoading: false
+                              });
+                              console.log(err);
                             });
-                        })
-                        .catch((err) => {
-                          console.log(err);
+                        }).catch(err => {
+                          this.setState({
+                            isLoading: false
+                          });
                         });
-                    });
-                  });
-                }
-                await apiPatchAnswers(
-                  `activities/${props.activityData.id}`,
-                  `installer_manager_answers=${JSON.stringify(props.activityData.installer_questions_answers)}`,
-                  props.token,
-                ).then((response) => {
-                  if (response.status === 200) {
-                    Alert.alert(
-                      'Success',
-                      'Your answer was added',
-                      [
-                        { text: 'Ok' },
-                      ],
-                    );
-                  }
-                });
-                await apiChangeStatus('Complete', props.activityId, props.token)
-                  .then((response) => {
-                    const res = response.json();
-                    if (res.data === null) {
-                      props.navigation.navigate('Work Order');
+                      }
+                    } else {
+                      this.isSignatureUploaded = true;
+                      this.saveManagerQuestionAnswers();
                     }
-                  });
-                await props.setModalVisible(true);
-              }}
-              textColor={colors.white}
-              textStyle={{ fontSize: 20 }}
-              caption="Submit"
-            />
-          </View>
+                  }}
+                  textColor={colors.white}
+                  textStyle={{ fontSize: 20 }}
+                  isLoading={this.state.isLoading}
+                  caption="Submit"
+                  bgColor={
+                    (this.state.isSubmitBtnDisabled)
+                      ? '#b1cec1'
+                      : colors.green
+                  }
+                  disabled={this.state.isSubmitBtnDisabled}
+                />
+              </View>
+            </View>
+          </ScrollView>
+          <ManagerModal />
+          {this.props.isIncompleteOpen &&
+            <IncompleteModal close={() => this.props.setIsIncompleteOpen(false)} />
+          }
+        </KeyboardAvoidingView >
+      );
+    } else {
+      return (
+        <View style={styles.backgroundActivity}>
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
-      </ScrollView>
-      <ManagerModal />
-      {props.isIncompleteOpen &&
-        <IncompleteModal close={() => props.setIsIncompleteOpen(false)} />
-      }
-    </KeyboardAvoidingView>
-  );
+      );
+    }
+  }
 }
 
 const styles = StyleSheet.create({

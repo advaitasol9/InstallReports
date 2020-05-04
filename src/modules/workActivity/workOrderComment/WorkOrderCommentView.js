@@ -42,7 +42,8 @@ export default function WorkOrderCommentView(props) {
   const renderPhoto = (photo, index) => {
     const photosCopy = props.photos.slice();
     return (
-      <View style={{ position: 'relative' }}>
+      <View style={{ position: 'relative' }}
+        key={index}>
         <TouchableOpacity
           style={styles.delPhoto}
           onPress={async () => {

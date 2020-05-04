@@ -26,6 +26,7 @@ export default compose(
   withState('activityData', 'setActivityData', {}),
   withState('isLoading', 'setIsloading', true),
   withState('update', 'setUpdate', true),
+  withState('signature', 'setSignature', []),
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
