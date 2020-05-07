@@ -45,8 +45,6 @@ export const apiPostComment = (method, body, token) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       } else {
-        // console.log('error found');
-
         throw (new Error(response));
       }
       return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);

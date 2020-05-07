@@ -33,7 +33,7 @@ export default class WorkOrderManagerView extends Component {
 
   constructor(props) {
     super(props);
-    uploadedImagesCount = 0;
+    this.uploadedImagesCount = 0;
     isSignatureUploaded = false;
     this.state = {
       isSubmitBtnDisabled: true,
@@ -101,7 +101,6 @@ export default class WorkOrderManagerView extends Component {
           <StatusBar backgroundColor={colors.lightGray} />
           <NavigationEvents
             onWillFocus={() => {
-              console.log(this.props);
               let installerQuestions = [];
               try {
                 installerQuestions = JSON.parse(this.props.activityData.installer_questions_answers);
@@ -147,7 +146,7 @@ export default class WorkOrderManagerView extends Component {
                     });
                     this.uploadedImagesCount = 0;
                     if (this.props.photos.length > 0) {
-                      this.props.photos.forEach((item) => {
+                      this.props.photos.forEach((item, photoIndex) => {
                         apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
                           RNFetchBlob.fetch('PUT', res.data.url, {
                             'security-token': this.props.token,
@@ -184,7 +183,7 @@ export default class WorkOrderManagerView extends Component {
                                           }
                                         }
                                       });
-                                    this.uploadedImagesCount = photoIndex + 1;
+                                    this.uploadedImagesCount += 1;
                                     this.saveManagerQuestionAnswers();
                                   }).catch(err => {
                                     this.setState({

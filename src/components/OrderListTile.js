@@ -16,7 +16,6 @@ export default class OrderListTile extends Component {
     this.state = {
       height: 10
     };
-    console.log(this.props);
   }
 
   componentWillMount() {
@@ -31,11 +30,7 @@ export default class OrderListTile extends Component {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log(this.props);
-          console.log(this.props.item);
-
           this.props.setActivityId(this.props.item.id);
-          // this.props.setItemId(this.props.item.items[0].id);
           this.props.navigation.navigate('Details');
         }}
         style={[styles.tileContainer, { marginTop: this.props.index === 0 ? 8 : 0 }]}
@@ -46,7 +41,6 @@ export default class OrderListTile extends Component {
               ?
               <Image
                 style={{ width: 50, height: this.state.height }}
-                // source={{ uri: 'https://sanmark-proxy-retail-test.s3.amazonaws.com/2y10pafk2d6l2napuqvatqjzulzhuekwgum8v1zi7zav9hwljlvhqni' }}
                 source={{ uri: this.props.item.accounts[0].logo_thumb_file_url }}
               />
               : null
