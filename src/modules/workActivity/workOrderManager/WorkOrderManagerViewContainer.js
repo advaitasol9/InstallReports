@@ -34,17 +34,18 @@ export default compose(
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
-        apiGetJson(`test-app-1/activities/${this.props.activityId}?with=["items"]`, this.props.token)
+        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
           .then(async (response) => {
             const installerAnswers = JSON.parse(response.data.installer_questions_answers);
-            await this.props.setActivityData({
+            this.props.setActivityData({
               ...response.data,
-              installer_questions_answers: installerAnswers,
               manager_questions_answers: JSON.parse(response.data.manager_questions_answers),
             });
+
             this.props.setIsloading(false);
-            if (installerAnswers === null ||
-              installerAnswers.filter(answer => answer !== null).length < installerAnswers.length) {
+
+            if (installerAnswers.length == 0 ||
+              installerAnswers.filter(answer => answer.answers !== "").length < installerAnswers.length) {
               this.props.setIsIncompleteOpen(true);
             }
           });

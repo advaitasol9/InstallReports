@@ -66,10 +66,16 @@ class FailedModalComponent extends Component {
     super(props);
     uploadedImagesCount = 0;
     isSignatureUploaded = false;
+    this.state = {
+      isLoading: false
+    };
   }
 
   isLastImageUploaded() {
     if (this.uploadedImagesCount == this.props.mainProps.photos.length && this.isSignatureUploaded) {
+      this.setState({
+        isLoading: false
+      });
       this.props.mainProps.addPhoto([]);
       this.props.mainProps.setSignature([]);
       this.props.mainProps.navigation.navigate('Work Order');
@@ -99,6 +105,9 @@ class FailedModalComponent extends Component {
                   bgColor={colors.green}
                   style={{ width: '48%' }}
                   onPress={async () => {
+                    this.setState({
+                      isLoading: true
+                    });
                     if (!this.props.mainProps.connectionStatus) {
                       setChangesInOffline(
                         this.props.mainProps.changes,
@@ -111,82 +120,113 @@ class FailedModalComponent extends Component {
                         'Failed',
                       );
                       this.mainProps.props.setModalVisible(true);
+                      this.setState({
+                        isLoading: false
+                      });
                     } else {
-                      const data = `text=${this.props.mainProps.comment}&user_id=${this.props.mainProps.accountId}`;
-                      apiPostComment(`test-app-1/activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
-                        Promise.all([
-                          apiChangeStatus('Failed', this.props.mainProps.activityId, this.props.token),
-                          apiPatch(`test-app-1/activities/` + this.props.mainProps.activityId, this.props.token,
-                            {
-                              'failed_installation_manager_name': this.props.mainProps.name,
-                              'failed_installation_comment_id': resPostText.data.id,
-                            }),
-                        ]).then(() => {
+                      try {
+                        const data = `text=${this.props.mainProps.comment}&user_id=${this.props.mainProps.accountId}`;
+                        apiPostComment(`activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
+                          Promise.all([
+                            apiChangeStatus('Failed', this.props.mainProps.activityId, this.props.token),
+                            apiPatch(`activities/` + this.props.mainProps.activityId, this.props.token,
+                              {
+                                'failed_installation_manager_name': this.props.mainProps.name,
+                                'failed_installation_comment_id': resPostText.data.id,
+                              }),
+                          ]).then(() => {
 
-                        }).catch((err) => {
-                          console.log(err);
-                        });
-                        if (this.props.mainProps.photos.length > 0) {
-                          this.props.mainProps.photos.forEach((item, index) => {
-                            apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
+                          }).catch((err) => {
+                            this.setState({
+                              isLoading: false
+                            });
+                            console.log(err);
+                          });
+                          if (this.props.mainProps.photos.length > 0) {
+                            this.props.mainProps.photos.forEach((item, index) => {
+                              apiGet('aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
+                                RNFetchBlob.fetch('PUT', res.data.url, {
+                                  'security-token': this.props.mainProps.token,
+                                  'Content-Type': 'application/octet-stream',
+                                }, RNFetchBlob.wrap(item.replace('file://', '')))
+                                  .then(() => {
+                                    RNFetchBlob.fs.stat(item.replace('file://', ''))
+                                      .then((stats) => {
+                                        const formData = new FormData();
+                                        formData.append('file_type', 'image/jpeg');
+                                        formData.append('name', stats.filename);
+                                        formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                        formData.append('size', stats.size);
+                                        apiPostImage(
+                                          `activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
+                                          formData, this.props.mainProps.token,
+                                        );
+                                        this.uploadedImagesCount = index + 1;
+                                        this.isLastImageUploaded();
+                                      });
+                                  })
+                                  .catch((err) => {
+                                    this.setState({
+                                      isLoading: false
+                                    });
+                                    console.log(err);
+                                  });
+                              })
+                                .catch((err) => {
+                                  this.setState({
+                                    isLoading: false
+                                  });
+                                  console.log(err);
+                                });
+                              ;
+                            });
+                          }
+                          if (this.props.mainProps.signature.length == 1) {
+                            apiGet('aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
                               RNFetchBlob.fetch('PUT', res.data.url, {
                                 'security-token': this.props.mainProps.token,
                                 'Content-Type': 'application/octet-stream',
-                              }, RNFetchBlob.wrap(item.replace('file://', '')))
+                              }, this.props.mainProps.signature[0])
                                 .then(() => {
-                                  RNFetchBlob.fs.stat(item.replace('file://', ''))
-                                    .then((stats) => {
-                                      const formData = new FormData();
-                                      formData.append('file_type', 'image/jpeg');
-                                      formData.append('name', stats.filename);
-                                      formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                      formData.append('size', stats.size);
-                                      apiPostImage(
-                                        `http://142.93.1.107:9001/test-app-1/activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
-                                        formData, this.props.mainProps.token,
-                                      );
-                                      this.uploadedImagesCount = index + 1;
-                                      this.isLastImageUploaded();
-                                    });
+                                  const formData = new FormData();
+                                  formData.append('file_type', 'image/jpeg');
+                                  formData.append('name', 'partial_sign.jpg');
+                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                  formData.append('size', this.props.mainProps.signature[0].length);
+                                  apiPostImage(
+                                    `activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
+                                    formData, this.props.mainProps.token,
+                                  );
+                                  this.isSignatureUploaded = true;
+                                  this.isLastImageUploaded();
                                 })
                                 .catch((err) => {
+                                  this.setState({
+                                    isLoading: false
+                                  });
                                   console.log(err);
                                 });
-                            });
-                          });
-                        }
-                        if (this.props.mainProps.signature.length == 1) {
-                          apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
-                            RNFetchBlob.fetch('PUT', res.data.url, {
-                              'security-token': this.props.mainProps.token,
-                              'Content-Type': 'application/octet-stream',
-                            }, this.props.mainProps.signature[0])
-                              .then(() => {
-                                const formData = new FormData();
-                                formData.append('file_type', 'image/jpeg');
-                                formData.append('name', 'partial_sign.jpg');
-                                formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                formData.append('size', this.props.mainProps.signature[0].length);
-                                apiPostImage(
-                                  `http://142.93.1.107:9001/test-app-1/activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
-                                  formData, this.props.mainProps.token,
-                                );
-                                this.isSignatureUploaded = true;
-                                this.isLastImageUploaded();
-                              })
-                              .catch((err) => {
-                                console.log(err);
+                            }).catch((err) => {
+                              this.setState({
+                                isLoading: false
                               });
-                          });
-                        } else {
-                          this.isSignatureUploaded = true;
-                          this.isLastImageUploaded();
-                        }
-                      });
+                              console.log(err);
+                            });
+                          } else {
+                            this.isSignatureUploaded = true;
+                            this.isLastImageUploaded();
+                          }
+                        });
+                      } catch (e) {
+                        this.setState({
+                          isLoading: false
+                        });
+                      }
                     }
                   }}
                   textColor={colors.white}
                   caption="Submit"
+                  isLoading={this.state.isLoading}
                   textStyle={{ fontSize: 20 }}
                 />
                 <Button

@@ -2,6 +2,7 @@
 import QuestionsList from './QuestionsList';
 import IncompleteModal from './IncompleteModal';
 import OrderListTile from './OrderListTile';
+import SearchSideFilter from './SearchSideFilter';
 import FailedModal from './FailedModal';
 import ActivityTitle from './ActivityTitle';
 import ActivityStatus from './ActivityStatus';
@@ -24,6 +25,7 @@ export {
   QuestionsList,
   IncompleteModal,
   OrderListTile,
+  SearchSideFilter,
   FailedModal,
   ActivityTitle,
   ActivityStatus,

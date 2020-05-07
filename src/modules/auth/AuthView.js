@@ -51,8 +51,7 @@ export default class AuthScreen extends React.Component {
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
-      auth('test-app-1/login/', formData).then((response) => {
-        console.log(response);
+      auth('login/', formData).then((response) => {
         if (!this.props.connectionStatus) {
           Alert.alert('There is no connection');
         }
@@ -116,10 +115,10 @@ export default class AuthScreen extends React.Component {
               resizeMode="contain"
               style={[
                 styles.logo,
-                this.state.isKeyboardVisible && { height: 90 },
+                this.state.isKeyboardVisible && { height: 30 },
                 this.fadeIn(0),
               ]}
-              source={require('../../../assets/images/white-logo.png')}
+              source={require('../../../assets/images/logo-white.png')}
             />
           </View>
 
@@ -158,7 +157,7 @@ export default class AuthScreen extends React.Component {
               {!this.state.isKeyboardVisible && (
                 <TouchableOpacity
                   onPress={() => {
-                    Linking.openURL('https://trello.com/c/8FtwG3Wi');
+                    Linking.openURL('https://installreports.com/reset-password');
                   }}
                   style={{ paddingTop: 30, flexDirection: 'row' }}
                 >
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logo: {
-    height: 150,
+    height: 40,
   },
   socialLoginContainer: {
     flexDirection: 'row',

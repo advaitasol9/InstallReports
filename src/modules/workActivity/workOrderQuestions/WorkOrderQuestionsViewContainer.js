@@ -26,16 +26,16 @@ export default compose(
   withState('activityData', 'setActivityData', {}),
   withState('isLoading', 'setIsloading', true),
   withState('update', 'setUpdate', true),
+  withState('signature', 'setSignature', []),
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
-        apiGetJson(`test-app-1/activities/${this.props.activityId}?with=["items"]`, this.props.token)
+        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
           .then((response) => {
             this.props.setActivityData({
               ...response.data,
               installer_questions_answers: JSON.parse(response.data.installer_questions_answers),
             });
-            console.log(this.props.activityData);
             this.props.setIsloading(false);
           });
       } else {

@@ -31,6 +31,7 @@
     "react-native-check-box": "^2.1.7",
     "react-native-gesture-handler": "~1.4.0",
     "react-native-image-picker": "^0.28.1",
+    "react-native-image-view": "^2.1.9",
     "react-native-linear-gradient": "^2.5.3",
     "react-native-location": "^2.5.0",
     "react-native-material-dropdown": "^0.11.1",

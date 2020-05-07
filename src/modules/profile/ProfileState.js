@@ -19,7 +19,6 @@ export function setUserInfo(payload) {
 export default function AppStateReducer(state = initialState, action) {
   switch (action.type) {
     case SET_USER_INFO:
-      console.log(action);
       return {
         authorizations: action.payload.data.authorizations,
         security_token: action.payload.data.security_token,

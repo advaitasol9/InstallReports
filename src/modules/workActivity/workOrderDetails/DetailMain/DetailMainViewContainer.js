@@ -32,9 +32,8 @@ export default compose(
     async componentDidMount() {
       this.props.setChangesInOffline(this.props.changes.length);
       if (this.props.connectionStatus) {
-        await apiGetJson(`test-app-1/activities/${this.props.activityId}?with=["items"]`, this.props.token)
+        await apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
           .then((response) => {
-            console.log(response);
             this.props.setActivityData(response.data);
             this.props.setIsloading(false);
           });

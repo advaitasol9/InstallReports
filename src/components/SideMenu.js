@@ -8,7 +8,6 @@ import { colors } from '../styles';
 
 function SideMenu(props) {
   const navigateToScreen = (route, params) => () => {
-    console.log(route, params);
     const navigateAction = NavigationActions.navigate({
       routeName: route,
       params,
@@ -23,9 +22,6 @@ function SideMenu(props) {
       </TouchableOpacity>
       <TouchableOpacity onPress={navigateToScreen('Search')}>
         <Text style={styles.text}>Search</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={navigateToScreen('Profile')}>
-        <Text style={styles.text}>Profile</Text>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {

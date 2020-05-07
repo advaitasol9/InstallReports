@@ -42,7 +42,8 @@ export default function WorkOrderCommentView(props) {
   const renderPhoto = (photo, index) => {
     const photosCopy = props.photos.slice();
     return (
-      <View style={{ position: 'relative' }}>
+      <View style={{ position: 'relative' }}
+        key={index}>
         <TouchableOpacity
           style={styles.delPhoto}
           onPress={async () => {
@@ -177,10 +178,10 @@ export default function WorkOrderCommentView(props) {
                     await props.setComment('');
                   } else {
                     const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
-                    await apiPostComment(`test-app-1/activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
+                    await apiPostComment(`activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
                       if (props.photos.length > 0) {
                         props.photos.forEach((item) => {
-                          apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', props.token).then((res) => {
+                          apiGet('aws-s3-presigned-urls', props.token).then((res) => {
                             RNFetchBlob.fetch('PUT', res.data.url, {
                               'security-token': props.token,
                               'Content-Type': 'application/octet-stream',
@@ -193,10 +194,10 @@ export default function WorkOrderCommentView(props) {
                                     formData.append('name', stats.filename);
                                     formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                     formData.append('size', stats.size);
-                                    apiPostImage(`http://142.93.1.107:9001/test-app-1/activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
-                                      apiGetJson(`test-app-1/activities/${props.activityId}/comments`, props.token)
+                                    apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
+                                      apiGetJson(`activities/${props.activityId}/comments`, props.token)
                                         .then((response) => {
-                                          props.setData(response.data);
+                                          props.setData(response.data.reverse());
                                         });
                                     });
                                   });
@@ -207,9 +208,9 @@ export default function WorkOrderCommentView(props) {
                           });
                         });
                       } else {
-                        apiGetJson(`test-app-1/activities/${props.activityId}/comments`, props.token)
+                        apiGetJson(`activities/${props.activityId}/comments`, props.token)
                           .then((response) => {
-                            props.setData(response.data);
+                            props.setData(response.data.reverse());
                           });
                       }
                     });

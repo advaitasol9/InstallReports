@@ -57,7 +57,6 @@ export default function Header({
         {sortAndFilter && (
           <TouchableOpacity
             onPress={() => {
-              console.log(changesNum);
               navigation.navigate({ routeName: 'Search' });
             }}
           >
@@ -98,7 +97,7 @@ const styles = {
     elevation: 5,
   },
   logo: {
-    height: 30,
+    height: 40,
     aspectRatio: 4,
     resizeMode: 'contain',
   },

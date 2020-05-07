@@ -10,9 +10,7 @@ import { colors, fonts } from '../../styles';
 
 import WorkOrderScreen from '../workOrder/WorkOrderViewContainer';
 import SearchScreen from '../search/SearchViewContainer';
-import ProfileScreen from '../profile/ProfileViewContainer';
 import Logout from '../logout/LogoutViewContainer';
-
 
 const hederBackground = require('../../../assets/images/topBarBg-red.png');
 
@@ -79,17 +77,6 @@ export default createBottomTabNavigator(
         ),
       },
     },
-    Profile: {
-      screen: ProfileScreen,
-      navigationOptions: {
-        header: (
-          <View style={styles.headerContainer}>
-            <Image style={styles.headerImage} source={hederBackground} />
-            <Text style={styles.headerCaption}>Profile</Text>
-          </View>
-        ),
-      },
-    },
     Logout: {
       screen: Logout,
       navigationOptions: {
@@ -128,9 +115,6 @@ export default createBottomTabNavigator(
             break;
           case 'Search':
             iconName = 'search';
-            break;
-          case 'Profile':
-            iconName = 'user-circle';
             break;
           case 'Logout':
             iconName = 'sign-out-alt';

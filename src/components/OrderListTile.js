@@ -1,5 +1,5 @@
 // @flow
-import React from 'react';
+import React, { Component } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,60 +9,89 @@ import {
 } from 'react-native';
 import moment from 'moment';
 
-export default props => (
-  <TouchableOpacity
-    onPress={() => {
-      props.setActivityId(props.item.id);
-      props.setItemId(props.item.items[0].id);
-      props.navigation.navigate('Details');
-    }}
-    style={[styles.tileContainer, { marginTop: props.index === 0 ? 8 : 0 }]}
-  >
-    <View style={styles.tileLogoContainer}>
-      <Image
-        style={styles.tileLogo}
-        source={require('../../assets/images/tileLogoExample.png')}
-      />
-    </View>
-    <View style={styles.tileInfoContainer}>
-      {(props.item.accounts).length > 0 ?
-        <Text style={styles.infoCompany}>{props.item.accounts[0].name}</Text> : null}
-      <Text style={styles.infoTitle}>{props.item.items[0].name}</Text>
-      <View style={styles.infoBottomSection}>
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={[styles.infoBottomText, { marginRight: 20 }]}>
-            #{props.item.id}
-          </Text>
-        </View>
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={styles.infoBottomText}>
-            {props.item.date_2 && (
-              `Due ${moment(props.item.date_2).format('MM/DD/YY')}`
-            )}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.infoBottomSection}>
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
+export default class OrderListTile extends Component {
 
-            <Text style={styles.infoBottomText}>
-              {props.item.address_1 && (
-                `${props.item.address_1}, `
-              )}
-              {props.item.city && (
-                `${props.item.city}, `
-              )}
-              {props.item.state && (
-                `${props.item.state}`
-              )}
-            </Text>
+  constructor(props) {
+    super(props);
+    this.state = {
+      height: 10
+    };
+    console.log(this.props);
+  }
+
+  componentWillMount() {
+    if (this.props.item.accounts.length > 0 && this.props.item.accounts[0].logo_thumb_file_url) {
+      Image.getSize(this.props.item.accounts[0].logo_thumb_file_url, (width, height) => {
+        this.setState({ height: height / 2 });
+      });
+    }
+  }
+
+  render() {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          console.log(this.props);
+          console.log(this.props.item);
+
+          this.props.setActivityId(this.props.item.id);
+          // this.props.setItemId(this.props.item.items[0].id);
+          this.props.navigation.navigate('Details');
+        }}
+        style={[styles.tileContainer, { marginTop: this.props.index === 0 ? 8 : 0 }]}
+      >
+        <View style={styles.tileLogoContainer}>
+          {
+            (this.props.item.accounts.length > 0 && this.props.item.accounts[0].logo_thumb_file_url)
+              ?
+              <Image
+                style={{ width: 50, height: this.state.height }}
+                // source={{ uri: 'https://sanmark-proxy-retail-test.s3.amazonaws.com/2y10pafk2d6l2napuqvatqjzulzhuekwgum8v1zi7zav9hwljlvhqni' }}
+                source={{ uri: this.props.item.accounts[0].logo_thumb_file_url }}
+              />
+              : null
+          }
+        </View>
+        <View style={styles.tileInfoContainer}>
+          <Text style={styles.infoCompany}>{this.props.item.account_name}</Text>
+          <Text style={styles.infoTitle}>{this.props.item.item_name}</Text>
+          <View style={styles.infoBottomSection}>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={[styles.infoBottomText, { marginRight: 20 }]}>
+                #{this.props.item.id}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={styles.infoBottomText}>
+                {this.props.item.date_2 && (
+                  `Due ${moment(this.props.item.date_2).format('MM/DD/YY')}`
+                )}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.infoBottomSection}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center' }}>
+
+                <Text style={styles.infoBottomText}>
+                  {this.props.item.address_1 && (
+                    `${this.props.item.address_1}, `
+                  )}
+                  {this.props.item.city && (
+                    `${this.props.item.city}, `
+                  )}
+                  {this.props.item.state && (
+                    `${this.props.item.state}`
+                  )}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
-      </View>
-    </View>
-  </TouchableOpacity >
-);
+      </TouchableOpacity >
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   tileContainer: {
@@ -76,11 +105,7 @@ const styles = StyleSheet.create({
   tileLogoContainer: {
     width: '15%',
     alignItems: 'center',
-  },
-  tileLogo: {
-    width: 50,
-    height: 50,
-    aspectRatio: 1,
+    marginLeft: 8,
   },
   tileInfoContainer: {
     width: '85%',

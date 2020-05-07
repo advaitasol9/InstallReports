@@ -72,10 +72,16 @@ class ParialModalComponent extends Component {
     super(props);
     uploadedImagesCount = 0;
     isSignatureUploaded = false;
+    this.state = {
+      isLoading: false
+    };
   }
 
   isLastImageUploaded() {
     if (this.uploadedImagesCount == this.props.mainProps.photos.length && this.isSignatureUploaded) {
+      this.setState({
+        isLoading: false
+      });
       this.props.mainProps.addPhoto([]);
       this.props.mainProps.setSignature([]);
       this.props.mainProps.navigation.navigate('Work Order');
@@ -105,6 +111,9 @@ class ParialModalComponent extends Component {
                   bgColor={colors.green}
                   style={{ width: '48%' }}
                   onPress={async () => {
+                    this.setState({
+                      isLoading: true
+                    });
                     if (!this.props.mainProps.connectionStatus) {
                       setChangesInOffline(
                         this.props.mainProps.changes,
@@ -117,24 +126,26 @@ class ParialModalComponent extends Component {
                         'Partial',
                       );
                       this.props.mainProps.setModalVisible(true);
+                      this.setState({
+                        isLoading: false
+                      });
                     } else {
-                      const data = `text=${this.props.mainProps.comment}&user_ids=%5B${this.props.mainProps.accountId}%5D&undefined=`;
-                      await apiPostComment(`test-app-1/activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
+                      const data = `text=${this.props.mainProps.comment}&user_ids=[${this.props.mainProps.accountId}]`;
+                      await apiPostComment(`activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then((resPostText) => {
                         Promise.all([
                           apiChangeStatus('Partial', this.props.mainProps.activityId, this.props.token),
-                          apiPatch(`test-app-1/activities/` + this.props.mainProps.activityId, this.props.token,
+                          apiPatch(`activities/` + this.props.mainProps.activityId, this.props.token,
                             {
                               'partial_installation_manager_name': this.props.mainProps.name,
                               'partial_installation_comment_id': resPostText.data.id,
                             }),
-                        ]).then(() => {
-
+                        ]).then((res) => {
                         }).catch((err) => {
                           console.log(err);
                         });
                         if (this.props.mainProps.photos.length > 0) {
                           this.props.mainProps.photos.forEach((item, index) => {
-                            apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
+                            apiGet('aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
                               RNFetchBlob.fetch('PUT', res.data.url, {
                                 'security-token': this.props.mainProps.token,
                                 'Content-Type': 'application/octet-stream',
@@ -148,7 +159,7 @@ class ParialModalComponent extends Component {
                                       formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                       formData.append('size', stats.size);
                                       apiPostImage(
-                                        `http://142.93.1.107:9001/test-app-1/activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
+                                        `activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
                                         formData, this.props.mainProps.token,
                                       );
                                       this.uploadedImagesCount = index + 1;
@@ -156,13 +167,20 @@ class ParialModalComponent extends Component {
                                     });
                                 })
                                 .catch((err) => {
+                                  this.setState({
+                                    isLoading: false
+                                  });
                                   console.log(err);
                                 });
+                            }).catch((error) => {
+                              this.setState({
+                                isLoading: false
+                              });
                             });
                           });
                         }
                         if (this.props.mainProps.signature.length == 1) {
-                          apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
+                          apiGet('aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
                             RNFetchBlob.fetch('PUT', res.data.url, {
                               'security-token': this.props.mainProps.token,
                               'Content-Type': 'application/octet-stream',
@@ -174,13 +192,16 @@ class ParialModalComponent extends Component {
                                 formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                 formData.append('size', this.props.mainProps.signature[0].length);
                                 apiPostImage(
-                                  `http://142.93.1.107:9001/test-app-1/activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
+                                  `activities/${this.props.mainProps.activityId}/comments/${resPostText.data.id}/files`,
                                   formData, this.props.mainProps.token,
                                 );
                                 this.isSignatureUploaded = true;
                                 this.isLastImageUploaded();
                               })
                               .catch((err) => {
+                                this.setState({
+                                  isLoading: false
+                                });
                                 console.log(err);
                               });
                           });
@@ -190,6 +211,7 @@ class ParialModalComponent extends Component {
                   }}
                   textColor={colors.white}
                   caption="Submit"
+                  isLoading={this.state.isLoading}
                   textStyle={{ fontSize: 20 }}
                 />
                 <Button

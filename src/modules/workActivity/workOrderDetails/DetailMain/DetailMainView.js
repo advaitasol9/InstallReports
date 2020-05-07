@@ -91,7 +91,10 @@ export default class DetailMainView extends Component {
                 Work Order #{this.props.activityData.id}
               </Text>
               <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
-                Project: {this.props.activityData.items[0].name}
+                Project: {this.props.activityData.items.length > 0
+                  ? this.props.activityData.items[0].name
+                  : null
+                }
               </Text>
               <Text style={{ paddingTop: 8 }}>
                 {this.props.activityData.location && (
@@ -138,16 +141,12 @@ export default class DetailMainView extends Component {
                   }).then((granted) => {
                     if (granted) {
                       RNLocation.subscribeToLocationUpdates(async (locations) => {
-                        console.log(locations);
                         const currentLongitude = await JSON.stringify(locations[0].longitude);
                         const currentLatitude = await JSON.stringify(locations[0].latitude);
-                        console.log(currentLatitude, currentLongitude);
                         Geocode.fromLatLng(currentLatitude, currentLongitude).then(
                           (response) => {
-                            console.log(response);
                             const address = response.results[0].formatted_address.replace(/[ ,.]/g, '+');
                             const url = `https://www.google.com/maps/dir/${address}/${destination}`;
-                            console.log(url);
                             Linking.openURL(url);
                           },
                           (error) => {

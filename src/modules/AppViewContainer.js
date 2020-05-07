@@ -42,10 +42,10 @@ export default compose(
             item.comments.forEach((comment) => {
               if (comment.changeStatus === 'In_Progress' || comment.changeStatus === item.status || comment.changeStatus === null) {
                 const data = `text=${comment.comment}&user_ids=%5B${item.accountId}%5D&undefined=`;
-                apiPostComment(`test-app-1/activities/${item.id}/comments`, data, this.props.token).then((resPostText) => {
+                apiPostComment(`activities/${item.id}/comments`, data, this.props.token).then((resPostText) => {
                   if (comment.photos.length > 0) {
                     comment.photos.forEach((photo) => {
-                      apiGet('http://142.93.1.107:9002/api/test-app-1/aws-s3-presigned-urls', this.props.token).then((res) => {
+                      apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
                         RNFetchBlob.fetch('PUT', res.data.url, {
                           'security-token': this.props.token,
                           'Content-Type': 'application/octet-stream',
@@ -59,7 +59,7 @@ export default compose(
                                 formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                 formData.append('size', stats.size);
                                 apiPostImage(
-                                  `http://142.93.1.107:9001/test-app-1/activities/${item.id}/comments/${resPostText.data.id}/files`,
+                                  `activities/${item.id}/comments/${resPostText.data.id}/files`,
                                   formData,
                                   this.props.token,
                                 );

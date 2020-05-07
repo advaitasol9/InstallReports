@@ -12,7 +12,7 @@ export default compose(
     state => ({
       token: state.profile.security_token.token,
       activityId: state.workOrder.activityId,
-      itemId: state.workOrder.itemId,
+      // itemId: state.workOrder.itemId,
       connectionStatus: state.app.isConnected,
       orderList: state.workOrder.orderList,
     }),
@@ -29,16 +29,14 @@ export default compose(
   lifecycle({
     componentDidMount() {
       if (this.props.connectionStatus) {
-        apiGetJson(`test-app-1/activities/${this.props.activityId}?with=["items"]`, this.props.token)
+        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
           .then(async (response) => {
             await this.props.setActivityData(response.data);
             this.props.setIsloading(false);
           });
 
-        apiGetJson(`test-app-1/items/${this.props.itemId}/files`, this.props.token)
+        apiGetJson(`activities/${this.props.activityId}/files`, this.props.token)
           .then((response) => {
-            console.log(this.props.docs);
-            console.log(response);
             this.props.setDocs(response.data);
           });
       } else {

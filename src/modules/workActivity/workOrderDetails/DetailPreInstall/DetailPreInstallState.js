@@ -15,7 +15,6 @@ export function addPreInstallPhoto(payload) {
 export default function AppStateReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_PREINSTALL_PHOTO:
-      console.log(action);
       return {
         ...state,
         photos: action.payload,
