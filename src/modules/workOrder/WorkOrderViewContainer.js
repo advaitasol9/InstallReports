@@ -20,7 +20,6 @@ export default compose(
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
       setActivityId: id => dispatch(setActivityId(id)),
-      // setItemId: id => dispatch(setItemId(id)),
       setWorkOrdersFullCount: id => dispatch(setWorkOrdersFullCount(id)),
     }),
   ),

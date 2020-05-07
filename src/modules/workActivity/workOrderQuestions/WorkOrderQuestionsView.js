@@ -78,7 +78,7 @@ export default class WorkOrderQuestionsView extends Component {
         if (response.status === 200) {
           Alert.alert(
             'Success',
-            'Your answer was added',
+            'Your answer(s) have been received.',
             [
               { text: 'Ok' },
             ],
@@ -164,7 +164,7 @@ export default class WorkOrderQuestionsView extends Component {
                                             }
                                           }
                                         });
-                                      this.uploadedImagesCount = photoIndex + 1;
+                                      this.uploadedImagesCount += 1;
                                       this.saveInstallerQuestionAnswers();
                                     }).catch(err => {
                                       this.setState({
