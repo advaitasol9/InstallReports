@@ -30,7 +30,7 @@ export default class WorkOrderQuestionsView extends Component {
 
   constructor(props) {
     super(props);
-    uploadedImagesCount = 0;
+    this.uploadedImagesCount = 0;
     isSignatureUploaded = false;
     this.state = {
       isSubmitBtnDisabled: true,
