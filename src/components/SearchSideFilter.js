@@ -52,6 +52,7 @@ export default props => (
               <Text style={{ fontSize: 16, paddingRight: 12, color: colors.grey }}>CLEAR ALL</Text>
             </TouchableOpacity>
             <Button
+              style={{ width: 80 }}
               bgColor={colors.blue}
               onPress={async () => {
                 let cities = [];

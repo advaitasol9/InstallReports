@@ -196,7 +196,7 @@ export default function WorkOrderCommentView(props) {
                                     apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
                                       apiGetJson(`activities/${props.activityId}/comments`, props.token)
                                         .then((response) => {
-                                          props.setData(response.data);
+                                          props.setData(response.data.reverse());
                                         });
                                     });
                                   });
@@ -209,7 +209,7 @@ export default function WorkOrderCommentView(props) {
                       } else {
                         apiGetJson(`activities/${props.activityId}/comments`, props.token)
                           .then((response) => {
-                            props.setData(response.data);
+                            props.setData(response.data.reverse());
                           });
                       }
                     });

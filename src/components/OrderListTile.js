@@ -16,35 +16,45 @@ export default class OrderListTile extends Component {
     this.state = {
       height: 10
     };
+    console.log(this.props);
   }
 
   componentWillMount() {
-    Image.getSize(this.props.item.accounts[0].logo_thumb_file_url, (width, height) => {
-      this.setState({ height: height / 2 });
-    });
+    if (this.props.item.accounts.length > 0 && this.props.item.accounts[0].logo_thumb_file_url) {
+      Image.getSize(this.props.item.accounts[0].logo_thumb_file_url, (width, height) => {
+        this.setState({ height: height / 2 });
+      });
+    }
   }
 
   render() {
     return (
       <TouchableOpacity
         onPress={() => {
+          console.log(this.props);
+          console.log(this.props.item);
+
           this.props.setActivityId(this.props.item.id);
-          this.props.setItemId(this.props.item.items[0].id);
+          // this.props.setItemId(this.props.item.items[0].id);
           this.props.navigation.navigate('Details');
         }}
         style={[styles.tileContainer, { marginTop: this.props.index === 0 ? 8 : 0 }]}
       >
         <View style={styles.tileLogoContainer}>
-          <Image
-            style={{ width: 50, height: this.state.height }}
-            // source={{ uri: 'https://sanmark-proxy-retail-test.s3.amazonaws.com/2y10pafk2d6l2napuqvatqjzulzhuekwgum8v1zi7zav9hwljlvhqni' }}
-            source={{ uri: this.props.item.accounts[0].logo_thumb_file_url }}
-          />
+          {
+            (this.props.item.accounts.length > 0 && this.props.item.accounts[0].logo_thumb_file_url)
+              ?
+              <Image
+                style={{ width: 50, height: this.state.height }}
+                // source={{ uri: 'https://sanmark-proxy-retail-test.s3.amazonaws.com/2y10pafk2d6l2napuqvatqjzulzhuekwgum8v1zi7zav9hwljlvhqni' }}
+                source={{ uri: this.props.item.accounts[0].logo_thumb_file_url }}
+              />
+              : null
+          }
         </View>
         <View style={styles.tileInfoContainer}>
-          {(this.props.item.accounts).length > 0 ?
-            <Text style={styles.infoCompany}>{this.props.item.accounts[0].name}</Text> : null}
-          <Text style={styles.infoTitle}>{this.props.item.items[0].name}</Text>
+          <Text style={styles.infoCompany}>{this.props.item.account_name}</Text>
+          <Text style={styles.infoTitle}>{this.props.item.item_name}</Text>
           <View style={styles.infoBottomSection}>
             <View style={{ flexDirection: 'row' }}>
               <Text style={[styles.infoBottomText, { marginRight: 20 }]}>

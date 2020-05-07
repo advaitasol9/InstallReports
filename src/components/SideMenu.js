@@ -23,9 +23,6 @@ function SideMenu(props) {
       <TouchableOpacity onPress={navigateToScreen('Search')}>
         <Text style={styles.text}>Search</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={navigateToScreen('Profile')}>
-        <Text style={styles.text}>Profile</Text>
-      </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {
           Alert.alert(

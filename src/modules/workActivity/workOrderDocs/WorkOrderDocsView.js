@@ -117,7 +117,7 @@ export default class WorkOrderDocsView extends Component {
                   <Text style={{ alignSelf: 'center' }}>There is no connection</Text>
                 )}
                 {this.props.connectionStatus && this.props.docs.length === 0 && (
-                  <Text style={{ alignSelf: 'center' }}>There is no documents</Text>
+                  <Text style={{ textAlign: 'left', paddingLeft: 25 }}>There are no documents for this work order</Text>
                 )}
                 {
                   this.props.connectionStatus && this.props.docs.length > 0 && this.props.docs.map((item) => {

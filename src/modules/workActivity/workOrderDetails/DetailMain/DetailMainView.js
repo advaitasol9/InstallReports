@@ -91,7 +91,10 @@ export default class DetailMainView extends Component {
                 Work Order #{this.props.activityData.id}
               </Text>
               <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
-                Project: {this.props.activityData.items[0].name}
+                Project: {this.props.activityData.items.length > 0
+                  ? this.props.activityData.items[0].name
+                  : null
+                }
               </Text>
               <Text style={{ paddingTop: 8 }}>
                 {this.props.activityData.location && (

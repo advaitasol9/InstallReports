@@ -12,7 +12,7 @@ export default compose(
     state => ({
       token: state.profile.security_token.token,
       activityId: state.workOrder.activityId,
-      itemId: state.workOrder.itemId,
+      // itemId: state.workOrder.itemId,
       connectionStatus: state.app.isConnected,
       orderList: state.workOrder.orderList,
     }),

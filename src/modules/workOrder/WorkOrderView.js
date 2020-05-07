@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import {
-  StyleSheet, View, FlatList, StatusBar, Image
+  StyleSheet, View, FlatList, StatusBar, Image, ActivityIndicator
 } from 'react-native';
 import { apiGetJson, apiGetActivities } from '../../core/api';
 
@@ -15,6 +15,9 @@ export default class WorkOrderScreen extends Component {
   constructor(props) {
     super(props);
     this.page = 1;
+    this.state = {
+      isDataLoading: false
+    };
   }
 
   render() {
@@ -22,28 +25,50 @@ export default class WorkOrderScreen extends Component {
       <OrderListTile
         index={index}
         item={item}
-        setItemId={this.props.setItemId}
+        // setItemId={this.props.setItemId}
         setActivityId={this.props.setActivityId}
         navigation={this.props.navigation}
       />
     );
 
     const loadMoreWorkOrders = async () => {
-      this.page += 1;
-      const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
-      const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=' + this.page + '&count=10&sort_by=id&sort_order=asc'
-        + statuses,
-        this.props.token);
+      if (this.props.orderList.length < this.props.workOrdersFullCount) {
+        this.page += 1;
+        this.setState({
+          isDataLoading: true
+        })
+        const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+        const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=' + this.page + '&count=10&sort_by=id&sort_order=asc'
+          + statuses,
+          this.props.token);
 
-      const result = this.props.orderList;
+        const result = this.props.orderList;
 
-      if (data.data.data.length > 0) {
-        await data.data.data.forEach(activity => {
-          result.push(activity);
-        });
-        this.props.setOrderList(result);
+        if (data.data.data.length > 0) {
+          await data.data.data.forEach(activity => {
+            result.push(activity);
+          });
+          this.props.setOrderList(result);
+          this.setState({
+            isDataLoading: false
+          })
+        }
       }
     }
+
+    const renderFooter = () => {
+      if (!this.state.isDataLoading) return null;
+
+      return (
+        <View
+          style={{
+            paddingVertical: 20,
+          }}
+        >
+          <ActivityIndicator animating size="small" />
+        </View>
+      );
+    };
 
     return (
       <View style={styles.container} >
@@ -95,7 +120,8 @@ export default class WorkOrderScreen extends Component {
                       }}
                       renderItem={({ item, index }) => renderTile(item, index)}
                       onEndReached={loadMoreWorkOrders}
-                      onEndReachedThreshold={1}
+                      onEndReachedThreshold={0.8}
+                      ListFooterComponent={renderFooter}
                     />
                     :
                     <Image style={{ height: '100%', width: '100%' }} source={require('../../../assets/images/loading.gif')} />
