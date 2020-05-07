@@ -113,7 +113,6 @@ export default class WorkOrderScreen extends Component {
       <OrderListTile
         index={index}
         item={item}
-        // setItemId={this.props.setItemId}
         setActivityId={this.props.setActivityId}
         navigation={this.props.navigation}
       />

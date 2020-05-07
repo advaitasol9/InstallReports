@@ -205,7 +205,7 @@ export default class DetailMainView extends Component {
                       <View>
                         <Text>Scope of Work</Text>
                         <View style={styles.detailDescription}>
-                          <Text>
+                          <Text textBreakStrategy="simple">
                             {this.props.activityData.scope_of_work}
                           </Text>
                         </View>
@@ -217,7 +217,7 @@ export default class DetailMainView extends Component {
                       <View>
                         <Text>Special Instructions</Text>
                         <View style={styles.detailDescription}>
-                          <Text>
+                          <Text textBreakStrategy="simple">
                             {this.props.activityData.special_instructions}
                           </Text>
                         </View>

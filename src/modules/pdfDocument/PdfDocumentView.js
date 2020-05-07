@@ -138,7 +138,6 @@ const styles = StyleSheet.create({
   row: {
     flex: 1,
     flexDirection: 'row',
-    // paddingTop: 10,
   },
   container: {
     flex: 1,

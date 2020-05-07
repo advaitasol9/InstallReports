@@ -140,7 +140,7 @@ export default class DetailFailedView extends Component {
               to circumstances like a closed or incorrect location.
           </Text>
             <Text style={{ fontSize: 16, marginTop: 16 }}>
-              Please explain why the installation cannot be comleted.
+              Please explain why the installation cannot be completed.
               Take photos to document the situation.
           </Text>
             <TextInput
