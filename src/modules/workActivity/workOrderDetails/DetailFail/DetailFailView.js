@@ -131,14 +131,10 @@ export default class DetailFailedView extends Component {
           indicator
         />
         <View style={styles.partialInstallationsHeader}>
-          <Text style={styles.partialInstallations}>Failed Installation</Text>
+          <Text style={styles.partialInstallations}>Failed Attempt</Text>
         </View>
         <ScrollView>
           <View style={styles.scrollContainer}>
-            <Text style={{ fontSize: 16 }}>
-              A failed installation occurs when an installation will never be completed due
-              to circumstances like a closed or incorrect location.
-          </Text>
             <Text style={{ fontSize: 16, marginTop: 16 }}>
               Please explain why the installation cannot be completed.
               Take photos to document the situation.

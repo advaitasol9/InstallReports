@@ -65,7 +65,7 @@ export default class WorkOrderScreen extends Component {
                   this.props.setIsLoaded(false);
                   if (text === '') {
                     const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
-                    const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]' + statuses, this.props.token);
+                    const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + statuses, this.props.token);
                     await setSearchResult(data.data.data);
                     this.props.setIsLoaded(true);
                   } else if (connectionStatus) {
@@ -73,7 +73,7 @@ export default class WorkOrderScreen extends Component {
                       + '"keyword": "' + text + '",'
                       + '"search_keyword_in": ["items.name","accounts.name","activities.id","activities.address_1","activities.city","activities.state","activities.date_2"]'
                       + '}';
-                    const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]' + searchParams, this.props.token);
+                    const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + searchParams, this.props.token);
                     await setSearchResult(data.data.data);
                     this.props.setIsLoaded(true);
                   } else if (orderList !== [] && !connectionStatus) {

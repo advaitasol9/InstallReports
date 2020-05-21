@@ -42,7 +42,7 @@ export default props => (
                 props.setCitiesFilter([]);
                 props.setSearchText("");
                 props.setFiltersOpen(!props.filtersOpen);
-                const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+                const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
                 const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]' + statuses, props.token);
                 result = data.data.data;
                 props.setSearchResult(data.data.data);
@@ -102,7 +102,7 @@ export default props => (
                 };
 
                 searchParams += ']}';
-                searchRequests.push(apiGetActivities('spectrum/activities?with=["items","accounts"]&' + searchParams, props.token));
+                searchRequests.push(apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + searchParams, props.token));
 
                 //Dates filter
                 if (props.datesFilter.length > 0) {
@@ -111,7 +111,7 @@ export default props => (
                       + '"keyword": "' + (item.title).split(" ")[0] + '",'
                       + '"search_keyword_in": ["activities.date_2"]'
                       + '}';
-                    searchRequests.push(apiGetActivities('spectrum/activities?with=["items","accounts"]&' + searchParams, props.token));
+                    searchRequests.push(apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + searchParams, props.token));
                   });
                 };
                 props.setFiltersOpen(false);
