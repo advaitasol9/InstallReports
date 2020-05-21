@@ -31,13 +31,12 @@ export default class WorkOrderScreen extends Component {
     );
 
     const loadMoreWorkOrders = async () => {
-      if (this.props.orderList.length < this.props.workOrdersFullCount) {
-        this.page += 1;
+      if (this.props.orderList.length < this.props.workOrdersFullCount && !this.state.isDataLoading) {
         this.setState({
           isDataLoading: true
         })
-        const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
-        const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=' + this.page + '&count=10&sort_by=id&sort_order=asc'
+        const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
+        const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=' + (this.page + 1) + '&count=10'
           + statuses,
           this.props.token);
 
@@ -47,6 +46,7 @@ export default class WorkOrderScreen extends Component {
           await data.data.data.forEach(activity => {
             result.push(activity);
           });
+          this.page += 1;
           this.props.setOrderList(result);
           this.setState({
             isDataLoading: false
@@ -96,9 +96,10 @@ export default class WorkOrderScreen extends Component {
                       scrollEventThrottle={16}
                       refreshing={false}
                       onRefresh={async () => {
+                        this.page = 1;
                         this.props.setLoaded(false);
                         if (this.props.connectionStatus) {
-                          const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+                          const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
                           const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=1&count=10' + statuses,
                             this.props.token);
 
@@ -119,7 +120,7 @@ export default class WorkOrderScreen extends Component {
                       }}
                       renderItem={({ item, index }) => renderTile(item, index)}
                       onEndReached={loadMoreWorkOrders}
-                      onEndReachedThreshold={0.8}
+                      onEndReachedThreshold={0.1}
                       ListFooterComponent={renderFooter}
                     />
                     :

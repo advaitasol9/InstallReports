@@ -31,6 +31,7 @@ export default compose(
   lifecycle({
     componentWillMount() {
       this.props.setNumOfChanges(this.props.changes.length);
+console.log('refresh whole comments');
 
       if (this.props.navigation.state.params
         && this.props.navigation.state.params.screenData.text) {

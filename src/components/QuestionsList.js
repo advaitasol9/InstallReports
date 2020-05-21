@@ -96,18 +96,18 @@ const QuestionsList = (props) => {
               {
                 text: 'Take a photo',
                 onPress: () => {
-                  props.navigation.navigate(
-                    'Camera',
-                    {
-                      photos: props.photos,
-                      addPhoto: (arr) => {
-                        props.addPhoto(arr);
-                        props.updateAnswers();
-                      },
-                      order,
-                      screen: props.screen,
-                    },
-                  );
+                  ImagePicker.launchCamera(options, (response) => {
+                    const { photos } = props;
+                    if (!response.didCancel) {
+                      photos.push({
+                        uri: response.uri,
+                        order,
+                      });
+                      props.setUpdate(!props.update);
+                      props.addPhoto(photos);
+                      props.updateAnswers();
+                    }
+                  });
                 },
               },
               {
