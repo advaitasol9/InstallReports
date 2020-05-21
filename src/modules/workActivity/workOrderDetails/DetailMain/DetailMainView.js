@@ -303,18 +303,11 @@ export default class DetailMainView extends Component {
                 (
                   <View>
                     <Button
-                      primary
-                      onPress={() => this.props.navigation.navigate('DetailsPartial')}
-                      bgColor={colors.blue}
-                      textColor="white"
-                      caption="Partial Installation"
-                    />
-                    <Button
                       style={{ marginTop: 24 }}
                       bgColor={colors.blue}
                       onPress={() => this.props.navigation.navigate('DetailsFail')}
                       textColor="white"
-                      caption="Failed Installation"
+                      caption="Failed Attempt"
                     />
                   </View>
                 )

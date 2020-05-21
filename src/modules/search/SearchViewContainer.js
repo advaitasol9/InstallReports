@@ -27,7 +27,7 @@ export default compose(
   withState('isLoaded', 'setIsLoaded', false),
   lifecycle({
     async componentWillMount() {
-      const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+      const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
       const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]' + statuses, this.props.token);
       result = data.data.data;
       this.props.setSearchResult(data.data.data);

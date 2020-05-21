@@ -29,7 +29,7 @@ export default compose(
     async componentWillMount() {
       this.props.setOrderList([]);
       if (this.props.connectionStatus) {
-        const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
+        const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
         const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=1&count=10' + statuses, this.props.token);
         this.props.setOrderList(data.data.data);
         this.props.setWorkOrdersFullCount(data.appContentFullCount);

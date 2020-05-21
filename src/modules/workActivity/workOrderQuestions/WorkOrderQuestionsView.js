@@ -89,6 +89,9 @@ export default class WorkOrderQuestionsView extends Component {
   }
 
   render() {
+    console.log('render');
+    console.log(this.props);
+
     if (this.props.isLoading === false) {
       return (
         <KeyboardAvoidingView
@@ -111,6 +114,7 @@ export default class WorkOrderQuestionsView extends Component {
             <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
               <View style={styles.scrollContainer}>
                 <QuestionsList
+                  // questions={this.props.installerQuestions}
                   questions={this.props.activityData.installer_questions_answers}
                   photos={this.props.photos}
                   addPhoto={this.props.addPhoto}
