@@ -212,26 +212,29 @@ export default class WorkOrderManagerView extends Component {
                         apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
                           RNFetchBlob.fetch('PUT', res.data.url, {
                             'security-token': this.props.token,
-                            'Content-Type': 'application/octet-stream',
-                          }, this.props.signature[0])
+                            'Content-Type': 'image/png',
+                          }, RNFetchBlob.wrap(this.props.signature[0].replace('file://', '')))
                             .then(() => {
-                              const formData = new FormData();
-                              formData.append('file_type', 'image/jpeg');
-                              formData.append('name', signatureQuestion.text);
-                              formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                              formData.append('size', this.props.signature[0].length);
-                              apiPostImage(
-                                `files`,
-                                formData, this.props.token,
-                              ).then(fileRes => {
-                                signatureQuestion.answers = fileRes.data.id;
-                                this.isSignatureUploaded = true;
-                                this.saveManagerQuestionAnswers();
-                              }).catch(err => {
-                                this.setState({
-                                  isLoading: false
+                              RNFetchBlob.fs.stat(this.props.signature[0].replace('file://', ''))
+                                .then((stats) => {
+                                  const formData = new FormData();
+                                  formData.append('file_type', 'image/jpeg');
+                                  formData.append('name', stats.filename);
+                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                                  formData.append('size', stats.size);
+                                  apiPostImage(
+                                    `files`,
+                                    formData, this.props.token,
+                                  ).then(fileRes => {
+                                    signatureQuestion.answers = fileRes.data.id;
+                                    this.isSignatureUploaded = true;
+                                    this.saveManagerQuestionAnswers();
+                                  }).catch(err => {
+                                    this.setState({
+                                      isLoading: false
+                                    });
+                                  });
                                 });
-                              });
                             })
                             .catch((err) => {
                               this.setState({
@@ -239,10 +242,6 @@ export default class WorkOrderManagerView extends Component {
                               });
                               console.log(err);
                             });
-                        }).catch(err => {
-                          this.setState({
-                            isLoading: false
-                          });
                         });
                       }
                     } else {
