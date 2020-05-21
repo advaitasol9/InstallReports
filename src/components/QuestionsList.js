@@ -241,25 +241,15 @@ const QuestionsList = (props) => {
           console.log('Image path missing and no images in camera roll')
           return;
         }
-
       } else {
-        imageUri = path
+        imageUri = path;
       }
     } catch (e) {
       console.log(e.message)
     }
 
-    RNFetchBlob.fs.readFile(imageUri, 'base64')
-      .then((data) => {
-        props.setSignature([data]);
-        props.updateAnswers();
-        RNFetchBlob.fs
-          .unlink(imageUri)
-          .then(() => {
-          })
-          .catch(err => {
-          });
-      })
+    props.setSignature([imageUri]);
+    props.updateAnswers();
   }
 
   const renderSignature = (item) => {
@@ -301,7 +291,7 @@ const QuestionsList = (props) => {
               folder: 'RNSketchCanvas',
               filename: item.text,
               transparent: false,
-              imageType: 'jpg'
+              imageType: 'png'
             }
           }}
           onStrokeEnd={(path) => {
