@@ -24,7 +24,7 @@ import {
   QuestionsList,
 } from '../../../components';
 import {
-  apiPatchAnswers, apiGet, apiPostImage, apiChangeStatus,
+  apiPatchAnswers, apiGet, apiPostImage, apiChangeStatus, apiGetJson
 } from '../../../core/api';
 
 const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : '';
@@ -73,7 +73,9 @@ export default class WorkOrderManagerView extends Component {
     if (this.uploadedImagesCount == this.props.photos.length && this.isSignatureUploaded) {
       await apiPatchAnswers(
         `activities/${this.props.activityData.id}`,
-        `manager_questions_answers=${JSON.stringify(this.props.activityData.manager_questions_answers)}`,
+        {
+          manager_questions_answers: JSON.stringify(this.props.activityData.manager_questions_answers)
+        },
         this.props.token,
       ).then((response) => {
         apiChangeStatus('Complete', this.props.activityId, this.props.token)
@@ -101,15 +103,25 @@ export default class WorkOrderManagerView extends Component {
           <StatusBar backgroundColor={colors.lightGray} />
           <NavigationEvents
             onWillFocus={() => {
-              let installerQuestions = [];
-              try {
-                installerQuestions = JSON.parse(this.props.activityData.installer_questions_answers);
-              } catch (e) {
-                installerQuestions = this.props.activityData.installer_questions_answers;
-              }
-              if (installerQuestions.length == 0 ||
-                installerQuestions.filter(answer => (answer.answers !== "") || (answer.answers.length > 0)).length < installerQuestions.length) {
-                this.props.setIsIncompleteOpen(true);
+              if (this.props.connectionStatus) {
+                apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
+                  .then(async (response) => {
+                    const installerAnswers = JSON.parse(response.data.installer_questions_answers);
+                    this.props.setActivityData({
+                      ...response.data,
+                      manager_questions_answers: JSON.parse(response.data.manager_questions_answers),
+                    });
+                    this.props.setIsloading(false);
+                    if (installerAnswers.length == 0 ||
+                      installerAnswers.filter(answer => answer.answers != "").length == 0) {
+                      this.props.setIsIncompleteOpen(true);
+                    }
+                  });
+              } else {
+                this.props.setActivityData(
+                  this.props.orderList.filter(order => order.id === this.props.activityId)[0],
+                );
+                this.props.setIsloading(false);
               }
             }}
             onWillBlur={() => this.props.setIsIncompleteOpen(false)}
@@ -169,13 +181,15 @@ export default class WorkOrderManagerView extends Component {
                                       .forEach((question, index) => {
                                         if (question.order === item.order) {
                                           if (question.type == "photo") {
-                                            if (this.props.activityData.manager_questions_answers[index].answers == undefined) {
+                                            if (this.props.activityData.manager_questions_answers[index].answers == undefined
+                                              || this.props.activityData.manager_questions_answers[index].photo === "") {
                                               this.props.activityData.manager_questions_answers[index].answers = [fileRes.data.id];
                                             } else {
                                               this.props.activityData.manager_questions_answers[index].answers.push(fileRes.data.id);
                                             }
                                           } else {
-                                            if (this.props.activityData.manager_questions_answers[index].photo == undefined) {
+                                            if (this.props.activityData.manager_questions_answers[index].photo == undefined
+                                              || this.props.activityData.manager_questions_answers[index].photo === "") {
                                               this.props.activityData.manager_questions_answers[index].photo = [fileRes.data.id];
                                             } else {
                                               this.props.activityData.manager_questions_answers[index].photo.push(fileRes.data.id);

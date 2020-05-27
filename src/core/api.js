@@ -287,9 +287,10 @@ export const apiPatchAnswers = (method, body, token) => {
   const url = `${API_PATH}/${method}`;
   return fetch(url, {
     method: 'PATCH',
-    body,
+    body: JSON.stringify(body),
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
       'security-token': token,
     },
   })
