@@ -281,7 +281,9 @@ const QuestionsList = (props) => {
           )}
           onClearPressed={() => {
             props.setSignature([]);
-            props.updateAnswers();
+            setTimeout(() => {
+              props.updateAnswers();
+            }, 1000);
           }}
           onSketchSaved={(success, filePath) => {
             onSave(success, filePath);
@@ -296,6 +298,9 @@ const QuestionsList = (props) => {
           }}
           onStrokeEnd={(path) => {
             this.canvas.save();
+            setTimeout(() => {
+              props.updateAnswers();
+            }, 500);
           }}
         />
         {item.allow_photos && renderAddPhotoButton(item.order)}
