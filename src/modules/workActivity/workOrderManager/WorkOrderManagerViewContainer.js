@@ -31,6 +31,7 @@ export default compose(
   withState('isQuestionsAnswered', 'setIsQuestionsAnswered', true),
   withState('isIncompleteOpen', 'setIsIncompleteOpen', false),
   withState('update', 'setUpdate', true),
+  withState('photos', 'addPhotos', []),
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
