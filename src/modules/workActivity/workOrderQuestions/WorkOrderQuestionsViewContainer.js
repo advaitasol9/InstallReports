@@ -27,6 +27,7 @@ export default compose(
   withState('isLoading', 'setIsloading', true),
   withState('update', 'setUpdate', true),
   withState('signature', 'setSignature', []),
+  withState('photos', 'addPhoto', []),
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
