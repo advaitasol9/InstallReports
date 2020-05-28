@@ -43,9 +43,8 @@ export default compose(
             });
 
             this.props.setIsloading(false);
-
             if (installerAnswers.length == 0 ||
-              installerAnswers.filter(answer => answer.answers !== "").length < installerAnswers.length) {
+              installerAnswers.filter(answer => answer.answers != "").length == 0) {
               this.props.setIsIncompleteOpen(true);
             }
           });

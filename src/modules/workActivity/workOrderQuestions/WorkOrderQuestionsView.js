@@ -69,7 +69,9 @@ export default class WorkOrderQuestionsView extends Component {
     if (this.uploadedImagesCount == this.props.photos.length && this.isSignatureUploaded) {
       await apiPatchAnswers(
         `activities/${this.props.activityData.id}`,
-        `installer_questions_answers=${JSON.stringify(this.props.activityData.installer_questions_answers)}`,
+        {
+          installer_questions_answers: JSON.stringify(this.props.activityData.installer_questions_answers)
+        },
         this.props.token,
       ).then((response) => {
         this.setState({
@@ -150,13 +152,15 @@ export default class WorkOrderQuestionsView extends Component {
                                         .forEach((question, index) => {
                                           if (question.order === item.order) {
                                             if (question.type == "photo") {
-                                              if (this.props.activityData.installer_questions_answers[index].answers == undefined) {
+                                              if (this.props.activityData.installer_questions_answers[index].answers == undefined
+                                                || this.props.activityData.installer_questions_answers[index].answers == "") {
                                                 this.props.activityData.installer_questions_answers[index].answers = [fileRes.data.id];
                                               } else {
                                                 this.props.activityData.installer_questions_answers[index].answers.push(fileRes.data.id);
                                               }
                                             } else {
-                                              if (this.props.activityData.installer_questions_answers[index].photo == undefined) {
+                                              if (this.props.activityData.installer_questions_answers[index].photo == undefined
+                                                || this.props.activityData.installer_questions_answers[index].photo == "") {
                                                 this.props.activityData.installer_questions_answers[index].photo = [fileRes.data.id];
                                               } else {
                                                 this.props.activityData.installer_questions_answers[index].photo.push(fileRes.data.id);
