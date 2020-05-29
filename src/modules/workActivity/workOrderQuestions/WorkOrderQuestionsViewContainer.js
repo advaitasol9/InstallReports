@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { apiGetJson } from '../../../core/api';
 import { setChanges, setActivityId } from '../../workOrder/WorkOrderState';
 import WorkOrderQuestionsView from './WorkOrderQuestionsView';
-import { addQuestionPhoto } from './WorkOrderQuestionsState';
+import { addQuestionPhoto, clearPhotos } from './WorkOrderQuestionsState';
 
 export default compose(
   connect(
@@ -19,6 +19,7 @@ export default compose(
     dispatch => ({
       setActivityId: id => dispatch(setActivityId(id)),
       addPhoto: arr => dispatch(addQuestionPhoto(arr)),
+      clearPhotos: () => dispatch(clearPhotos()),
       setChanges: arr => dispatch(setChanges(arr)),
     }),
   ),
@@ -27,7 +28,6 @@ export default compose(
   withState('isLoading', 'setIsloading', true),
   withState('update', 'setUpdate', true),
   withState('signature', 'setSignature', []),
-  withState('photos', 'addPhoto', []),
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
@@ -37,6 +37,7 @@ export default compose(
               ...response.data,
               installer_questions_answers: JSON.parse(response.data.installer_questions_answers),
             });
+            this.props.clearPhotos();
             this.props.setIsloading(false);
           });
       } else {
