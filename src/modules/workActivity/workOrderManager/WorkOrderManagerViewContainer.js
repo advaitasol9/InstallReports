@@ -6,7 +6,7 @@ import { apiGetJson } from '../../../core/api';
 import WorkOrderManagerView from './WorkOrderManagerView';
 import { setActivityId } from '../../workOrder/WorkOrderState';
 import { setManagerModalVisible, setIncompleteModalVisible } from '../../AppState';
-import { addManagerPhoto } from '../workOrderQuestions/WorkOrderQuestionsState';
+import { addManagerPhoto, clearPhotos } from '../workOrderQuestions/WorkOrderQuestionsState';
 
 export default compose(
   connect(
@@ -22,6 +22,7 @@ export default compose(
       setIncompleteModalVisible: payload => dispatch(setIncompleteModalVisible(payload)),
       setActivityId: id => dispatch(setActivityId(id)),
       addPhoto: arr => dispatch(addManagerPhoto(arr)),
+      clearPhotos: () => dispatch(clearPhotos()),
     }),
   ),
   withState('inProgress', 'setInProgress', false),
@@ -42,7 +43,7 @@ export default compose(
               ...response.data,
               manager_questions_answers: JSON.parse(response.data.manager_questions_answers),
             });
-
+            this.props.clearPhotos();
             this.props.setIsloading(false);
             if (installerAnswers.length == 0 ||
               installerAnswers.filter(answer => answer.answers != "").length == 0) {
