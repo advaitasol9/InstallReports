@@ -28,6 +28,8 @@ export default compose(
   withState('numOfChanges', 'setNumOfChanges', 0),
   withState('activityData', 'setActivityData', {}),
   withState('comment', 'setComment', ''),
+  withState("geoLocation", "setLatLng",{ lat: "", lon: "" },
+  ),
   lifecycle({
     componentWillMount() {
       this.props.setNumOfChanges(this.props.changes.length);

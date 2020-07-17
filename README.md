@@ -1,81 +1,123 @@
-# React Native Starter 🚀
 
-*You're viewing the new and updated version of React Native Starter, previous version can be found under the [v1 branch](https://github.com/flatlogic/react-native-starter/tree/v1)*
+  
 
-A powerful react native starter template that bootstraps development of your mobile application. React Native Starter is a mobile application template with lots of built-in components like sidebar, navigation, form elements, etc - all you need to start building your mobile app faster. Check out live demo on [App Store](https://play.google.com/store/apps/details?id=com.reactnativestarter.lite), [Google Play](https://play.google.com/store/apps/details?id=com.reactnativestarter.lite).
+# Installer Mobile App 🚀
 
-![React Native Starter](https://i.imgur.com/vcz4bU6.png)
+  
 
-<a href='https://play.google.com/store/apps/details?id=com.reactnativestarter.lite&pcampaignid=Github-OS-Repo'><img width="200" alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
-<a href='https://play.google.com/store/apps/details?id=com.reactnativestarter.lite&pcampaignid=Github-OS-Repo'><img width="200" alt='Download on App Store' src='https://i.imgur.com/7IxtMV0.png'/></a>
+  
 
-## What's inside
+*This mobile app is built using [React Native Starter v1 branch](https://github.com/flatlogic/react-native-starter/tree/v1)*
 
-- Always up-to-date React Native scaffolding
-- UI/UX Design from industry experts
-- Modular and well-documented structure for application code
-- Redux for state management
-- React Navigation for simple navigation
-- Disk-persisted application state caching
-- More than 16 Ready-to-use Pages
+  
 
-## Getting Started
+  
 
-#### 1. Clone and Install
+- Staging REST API path - http://142.93.1.107:`<port>`/test-app-1
 
-```bash
-# Clone the repo
-git clone https://github.com/flatlogic/react-native-starter.git
+  
 
-# Install dependencies
-yarn install
+- Production REST API path- https://api.installreports.com/ir
+
+  
+
+  
+
+## How to run the android app on a development device.
+
+  
+
+  
+
+1. Clone the project from Github.
+
+  
+
+2. Navigate to project root and copy “env.js.dist” as “env.js” and fill the “API_PATH”. Make sure to not add an ending slash in the URL.
+
+  
+
+```javascript
+
+export const API_PATH = 'http://142.93.1.107:<port>/api/test-app-1';
+
 ```
 
-#### 2. Open RNS in your iOS simulator
+  
 
-Run this command to start the development server and to start your app on iOS simulator:
+3. Checkout to the latest `dev` branch.
+
+  
+
+4. Open terminal in project root and run `npm install`.
+
+  
+
+5. Connect testing device turning on USB Debugging.
+
+  
+
+6. Run `npx react-native run-android` to install the app into the device and the app will start on the device.
+
+  
+
+7. Close the terminal (Process).
+
+  
+
+8. Shake the device to access react native dev settings and enable “Live Reload” and “Hot Reload” features from the menu.
+
+  
+
+9. Open terminal in the project root directory and run `npm start`. This will start debugging bridge between device and development PC.
+
+  
+
+10. Press `F5` in Visual Studio Code to start debugging.
+
+  
+
+#### Demo Accounts
+
+  
+
+##### User
+
+- Email : installer1@gmail.com
+
+- Password : 111111
+
+  
+
+##### Admin
+
+- Email : admin1@gmail.com
+
+- Password : 111111
+
+  
+
+## How to build testing apk.
+
+  
+
+1. Open terminal in project root directory.
+
+2. Run following command.
+
+  
+
+```console
+
+foo@bar:~$ react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
+
 ```
-yarn run:ios
+
+3. Navigate in to `android` directory and run following command.
+
+
+```{r,engine=''bash}
+
+foo@bar:~$ ./gradlew assembleRelease
+
 ```
-
-Or, if you prefer Android:
-```
-yarn run:android
-```
-
-That's it! Cool, right?
-
-## Documentation
-
-Our handy documentation can be found on official RNS website: https://docs.reactnativestarter.com 
-
-## Contributing
-
-If you find any problems, please [open an issue](https://github.com/flatlogic/react-native-starter/issues/new) or submit a fix as a pull request.
-
-## Want more?
-
-We have a premium version of this mobile application template that saves you even more time and money and comes with advanced features:
-- Premium RED color scheme
-- More than 5 additional screens (such as chat, profile, product item, etc.)
-- Contains an extended charting library to visualize all the data you need
-- Premium support and updates included
-- Much, much more..
-
-Read more and purchase it at https://reactnativestarter.com
-
-## How can I support developers?
-- Star our GitHub repo :star:
-- [Tweet about it](https://twitter.com/intent/tweet?text=Amazing%20Mobile%20Application%20Template%20built%20with%20React%20Native!&url=https://github.com/flatlogic/react-native-starter&via=flatlogic).
-- Create pull requests, submit bugs, suggest new features or documentation updates :wrench:
-- Follow [@flatlogic on Twitter](https://twitter.com/flatlogic).
-- Subscribe to React Native Starter newsletter at [reactnativestarter.com](https://reactnativestarter.com/)
-- Like our page on [Facebook](https://www.facebook.com/flatlogic/) :thumbsup:
-
-## More from Flatlogic
-- [✔️Awesome Bootstrap Checkboxes & Radios](https://github.com/flatlogic/awesome-bootstrap-checkbox) - Pure css way to make inputs look prettier
-- [💥Sing App Dashboard](https://github.com/flatlogic/sing-app) - Free and open-source admin dashboard template built with Bootstrap 4 
-
-## License
-
-[MIT License](LICENSE)

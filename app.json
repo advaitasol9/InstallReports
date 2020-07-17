@@ -1,4 +1,7 @@
 {
   "name": "ReactNativeStarter",
-  "displayName": "ReactNativeStarter"
+  "displayName": "ReactNativeStarter",
+  "expo": {
+    "sdkVersion": "38.0.0"
+  }
 }
