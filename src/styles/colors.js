@@ -19,6 +19,7 @@ const blueVersion = {
   green: '#6DD0A3',
   yellow: '#ffc247',
   red: '#b61d24',
+  silver: '#C0C0C0',
 };
 
 // eslint-disable-next-line no-unused-vars
@@ -43,6 +44,7 @@ const redVersion = {
   green: '#6DD0A3',
   yellow: '#ffc247',
   red: '#b61d24',
+  silver: '#C0C0C0',
 };
 
 export default blueVersion;
