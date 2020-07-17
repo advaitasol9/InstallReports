@@ -1,5 +1,5 @@
 // @flow
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 import {
   StyleSheet,
@@ -13,19 +13,25 @@ import {
   Alert,
   StatusBar,
   WebView,
-} from 'react-native';
-import ImagePicker from 'react-native-image-picker';
-import RNFetchBlob from 'rn-fetch-blob';
-import IO from 'react-native-vector-icons/Ionicons';
+} from "react-native";
+import ImagePicker from "react-native-image-picker";
+import RNFetchBlob from "rn-fetch-blob";
+import IO from "react-native-vector-icons/Ionicons";
 
-import { colors } from '../../../../styles';
-import { Button, Header } from '../../../../components';
-import setChangesInOffline from '../../../../core/setChanges';
+import { colors } from "../../../../styles";
+import { Button, Header } from "../../../../components";
+import setChangesInOffline from "../../../../core/setChanges";
 import {
-  apiChangeStatus, apiGet, apiPostImage, apiPostComment,
-} from '../../../../core/api';
+  apiChangeStatus,
+  apiGet,
+  apiPostImage,
+  apiPostComment,
+  apiPatch,
+} from "../../../../core/api";
+import Geolocation from "@react-native-community/geolocation";
+import { PermissionsAndroid } from "react-native";
 
-const { height, width } = Dimensions.get('window');
+const { height, width } = Dimensions.get("window");
 export const screenHeight = height;
 export const screenWidth = width;
 
@@ -38,14 +44,34 @@ const options = {
   },
 };
 
-import { BackHandler } from 'react-native';
+import { BackHandler } from "react-native";
 
 export default class DetailPartialView extends Component {
   constructor(props) {
+    PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+    ).then((res) => {
+      if (res === PermissionsAndroid.RESULTS.GRANTED) {
+        Geolocation.getCurrentPosition(
+          (info) => {
+            props.geoLocation.lat = info.coords.latitude;
+            props.geoLocation.lon = info.coords.longitude;
+          },
+          (error) => {
+            console.error("faled");
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+          }
+        );
+      }
+    });
+
     super(props);
     uploadedImagesCount = 0;
     this.state = {
-      isLoading: false
+      isLoading: false,
     };
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
   }
@@ -53,42 +79,62 @@ export default class DetailPartialView extends Component {
   isLastImageUploaded() {
     if (this.uploadedImagesCount == this.props.photos.length) {
       this.setState({
-        isLoading: false
+        isLoading: false,
       });
       this.props.addPhoto([]);
-      this.props.navigation.navigate('DetailsMain');
+      this.props.navigation.navigate("DetailsMain");
     }
   }
 
   handleBackButtonClick = () => {
     this.props.addPhoto([]);
-    this.props.navigation.navigate('DetailsMain');
+    this.props.navigation.navigate("DetailsMain");
     return true;
+  };
+
+  async updateWorkOrderBeginLocation() {
+    try {
+      await apiPatch(`activities/` + this.props.activityId, this.props.token, {
+        geo_locations: JSON.stringify({
+          start: {
+            lat: this.props.geoLocation.lat,
+            lon: this.props.geoLocation.lon,
+          },
+        }) ,
+      });
+
+      return;
+    } catch (error) {
+      console.error(error);
+      return;
+    }
   }
 
   componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    BackHandler.removeEventListener(
+      "hardwareBackPress",
+      this.handleBackButtonClick
+    );
   }
 
   componentWillMount() {
-    BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+    BackHandler.addEventListener(
+      "hardwareBackPress",
+      this.handleBackButtonClick
+    );
   }
 
   render() {
-
     const Required = () => (
       <View style={styles.requiredBlock}>
-        <Text style={styles.requiredText}>
-          required
-      </Text>
+        <Text style={styles.requiredText}>required</Text>
       </View>
     );
 
     const renderPhoto = (photo, index) => {
       const photosCopy = this.props.photos.slice();
       return (
-        <View style={{ position: 'relative' }}
-          key={index}>
+        <View style={{ position: "relative" }} key={index}>
           <TouchableOpacity
             style={styles.delPhoto}
             onPress={async () => {
@@ -97,10 +143,7 @@ export default class DetailPartialView extends Component {
             }}
           >
             <View style={styles.whiteBackground} />
-            <IO
-              style={styles.delIcon}
-              name="md-close-circle"
-            />
+            <IO style={styles.delIcon} name="md-close-circle" />
           </TouchableOpacity>
           <Image source={{ uri: photo }} style={styles.photoBlock} />
         </View>
@@ -118,24 +161,26 @@ export default class DetailPartialView extends Component {
           indicator
         />
         <View style={styles.partialInstallationsHeader}>
-          <Text style={styles.partialInstallations}>Pre-Install Documentation</Text>
+          <Text style={styles.partialInstallations}>
+            Pre-Install Documentation
+          </Text>
         </View>
-        <ScrollView style={{ width: '100%' }}>
+        <ScrollView style={{ width: "100%" }}>
           <View style={styles.scrollContainer}>
             <Text style={{ fontSize: 16 }}>
-              Please take one or more photos to document the area before any work begins.
-              These are required and will be uploaded to this work order within the system.
-              You may also enter any additional comments in the text field below.
-              Please be sure to thoroughly document the condition of all work areas
-              before beginning the installation.
-              When you are satisfied with the photo(s) and comments,
-              press &quot;Submit&quot; to upload.
-          </Text>
+              Please take one or more photos to document the area before any
+              work begins. These are required and will be uploaded to this work
+              order within the system. You may also enter any additional
+              comments in the text field below. Please be sure to thoroughly
+              document the condition of all work areas before beginning the
+              installation. When you are satisfied with the photo(s) and
+              comments, press &quot;Submit&quot; to upload.
+            </Text>
             <TextInput
               multiline
               placeholder="Pre-Install Comments"
               style={[styles.inputStyle, { height: 160 }]}
-              onChangeText={text => this.props.setComment(text)}
+              onChangeText={(text) => this.props.setComment(text)}
               value={this.props.comment}
             />
             <View style={{ marginTop: 24 }}>
@@ -143,42 +188,44 @@ export default class DetailPartialView extends Component {
                 bgColor={colors.blue}
                 onPress={() => {
                   Alert.alert(
-                    'Add photo',
-                    '',
+                    "Add photo",
+                    "",
                     [
                       {
-                        text: 'Choose from gallery',
+                        text: "Choose from gallery",
                         onPress: () => {
-                          ImagePicker.launchImageLibrary(options, (response) => {
-                            const { photos } = this.props;
-                            photos.push(response.uri);
-                            this.props.addPhoto(photos);
-                            this.props.setNumOfChanges(this.props.numOfChanges);
-                          });
-                        },
-                      },
-                      {
-                        text: 'Take a photo',
-                        onPress: () => {
-                          this.props.navigation.navigate(
-                            'Camera',
-                            {
-                              photos: this.props.photos,
-                              addPhoto: arr => this.props.addPhoto(arr),
-                              screen: 'DetailsPreInstall',
-                              screenData: {
-                                text: this.props.comment,
-                              },
-                            },
+                          ImagePicker.launchImageLibrary(
+                            options,
+                            (response) => {
+                              const { photos } = this.props;
+                              photos.push(response.uri);
+                              this.props.addPhoto(photos);
+                              this.props.setNumOfChanges(
+                                this.props.numOfChanges
+                              );
+                            }
                           );
                         },
                       },
                       {
-                        text: 'Cancel',
-                        style: 'cancel',
+                        text: "Take a photo",
+                        onPress: () => {
+                          this.props.navigation.navigate("Camera", {
+                            photos: this.props.photos,
+                            addPhoto: (arr) => this.props.addPhoto(arr),
+                            screen: "DetailsPreInstall",
+                            screenData: {
+                              text: this.props.comment,
+                            },
+                          });
+                        },
+                      },
+                      {
+                        text: "Cancel",
+                        style: "cancel",
                       },
                     ],
-                    { cancelable: true },
+                    { cancelable: true }
                   );
                 }}
                 textColor={colors.white}
@@ -188,17 +235,24 @@ export default class DetailPartialView extends Component {
             </View>
             <Required />
             <View style={styles.photoSection}>
-              {this.props.photos.map((photo, index) => renderPhoto(photo, index))}
+              {this.props.photos.map((photo, index) =>
+                renderPhoto(photo, index)
+              )}
             </View>
             <View style={styles.buttonRow}>
               <Button
-                bgColor={(this.props.photos.length === 0 || this.props.comment === '') ? colors.grey : colors.green}
-                style={{ width: '48%' }}
-                disabled={this.props.photos.length === 0 || this.props.comment === ''}
-
+                bgColor={
+                  this.props.photos.length === 0 || this.props.comment === ""
+                    ? colors.grey
+                    : colors.green
+                }
+                style={{ width: "48%" }}
+                disabled={
+                  this.props.photos.length === 0 || this.props.comment === ""
+                }
                 onPress={async () => {
                   this.setState({
-                    isLoading: true
+                    isLoading: true,
                   });
                   const data = `text=PRE INSTALL NOTES - ${this.props.comment}&user_id=${this.props.accountId}`;
                   if (!this.props.connectionStatus) {
@@ -210,60 +264,97 @@ export default class DetailPartialView extends Component {
                       this.props.activityId,
                       this.props.accountId,
                       this.props.photos,
-                      'In_Progress',
+                      "In_Progress"
                     );
                     this.setState({
-                      isLoading: false
+                      isLoading: false,
                     });
-                    this.props.navigation.navigate('DetailsMain');
+                    this.props.navigation.navigate("DetailsMain");
                   } else {
-                    await apiChangeStatus('In_Progress', this.props.activityId, this.props.token).then(() => {
-                      apiPostComment(`activities/${this.props.activityId}/comments`, data, this.props.token).then((resPostText) => {
-                        this.props.photos.forEach((item, index) => {
-                          apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
-                            RNFetchBlob.fetch('PUT', res.data.url, {
-                              'security-token': this.props.token,
-                              'Content-Type': 'application/octet-stream',
-                            }, RNFetchBlob.wrap(item.replace('file://', '')))
-                              .then(() => {
-                                RNFetchBlob.fs.stat(item.replace('file://', ''))
-                                  .then((stats) => {
-                                    const formData = new FormData();
-                                    formData.append('file_type', 'image/jpeg');
-                                    formData.append('name', stats.filename);
-                                    formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                    formData.append('size', stats.size);
+                    await apiChangeStatus(
+                      "In_Progress",
+                      this.props.activityId,
+                      this.props.token
+                    )
+                      .then(async() => {
+                        await this.updateWorkOrderBeginLocation();
+                        apiPostComment(
+                          `activities/${this.props.activityId}/comments`,
+                          data,
+                          this.props.token
+                        )
+                          .then((resPostText) => {
+                            this.props.photos.forEach((item, index) => {
+                              apiGet("aws-s3-presigned-urls", this.props.token)
+                                .then((res) => {
+                                  RNFetchBlob.fetch(
+                                    "PUT",
+                                    res.data.url,
+                                    {
+                                      "security-token": this.props.token,
+                                      "Content-Type":
+                                        "application/octet-stream",
+                                    },
+                                    RNFetchBlob.wrap(
+                                      item.replace("file://", "")
+                                    )
+                                  )
+                                    .then(() => {
+                                      RNFetchBlob.fs
+                                        .stat(item.replace("file://", ""))
+                                        .then((stats) => {
+                                          const formData = new FormData();
+                                          formData.append(
+                                            "file_type",
+                                            "image/jpeg"
+                                          );
+                                          formData.append(
+                                            "name",
+                                            stats.filename
+                                          );
+                                          formData.append(
+                                            "s3_location",
+                                            res.data.file_name.replace(
+                                              "uploads/",
+                                              ""
+                                            )
+                                          );
+                                          formData.append("size", stats.size);
 
-                                    apiPostImage(
-                                      `activities/${this.props.activityId}/comments/${resPostText.data.id}/files`,
-                                      formData, this.props.token,
-                                    );
-                                    this.uploadedImagesCount = index + 1;
-                                    this.isLastImageUploaded();
+                                          apiPostImage(
+                                            `activities/${this.props.activityId}/comments/${resPostText.data.id}/files`,
+                                            formData,
+                                            this.props.token
+                                          );
+                                          this.uploadedImagesCount = index + 1;
+                                          this.isLastImageUploaded();
+                                        });
+                                    })
+                                    .catch((err) => {
+                                      this.setState({
+                                        isLoading: false,
+                                      });
+                                      console.log(err);
+                                    });
+                                })
+                                .catch((err) => {
+                                  this.setState({
+                                    isLoading: false,
                                   });
-                              })
-                              .catch((err) => {
-                                this.setState({
-                                  isLoading: false
                                 });
-                                console.log(err);
-                              });
-                          }).catch(err => {
+                            });
+                          })
+                          .catch((err) => {
                             this.setState({
-                              isLoading: false
+                              isLoading: false,
                             });
                           });
-                        });
-                      }).catch(err => {
+                      })
+                      .catch((err) => {
                         this.setState({
-                          isLoading: false
+                          isLoading: false,
                         });
                       });
-                    }).catch(err => {
-                      this.setState({
-                        isLoading: false
-                      });
-                    });
                   }
                 }}
                 textColor={colors.white}
@@ -273,10 +364,10 @@ export default class DetailPartialView extends Component {
               />
               <Button
                 bgColor={colors.red}
-                style={{ width: '48%' }}
+                style={{ width: "48%" }}
                 onPress={() => {
                   this.props.addPhoto([]);
-                  this.props.navigation.navigate('DetailsMain');
+                  this.props.navigation.navigate("DetailsMain");
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
@@ -293,8 +384,8 @@ export default class DetailPartialView extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: "center",
+    justifyContent: "flex-start",
     backgroundColor: colors.lightGray,
   },
   scrollContainer: {
@@ -309,11 +400,11 @@ const styles = StyleSheet.create({
     color: colors.black,
     paddingVertical: 12,
     paddingHorizontal: 12,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   requiredBlock: {
-    width: '100%',
-    alignItems: 'flex-end',
+    width: "100%",
+    alignItems: "flex-end",
   },
   requiredText: {
     fontSize: 12,
@@ -324,28 +415,28 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   photoBlock: {
-    width: '100%',
+    width: "100%",
     height: 400,
     backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
   },
   partialInstallations: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
     paddingVertical: 12,
   },
   partialInstallationsHeader: {
-    width: '100%',
+    width: "100%",
     backgroundColor: colors.blue,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     paddingHorizontal: 24,
   },
   modalContainer: {
     top: 0,
     left: 0,
-    position: 'absolute',
+    position: "absolute",
     height: screenHeight,
     width: screenWidth,
     backgroundColor: colors.black,
@@ -353,27 +444,27 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 24,
   },
   delPhoto: {
-    position: 'absolute',
+    position: "absolute",
     top: 28,
     right: 16,
     zIndex: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   delIcon: {
     color: colors.red,
     fontSize: 48,
   },
   whiteBackground: {
-    position: 'absolute',
+    position: "absolute",
     width: 32,
     height: 32,
     top: 10,
     borderRadius: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
 });

@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 
-import { API_PATH } from './config';
+import { API_PATH } from './../../env';
 
 export const apiPost = (method, body, token) => {
   const url = `${API_PATH}/${method}`;
@@ -167,6 +167,7 @@ export const apiGetActivities = (method, token, contentType = 'application/json'
 
 export const auth = (method, body) => {
   const url = `${API_PATH}/${method}`;
+
   return fetch(url, {
     method: 'POST',
     headers: {
@@ -309,7 +310,8 @@ export const apiPatch = (method, token, body) => {
     method: 'PATCH',
     body: JSON.stringify(body),
     headers: {
-      'Content-Type': 'application/json; charset=UTF-8',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
       'security-token': token,
     },
   })
