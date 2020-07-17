@@ -132,7 +132,7 @@ const QuestionsList = (props) => {
       data.push({ "key": key, "value": item.values[key] });
     });
     return (
-      <View style={{ width: '100%' }}
+      <View style={{ width: '100%' }, this.zebraStyle(item.order)}
         key={item.order}
       >
         <Text>{item.order}. {item.text}</Text>
@@ -170,8 +170,8 @@ const QuestionsList = (props) => {
     );
   };
 
-  const renderFreeform = item => (
-    <View style={{ width: '100%' }}
+  const renderFreeform = (item) => (
+    <View style={{ width: '100%' }, this.zebraStyle(item.order)}
       key={item.order}
     >
       <Text style={{ marginTop: 12, paddingBottom: 12 }}>{item.order}. {item.text}</Text>
@@ -202,7 +202,7 @@ const QuestionsList = (props) => {
       data.push({ "key": key, "value": item.values[key] });
     });
     return (
-      <View style={{ width: '100%' }}
+      <View style={{ width: '100%' }, this.zebraStyle(item.order)}
         key={item.order}
       >
         <Text style={{ marginTop: 12 }}>{item.order}. {item.text}</Text>
@@ -255,7 +255,7 @@ const QuestionsList = (props) => {
   const renderSignature = (item) => {
     const signature = [];
     return (
-      <View style={{ width: '100%' }}
+      <View style={{ width: '100%' }, this.zebraStyle(item.order)}
         key={item.order}
       >
         <Text style={{ marginTop: 12, paddingBottom: 12 }}>{item.order}. {item.text}</Text>
@@ -316,7 +316,7 @@ const QuestionsList = (props) => {
 
   const renderPhotoQuestion = (item) => {
     return (
-      <View style={{ width: '100%' }}
+      <View style={{ width: '100%' }, this.zebraStyle(item.order)}
         key={item.order}
       >
         <Text style={{ marginTop: 12, paddingBottom: 12 }}>{item.order}. {item.text}</Text>
@@ -356,6 +356,18 @@ const QuestionsList = (props) => {
     </View>
   );
 };
+
+function isEven(n) {
+  return n % 2 == 0;
+}
+
+zebraStyle = function (options) {
+  return {
+    backgroundColor: isEven(options) ? colors.silver : colors.bluish,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  }
+}
 
 export default compose(
   withNavigation,
