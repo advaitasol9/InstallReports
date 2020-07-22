@@ -15,6 +15,7 @@ import {
 import { TextInput, Button } from '../../components';
 import { auth } from '../../core/api';
 import { fonts, colors } from '../../styles';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class AuthScreen extends React.Component {
   state = {
@@ -61,12 +62,20 @@ export default class AuthScreen extends React.Component {
         } else {
           this.props.setPassword('');
           this.props.setEmail('');
+          this.storeUserData(response.data.user);
           this.props.setUserInfo(response);
           this.props.logIn();
           this.props.navigation.navigate({ routeName: 'Home' });
         }
       });
     }
+  }
+
+  storeUserData = async (data) => {
+    await AsyncStorage.setItem(
+      'currentUserData',
+      JSON.stringify(data)
+    );
   }
 
   fadeIn(delay, from = 0) {

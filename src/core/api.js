@@ -1,36 +1,12 @@
-import { Alert } from 'react-native';
-
 import { API_PATH } from './../../env';
-
-export const apiPost = (method, body, token) => {
-  const url = `${API_PATH}/${method}`;
-  console.log(method, body, token);
-  return fetch(url, {
-    method: 'POST',
-    followRedirects: true,
-    body,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'security-token': token,
-    },
-  })
-    .then((response) => {
-      if (response && (response.status === 200 || response.status === 201)) {
-        return response;
-      }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
-    })
-    .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
-    });
-};
+import { HttpErrorHandler } from './handlers';
+import { HttpErrorAlert } from '../components';
+import fetchToCurl from 'fetch-to-curl';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export const apiPostComment = (method, body, token) => {
   const url = `${API_PATH}/${method}`;
-  console.log(method, body, token);
-  return fetch(url, {
+  const options = {
     method: 'POST',
     followRedirects: true,
     body,
@@ -38,27 +14,28 @@ export const apiPostComment = (method, body, token) => {
       'Content-Type': 'application/x-www-form-urlencoded',
       'security-token': token,
     },
-  })
-    .then((response) => {
-      console.log(response);
+  };
 
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
+    .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
-        return response.json();
-      } else {
-        throw (new Error(response));
+        return response;
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'apiPostComment'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiChangeStatus = (status, activityId, token) => {
   const url = `${API_PATH}/spectrum/activities/${activityId}/status/${status}`;
-  return fetch(url, {
+  const options = {
     method: 'POST',
     followRedirects: true,
     headers: {
@@ -66,86 +43,95 @@ export const apiChangeStatus = (status, activityId, token) => {
       'Content-Type': 'application/json',
       'security-token': token,
     },
-  })
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response;
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'apiChangeStatus'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiGetJson = (method, token, contentType = 'application/json') => {
   const url = `${API_PATH}/${method}`;
-  console.log(url);
-
-  return fetch(url, {
+  const options = {
     method: 'GET',
     mode: 'cors',
     headers: {
       'Content-Type': contentType,
       'security-token': token,
     },
-  })
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
     .then((response) => {
-      console.log(response);
-
       if (response && (response.status === 200 || response.status === 201)) {
-        console.log(response.headers.get('app-content-full-count'));
-
         return response.json();
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'apiGetJson'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiGet = (method, token, contentType = 'application/json') => {
   const url = `${API_PATH}/${method}`;
-  return fetch(url, {
+  const options = {
     method: 'GET',
     mode: 'cors',
     headers: {
       'Content-Type': contentType,
       'security-token': token,
     },
-  })
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
     .then((response) => {
-      // eslint-disable-next-line
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'apiGet'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiGetActivities = (method, token, contentType = 'application/json') => {
   const url = `${API_PATH}/${method}`;
-  console.log(url);
-  console.log(token);
-
-  return fetch(url, {
+  const options = {
     method: 'GET',
     mode: 'cors',
     headers: {
       'Content-Type': contentType,
       'security-token': token,
     },
-  })
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json().then(function (json) {
@@ -155,138 +141,133 @@ export const apiGetActivities = (method, token, contentType = 'application/json'
           };
         });
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'apiGetActivities'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 
 export const auth = (method, body) => {
   const url = `${API_PATH}/${method}`;
-
-  return fetch(url, {
+  const options = {
     method: 'POST',
     headers: {
-      Accept: 'application/json',
+      'Accept': 'application/json',
       'Content-Type': 'multipart/form-data',
     },
     body,
-  })
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
-      return Alert.alert('Invalid Login');
+
+      throw [response, CURL, 'auth'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const logout = (method, token) => {
   const url = `${API_PATH}/${method}`;
-  console.log(url, token);
-  return fetch(url, {
+  const options = {
     method: 'POST',
     headers: {
-      Accept: 'application/json',
+      'Accept': 'application/json',
       'Content-Type': 'multipart/form-data',
       'security-token': token,
     },
-  })
-    .then((response) => {
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
+    .then(async(response) => {
       if (response && (response.status === 200 || response.status === 201)) {
+       await AsyncStorage.removeItem('currentUserData');
         return response.json();
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'logout'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiPostImage = (method, body, token) => {
   const url = `${API_PATH}/${method}`;
-  console.log(url, body, token);
-  return fetch(url, {
+  const options = {
     method: 'POST',
     body,
     headers: {
       'Content-Type': 'multipart/form-data',
       'security-token': token,
     },
-  })
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
-      console.log(response);
 
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+      throw [response, CURL, 'apiPostImage'];
     })
     .catch((error) => {
-      console.log(error);
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
-    });
-};
-
-export const apiPatchImage = (method, body, token) => {
-  const url = `${API_PATH}/${method}`;
-  console.log(url, body, token);
-  return fetch(url, {
-    method: 'PATCH',
-    body,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'security-token': token,
-    },
-  })
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      // ADD THIS THROW error
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiPut = (method, token, body) => {
   const url = `${API_PATH}/${method}`;
-  return fetch(url, {
+  const options = {
     method: 'PUT',
     headers: {
       'Content-Type': 'image/jpeg',
       'security-token': token,
     },
     body,
-  }, 15000)
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options, 15000)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
-      return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'apiPut'];
     })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiPatchAnswers = (method, body, token) => {
   const url = `${API_PATH}/${method}`;
-  return fetch(url, {
+  const options = {
     method: 'PATCH',
     body: JSON.stringify(body),
     headers: {
@@ -294,19 +275,28 @@ export const apiPatchAnswers = (method, body, token) => {
       'Content-Type': 'application/json',
       'security-token': token,
     },
-  })
-    .then(response => response)
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
+    .then((response) => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+
+      throw [response, CURL, 'apiPatchAnswers'];
+    })
     .catch((error) => {
-      console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      // ADD THIS THROW error
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
 
 export const apiPatch = (method, token, body) => {
   const url = `${API_PATH}/${method}`;
-
-  return fetch(url, {
+  const options = {
     method: 'PATCH',
     body: JSON.stringify(body),
     headers: {
@@ -314,16 +304,21 @@ export const apiPatch = (method, token, body) => {
       'Content-Type': 'application/json',
       'security-token': token,
     },
-  })
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
-      // return Alert.alert(`Error ${response.status}`, `Status Text: ${response.statusText}`);
+
+      throw [response, CURL, 'apiPatch'];
     })
     .catch((error) => {
-      // console.log(`There has been a problem with your fetch operation: ${error.message}`);
-      // Alert.alert('Error', `error message: ${error.message}`);
-      throw error;
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
     });
 };
