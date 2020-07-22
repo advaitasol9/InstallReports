@@ -174,7 +174,9 @@ export const auth = (method, body) => {
       throw [response, CURL, 'auth'];
     })
     .catch((error) => {
-      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error, {
+        401: { title: 'Login Failed', message: 'Your email or password was incorrect. Please try again.' },
+      });
       HttpErrorAlert(errorMsg);
       throw errorMsg;
     });
@@ -194,9 +196,9 @@ export const logout = (method, token) => {
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then(async(response) => {
+    .then(async (response) => {
       if (response && (response.status === 200 || response.status === 201)) {
-       await AsyncStorage.removeItem('currentUserData');
+        await AsyncStorage.removeItem('currentUserData');
         return response.json();
       }
 
