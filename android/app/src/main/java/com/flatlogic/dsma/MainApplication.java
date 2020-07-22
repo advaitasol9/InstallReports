@@ -3,6 +3,7 @@ package com.flatlogic.dsma;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.github.reactnativecommunity.location.RNLocationPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
@@ -35,6 +36,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new AsyncStoragePackage(),
             new RNCameraPackage(),
             new RNLocationPackage(),
             new GeolocationPackage(),

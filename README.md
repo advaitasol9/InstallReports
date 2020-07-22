@@ -113,7 +113,15 @@ foo@bar:~$ react-native bundle --platform android --dev false --entry-file index
 
 ```
 
-3. Navigate in to `android` directory and run following command.
+3. Run below command to remove drawble folders.
+
+```console
+
+foo@bar:~$  rm -rf android/app/src/main/res/drawable-*
+
+```
+
+4. Navigate in to `android` directory and run following command.
 
 
 ```{r,engine=''bash}

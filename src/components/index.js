@@ -18,6 +18,7 @@ import ManagerModal from './ManagerModal';
 import Accordion from './Accordion';
 import CheckBox from './CheckBox';
 import Loading from './Loading';
+import HttpErrorAlert from './HttpErrorAlert';
 
 
 export {
@@ -41,4 +42,5 @@ export {
   Accordion,
   CheckBox,
   Loading,
+  HttpErrorAlert,
 };
