@@ -17,7 +17,7 @@ export default function HttpErrorAlert(errorDataObj) {
           errorDataObj['currentUserData'] = JSON.parse(userData);
           const body=JSON.stringify(errorDataObj);
           
-          Linking.openURL('mailto:jsteenbarger@doriansolutions.com?subject=DSMA Bug Found ( ' + errorDataObj.action + ' )&body=' + body);
+          Linking.openURL('mailto:support@doriansolutions.com?subject=DSMA Bug Found ( ' + errorDataObj.action + ' )&body=' + body);
         }
       }
     ],
