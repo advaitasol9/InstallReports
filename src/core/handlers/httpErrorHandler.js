@@ -1,14 +1,14 @@
 
 export default class HttpErrorHandler {
 
-    static generateErrorMessage(error) {
+    static generateErrorMessage(error, specificErrors = {}) {
         var errorMessage = {
             title: '',
             message: '',
             curl: '',
             statusText: '',
             status: '',
-            action:''
+            action: ''
         };
 
         var customMessages = {
@@ -19,10 +19,12 @@ export default class HttpErrorHandler {
             429: { title: 'Too Many Requests', message: 'Too many requests to server.' },
         };
 
-        if (customMessages[error[0].status]) {
+        if (specificErrors[error[0].status]) {
+            errorMessage.title = specificErrors[error[0].status].title;
+            errorMessage.message = specificErrors[error[0].status].message;
+        } else if (customMessages[error[0].status]) {
             errorMessage.title = customMessages[error[0].status].title;
             errorMessage.message = customMessages[error[0].status].message;
-
         } else {
             errorMessage.title = 'Something Went Wrong';
             errorMessage.message = 'Something seems to be broken. We are working on it.';
