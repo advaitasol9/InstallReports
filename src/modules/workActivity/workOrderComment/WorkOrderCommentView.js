@@ -125,17 +125,14 @@ export default function WorkOrderCommentView(props) {
                       {
                         text: 'Take a photo',
                         onPress: () => {
-                          props.navigation.navigate(
-                            'Camera',
-                            {
-                              photos: props.photos,
-                              addPhoto: arr => props.addPhoto(arr),
-                              screen: 'Comment',
-                              screenData: {
-                                text: props.comment,
-                              },
-                            },
-                          );
+                          ImagePicker.launchCamera(options, (response) => {
+                            const { photos } = props;
+                            if (!response.didCancel) {
+                              photos.push(response.uri);
+                              props.addPhoto(photos);
+                              props.setNumOfChanges(props.numOfChanges);
+                            }
+                          });
                         },
                       },
                       {

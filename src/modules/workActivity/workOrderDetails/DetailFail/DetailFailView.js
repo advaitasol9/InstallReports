@@ -171,17 +171,14 @@ export default class DetailFailedView extends Component {
                       {
                         text: 'Take a photo',
                         onPress: () => {
-                          this.props.navigation.navigate(
-                            'Camera',
-                            {
-                              photos: this.props.photos,
-                              addPhoto: arr => this.props.addPhoto(arr),
-                              screen: 'DetailsFail',
-                              screenData: {
-                                text: this.props.comment,
-                              },
-                            },
-                          );
+                          ImagePicker.launchCamera(options, (response) => {
+                            const { photos } = this.props;
+                            if (!response.didCancel) {
+                              photos.push(response.uri);
+                              this.props.addPhoto(photos);
+                              this.props.setNumOfChanges(this.props.numOfChanges);
+                            }
+                          });
                         },
                       },
                       {
