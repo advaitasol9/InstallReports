@@ -50,7 +50,7 @@ export const apiChangeStatus = (status, activityId, token) => {
   return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
-        return response;
+        return response.json();
       }
 
       throw [response, CURL, 'apiChangeStatus'];
