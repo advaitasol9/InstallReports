@@ -181,7 +181,7 @@ export default function WorkOrderCommentView(props) {
                           apiGet('aws-s3-presigned-urls', props.token).then((res) => {
                             RNFetchBlob.fetch('PUT', res.data.url, {
                               'security-token': props.token,
-                              'Content-Type': 'application/octet-stream',
+                              'Content-Type': 'image/jpeg',
                             }, RNFetchBlob.wrap(item.replace('file://', '')))
                               .then(() => {
                                 RNFetchBlob.fs.stat(item.replace('file://', ''))
