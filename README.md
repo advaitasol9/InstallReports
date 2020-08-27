@@ -97,6 +97,15 @@ export const API_PATH = 'http://142.93.1.107:<port>/api/test-app-1';
 
   
 
+
+## Updating the version
+Simply change the version in `package.json` file.
+
+Or
+
+Run `npm version <next version>`. But this would make a new commit and a tag on git branch.
+
+
 ## How to build testing apk.
 
   

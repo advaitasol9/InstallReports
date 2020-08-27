@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { apiGetJson, apiGetActivities } from '../../core/api';
 
-
 import { Text } from '../../components/StyledText';
 import { Header, OrderListTile } from '../../components';
 import { colors } from '../../styles';
@@ -18,6 +17,7 @@ export default class WorkOrderScreen extends Component {
     this.state = {
       isDataLoading: false
     };
+    
   }
 
   render() {
@@ -78,7 +78,7 @@ export default class WorkOrderScreen extends Component {
           navigation={this.props.navigation}
           sortAndFilter
           indicator
-          title="My Work Orders"
+          title=''
         />
         {
           this.props.orderList === [] && this.props.connectionStatus

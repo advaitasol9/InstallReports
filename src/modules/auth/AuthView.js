@@ -11,19 +11,29 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-
+import {version} from "../../../package.json";
 import { TextInput, Button } from '../../components';
 import { auth } from '../../core/api';
 import { fonts, colors } from '../../styles';
 import AsyncStorage from '@react-native-community/async-storage';
 
 export default class AuthScreen extends React.Component {
+
+  
+
   state = {
     anim: new Animated.Value(0),
-
     // Current visible form
     isKeyboardVisible: false,
   };
+
+  constructor(){
+    super();
+    let versionString = version;
+    versionString = versionString.match(/^\d+\.\d+/g);
+    const formattedVersion = (versionString.length>0)?versionString[0]:'0.0';
+    this.state = {...this.state,version: formattedVersion};
+  }
 
   componentWillMount() {
     this.keyboardDidShowListener = Keyboard.addListener(
@@ -34,6 +44,7 @@ export default class AuthScreen extends React.Component {
       Platform.select({ android: 'keyboardDidHide', ios: 'keyboardWillHide' }),
       this._keyboardDidHide.bind(this),
     );
+    
   }
 
   componentDidMount() {
@@ -117,7 +128,7 @@ export default class AuthScreen extends React.Component {
               position: 'absolute', right: 32, top: 24, color: 'black', fontSize: 12,
             }}
           >
-            v 0.7
+            v {this.state.version}
           </Text>
           <View style={[styles.section, { paddingTop: 30 }]}>
             <Animated.Image

@@ -6,7 +6,7 @@ import {
 import {
   DrawerActions,
 } from 'react-navigation';
-
+import {version} from "../../package.json";
 import { colors } from '../styles';
 
 
@@ -17,6 +17,10 @@ export const screenWidth = width;
 export default function Header({
   connectionStatus, changesNum, navigation, sortAndFilter, sideBar, indicator,title
 }) {
+  let versionString = version;
+  versionString = versionString.match(/^\d+\.\d+/g);
+  const formattedVersion = (versionString.length>0)?versionString[0]:'0.0';
+   
   return (
     <View style={styles.header}>
       <View style={{ alignItems: 'center' }}>
@@ -27,7 +31,7 @@ export default function Header({
       </View>
       <View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-          <Text>{title}</Text>
+          <Text>v {formattedVersion}</Text>
           {indicator && (
             <View
               style={[
