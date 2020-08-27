@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -39,6 +39,10 @@ const options = {
 };
 
 export default function WorkOrderCommentView(props) {
+
+  console.log("call 1");
+
+  const [isLocading, setisLocading] = useState(false);
   const renderPhoto = (photo, index) => {
     const photosCopy = props.photos.slice();
     return (
@@ -160,6 +164,7 @@ export default function WorkOrderCommentView(props) {
                 }
                 disabled={props.photos.length === 0 && props.comment === ''}
                 onPress={async () => {
+                  setisLocading(true);
                   if (!props.connectionStatus) {
                     setChangesInOffline(
                       props.changes,
@@ -192,24 +197,21 @@ export default function WorkOrderCommentView(props) {
                                     formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                     formData.append('size', stats.size);
                                     apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
-                                      apiGetJson(`activities/${props.activityId}/comments`, props.token)
-                                        .then((response) => {
-                                          props.setData(response.data.reverse());
-                                        });
+                                      setisLocading(false);
                                     });
                                   });
                               })
                               .catch((err) => {
                                 console.log(err);
+                                setisLocading(false);
                               });
                           });
                         });
                       } else {
-                        apiGetJson(`activities/${props.activityId}/comments`, props.token)
-                          .then((response) => {
-                            props.setData(response.data.reverse());
-                          });
+                        setisLocading(false);
                       }
+                    }).catch(err => {
+                      setisLocading(false);
                     });
                     await props.addPhoto([]);
                     await props.setComment('');
@@ -217,7 +219,8 @@ export default function WorkOrderCommentView(props) {
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
-                caption="Submit"
+                caption="Submit 2"
+                isLoading={isLocading}
               />
             </View>
             {!props.connectionStatus && (
@@ -245,7 +248,7 @@ export default function WorkOrderCommentView(props) {
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 8 }}>
                   {item.files.map((photo, j) => {
-                    if (photo.file_type === 'image/jpeg') {
+                    if (photo.file_type === 'image/jpeg' || photo.file_type === 'image/png') {
                       return (
                         <Image
                           key={j}
