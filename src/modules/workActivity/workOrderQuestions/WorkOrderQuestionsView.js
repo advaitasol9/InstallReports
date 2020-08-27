@@ -36,6 +36,7 @@ export default class WorkOrderQuestionsView extends Component {
       isSubmitBtnDisabled: true,
       isLoading: false
     };
+    
   }
 
   updateAnswers = () => {
@@ -67,6 +68,10 @@ export default class WorkOrderQuestionsView extends Component {
 
   saveInstallerQuestionAnswers = async () => {
     if (this.uploadedImagesCount == this.props.photos.length && this.isSignatureUploaded) {
+      this.setState({
+        isLoading: true
+      });
+      this.uploadedImagesCount = 0;
       await apiPatchAnswers(
         `activities/${this.props.activityData.id}`,
         {
@@ -74,10 +79,12 @@ export default class WorkOrderQuestionsView extends Component {
         },
         this.props.token,
       ).then((response) => {
-        this.setState({
-          isLoading: false
-        });
+        this.state.isSubmitBtnDisabled = false;
         if (response.status === 200) {
+          this.setState({
+            isLoading: false
+          });
+          
           Alert.alert(
             'Success',
             'Your answer(s) have been received.',
@@ -85,7 +92,14 @@ export default class WorkOrderQuestionsView extends Component {
               { text: 'Ok' },
             ],
           );
+          
         }
+      });
+    }
+    else{
+      //this.state.isSubmitBtnDisabled = true;
+      this.setState({
+        isLoading: false
       });
     }
   }
@@ -128,6 +142,7 @@ export default class WorkOrderQuestionsView extends Component {
                       this.setState({
                         isLoading: true
                       });
+                      this.state.isSubmitBtnDisabled = true;
                       if (this.props.photos.length > 0) {
                         this.props.photos.forEach((item, photoIndex) => {
                           apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {

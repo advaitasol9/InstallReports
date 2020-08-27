@@ -284,13 +284,14 @@ export const apiPatchAnswers = (method, body, token) => {
   return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
-        return response.json();
+        //console.log(response.json());
+        return response;
       }
-
       throw [response, CURL, 'apiPatchAnswers'];
     })
     .catch((error) => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      console.log(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
     });
