@@ -223,7 +223,6 @@ export const apiPostImage = (method, body, token) => {
   };
 
   const CURL = fetchToCurl(url, options);
-
   return fetch(url, options)
     .then((response) => {
       if (response && (response.status === 200 || response.status === 201)) {
