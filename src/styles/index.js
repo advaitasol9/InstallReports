@@ -21,58 +21,58 @@ Typography.loadTypographies({
     ...Platform.select({
       ios: {
         fontFamily: fonts.primary,
-        fontWeight: 'bold',
+        fontWeight: 'bold'
       },
       android: {
-        fontFamily: fonts.primaryBold,
-      },
-    }),
+        fontFamily: fonts.primaryBold
+      }
+    })
   },
   h1: {
     fontSize: 34,
     ...Platform.select({
       ios: {
         fontFamily: fonts.primary,
-        fontWeight: 'bold',
+        fontWeight: 'bold'
       },
       android: {
-        fontFamily: fonts.primaryBold,
-      },
-    }),
+        fontFamily: fonts.primaryBold
+      }
+    })
   },
   rubik18: {
     fontFamily: fonts.primary,
     fontSize: 18,
-    lineHeight: 22,
+    lineHeight: 22
   },
   rubik20Bold: {
     fontFamily: fonts.primary,
     fontSize: 20,
     lineHeight: 22,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   rubik24Bold: {
     fontFamily: fonts.primary,
     fontSize: 24,
     lineHeight: 22,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   h1Rubik: {
     fontSize: 28,
     ...Platform.select({
       ios: {
         fontFamily: fonts.primary,
-        fontWeight: '500',
+        fontWeight: '500'
       },
       android: {
-        fontFamily: fonts.primaryBold,
-      },
-    }),
+        fontFamily: fonts.primaryBold
+      }
+    })
   },
   h2: {
     fontSize: 18,
     lineHeight: 22,
-    fontFamily: fonts.primaryBold,
+    fontFamily: fonts.primaryBold
   },
   h3: {
     fontSize: 16,
@@ -80,17 +80,17 @@ Typography.loadTypographies({
     ...Platform.select({
       ios: {
         fontFamily: fonts.primary,
-        fontWeight: 'bold',
+        fontWeight: 'bold'
       },
       android: {
-        fontFamily: fonts.primaryBold,
-      },
-    }),
+        fontFamily: fonts.primaryBold
+      }
+    })
   },
   h4: {
     fontSize: 14,
     lineHeight: 22,
-    fontFamily: fonts.primary,
+    fontFamily: fonts.primary
   },
   p: {
     fontSize: 14,
@@ -98,30 +98,28 @@ Typography.loadTypographies({
     ...Platform.select({
       ios: {
         fontFamily: fonts.primary,
-        fontWeight: '400',
+        fontWeight: '400'
       },
       android: {
-        fontFamily: fonts.primaryAndroid,
-      },
-    }),
+        fontFamily: fonts.primaryAndroid
+      }
+    })
   },
   default: {
     fontFamily: fonts.primary,
-    fontSize: 18,
+    fontSize: 18
   },
   defaultMedium: {
     fontFamily: fonts.primaryMedium,
-    fontSize: 18,
+    fontSize: 18
   },
   defaultLight: {
-    fontFamily: fonts.primary,
-  },
+    fontFamily: fonts.primary
+  }
 });
 
 Assets.loadAssetsGroup('images', {});
 
 const scale = (size: number): number => (width / guidelineBaseWidth) * size;
 
-export {
-  colors, fonts, scale, commonStyles, width, height,
-};
+export { colors, fonts, scale, commonStyles, width, height };

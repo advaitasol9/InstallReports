@@ -1,32 +1,13 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  StatusBar,
-  Text,
-  TextInput,
-  ScrollView,
-  Alert,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, StatusBar, Text, TextInput, ScrollView, Alert, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
 import RNFetchBlob from 'rn-fetch-blob';
 
 import { colors } from '../../../styles';
-import {
-  Header,
-  ActivityInfoSection,
-  ActivityStatus,
-  ActivityTitle,
-  Button,
-} from '../../../components';
+import { Header, ActivityInfoSection, ActivityStatus, ActivityTitle, Button } from '../../../components';
 import setChangesInOffline from '../../../core/setChanges';
-import {
-  apiGet, apiPostImage, apiPostComment, apiGetJson,
-} from '../../../core/api';
+import { apiGet, apiPostImage, apiPostComment, apiGetJson } from '../../../core/api';
 import moment from 'moment';
 
 const options = {
@@ -34,8 +15,8 @@ const options = {
   maxWidth: 500,
   maxHeight: 500,
   storageOptions: {
-    skipBackup: true,
-  },
+    skipBackup: true
+  }
 };
 
 export default function WorkOrderCommentView(props) {
@@ -43,8 +24,7 @@ export default function WorkOrderCommentView(props) {
   const renderPhoto = (photo, index) => {
     const photosCopy = props.photos.slice();
     return (
-      <View style={{ position: 'relative' }}
-        key={index}>
+      <View style={{ position: 'relative' }} key={index}>
         <TouchableOpacity
           style={styles.delPhoto}
           onPress={async () => {
@@ -53,10 +33,7 @@ export default function WorkOrderCommentView(props) {
           }}
         >
           <View style={styles.whiteBackground} />
-          <IO
-            style={styles.delIcon}
-            name="md-close-circle"
-          />
+          <IO style={styles.delIcon} name="md-close-circle" />
         </TouchableOpacity>
         <Image source={{ uri: photo }} style={styles.photoBlock} />
       </View>
@@ -74,16 +51,9 @@ export default function WorkOrderCommentView(props) {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={colors.lightGray} />
-      <Header
-        connectionStatus={props.connectionStatus}
-        navigation={props.navigation}
-        sideBar
-      />
+      <Header connectionStatus={props.connectionStatus} navigation={props.navigation} sideBar />
       <ScrollView style={{ width: '100%' }}>
-        <ActivityInfoSection
-          navigation={props.navigation}
-          activityData={props.activityData}
-        />
+        <ActivityInfoSection navigation={props.navigation} activityData={props.activityData} />
         <ActivityStatus status={props.activityData.status} />
         <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
         <ActivityTitle title="Messages" />
@@ -91,7 +61,7 @@ export default function WorkOrderCommentView(props) {
           style={{
             backgroundColor: colors.lightGray,
             paddingVertical: 24,
-            width: '100%',
+            width: '100%'
           }}
         >
           <View style={styles.scrollContainer}>
@@ -113,7 +83,7 @@ export default function WorkOrderCommentView(props) {
                       {
                         text: 'Choose from gallery',
                         onPress: () => {
-                          ImagePicker.launchImageLibrary(options, (response) => {
+                          ImagePicker.launchImageLibrary(options, response => {
                             const { photos } = props;
                             if (!response.didCancel) {
                               photos.push(response.uri);
@@ -121,12 +91,12 @@ export default function WorkOrderCommentView(props) {
                               props.setNumOfChanges(props.numOfChanges);
                             }
                           });
-                        },
+                        }
                       },
                       {
                         text: 'Take a photo',
                         onPress: () => {
-                          ImagePicker.launchCamera(options, (response) => {
+                          ImagePicker.launchCamera(options, response => {
                             const { photos } = props;
                             if (!response.didCancel) {
                               photos.push(response.uri);
@@ -134,14 +104,14 @@ export default function WorkOrderCommentView(props) {
                               props.setNumOfChanges(props.numOfChanges);
                             }
                           });
-                        },
+                        }
                       },
                       {
                         text: 'Cancel',
-                        style: 'cancel',
-                      },
+                        style: 'cancel'
+                      }
                     ],
-                    { cancelable: true },
+                    { cancelable: true }
                   );
                 }}
                 textColor={colors.white}
@@ -149,16 +119,10 @@ export default function WorkOrderCommentView(props) {
                 caption="Add Photo(s)"
               />
             </View>
-            <View style={styles.photoSection}>
-              {props.photos.map((photo, index) => renderPhoto(photo, index))}
-            </View>
+            <View style={styles.photoSection}>{props.photos.map((photo, index) => renderPhoto(photo, index))}</View>
             <View style={{ marginTop: 24 }}>
               <Button
-                bgColor={
-                  (props.photos.length === 0 && props.comment === '')
-                    ? '#b1cec1'
-                    : colors.green
-                }
+                bgColor={props.photos.length === 0 && props.comment === '' ? '#b1cec1' : colors.green}
                 disabled={props.photos.length === 0 && props.comment === ''}
                 onPress={async () => {
                   setisLocading(true);
@@ -171,45 +135,53 @@ export default function WorkOrderCommentView(props) {
                       props.activityId,
                       props.accountId,
                       props.photos,
-                      null,
+                      null
                     );
                     await props.addPhoto([]);
                     await props.setComment('');
                   } else {
                     const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
-                    await apiPostComment(`activities/${props.activityId}/comments`, data, props.token).then((resPostText) => {
-                      if (props.photos.length > 0) {
-                        props.photos.forEach((item) => {
-                          apiGet('aws-s3-presigned-urls', props.token).then((res) => {
-                            RNFetchBlob.fetch('PUT', res.data.url, {
-                              'security-token': props.token,
-                              'Content-Type': 'image/jpeg',
-                            }, RNFetchBlob.wrap(item.replace('file://', '')))
-                              .then(() => {
-                                RNFetchBlob.fs.stat(item.replace('file://', ''))
-                                  .then((stats) => {
+                    await apiPostComment(`activities/${props.activityId}/comments`, data, props.token)
+                      .then(resPostText => {
+                        if (props.photos.length > 0) {
+                          props.photos.forEach(item => {
+                            apiGet('aws-s3-presigned-urls', props.token).then(res => {
+                              RNFetchBlob.fetch(
+                                'PUT',
+                                res.data.url,
+                                {
+                                  'security-token': props.token,
+                                  'Content-Type': 'image/jpeg'
+                                },
+                                RNFetchBlob.wrap(item.replace('file://', ''))
+                              )
+                                .then(() => {
+                                  RNFetchBlob.fs.stat(item.replace('file://', '')).then(stats => {
                                     const formData = new FormData();
                                     formData.append('file_type', 'image/jpeg');
                                     formData.append('name', stats.filename);
                                     formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                     formData.append('size', stats.size);
-                                    apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
-                                      setisLocading(false);
-                                    });
+                                    apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then(
+                                      postRes => {
+                                        setisLocading(false);
+                                      }
+                                    );
                                   });
-                              })
-                              .catch((err) => {
-                                console.log(err);
-                                setisLocading(false);
-                              });
+                                })
+                                .catch(err => {
+                                  console.log(err);
+                                  setisLocading(false);
+                                });
+                            });
                           });
-                        });
-                      } else {
+                        } else {
+                          setisLocading(false);
+                        }
+                      })
+                      .catch(err => {
                         setisLocading(false);
-                      }
-                    }).catch(err => {
-                      setisLocading(false);
-                    });
+                      });
                     await props.addPhoto([]);
                     await props.setComment('');
                   }
@@ -220,70 +192,62 @@ export default function WorkOrderCommentView(props) {
                 isLoading={isLocading}
               />
             </View>
-            {!props.connectionStatus && (
-              <Text>Cant load comments. There is no connection</Text>
-            )}
-            {props.connectionStatus && props.data.map((item, i) => (
-              <View key={i}
-                style={{
-                  width: '100%',
-                  marginTop: 32,
-                  padding: 16,
-                  backgroundColor: 'white',
-                }}
-              >
-                {item.text !== '' && (
-                  <Text>
-                    {item.text}
-                  </Text>
-                )}
-                <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>
-                  {item.users[0].first_name + " " + item.users[0].last_name}
-                </Text>
-                <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>
-                  {moment(item.created_at).format('M/D/YY - hh:mmA')}
-                </Text>
-                <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                  {item.files.map((photo, j) => {
-                    if (photo.file_type === 'image/jpeg' || photo.file_type === 'image/png') {
-                      return (
-                        <Image
-                          key={j}
-                          source={{ uri: photo.s3_location }}
-                          style={{
-                            width: 50,
-                            height: 50,
-                            marginRight: 16,
-                            resizeMode: 'cover',
-                          }}
-                        />
-                      );
-                    }
-                    if (photo.file_type === 'pdf') {
-                      return (
-                        <TouchableOpacity
-                          onPress={() => {
-                            props.navigation.navigate('PdfDoc', { uri: photo.s3_location });
-                          }}
-                        >
+            {!props.connectionStatus && <Text>Cant load comments. There is no connection</Text>}
+            {props.connectionStatus &&
+              props.data.map((item, i) => (
+                <View
+                  key={i}
+                  style={{
+                    width: '100%',
+                    marginTop: 32,
+                    padding: 16,
+                    backgroundColor: 'white'
+                  }}
+                >
+                  {item.text !== '' && <Text>{item.text}</Text>}
+                  <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>{item.users[0].first_name + ' ' + item.users[0].last_name}</Text>
+                  <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>{moment(item.created_at).format('M/D/YY - hh:mmA')}</Text>
+                  <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                    {item.files.map((photo, j) => {
+                      if (photo.file_type === 'image/jpeg' || photo.file_type === 'image/png') {
+                        return (
                           <Image
-                            source={require('../../../../assets/images/pdf.png')}
+                            key={j}
+                            source={{ uri: photo.s3_location }}
                             style={{
                               width: 50,
                               height: 50,
                               marginRight: 16,
-                              resizeMode: 'cover',
+                              resizeMode: 'cover'
                             }}
                           />
-                          <Text>{photo.name}</Text>
-                        </TouchableOpacity>
-                      );
-                    }
-                    return null;
-                  })}
+                        );
+                      }
+                      if (photo.file_type === 'pdf') {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => {
+                              props.navigation.navigate('PdfDoc', { uri: photo.s3_location });
+                            }}
+                          >
+                            <Image
+                              source={require('../../../../assets/images/pdf.png')}
+                              style={{
+                                width: 50,
+                                height: 50,
+                                marginRight: 16,
+                                resizeMode: 'cover'
+                              }}
+                            />
+                            <Text>{photo.name}</Text>
+                          </TouchableOpacity>
+                        );
+                      }
+                      return null;
+                    })}
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
           </View>
         </View>
       </ScrollView>
@@ -296,12 +260,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.lightGray
   },
   scrollContainer: {
     paddingTop: 8,
     paddingHorizontal: 24,
-    paddingBottom: 48,
+    paddingBottom: 48
   },
   inputStyle: {
     fontSize: 14,
@@ -309,7 +273,7 @@ const styles = StyleSheet.create({
     color: colors.black,
     paddingVertical: 12,
     paddingHorizontal: 12,
-    textAlignVertical: 'top',
+    textAlignVertical: 'top'
   },
   photoBlock: {
     width: '100%',
@@ -317,18 +281,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 20
   },
   delPhoto: {
     position: 'absolute',
     top: 28,
     right: 16,
     zIndex: 10,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   delIcon: {
     color: colors.red,
-    fontSize: 48,
+    fontSize: 48
   },
   whiteBackground: {
     position: 'absolute',
@@ -336,12 +300,12 @@ const styles = StyleSheet.create({
     height: 32,
     top: 10,
     borderRadius: 16,
-    backgroundColor: 'white',
+    backgroundColor: 'white'
   },
   backgroundActivity: {
     backgroundColor: 'white',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
+    alignItems: 'center'
+  }
 });

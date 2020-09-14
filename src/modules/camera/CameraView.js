@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-  TouchableHighlight,
-  Image,
-  Text,
-  StatusBar,
-  CameraRoll,
-} from 'react-native';
+import { View, StyleSheet, Dimensions, TouchableOpacity, TouchableHighlight, Image, Text, StatusBar, CameraRoll } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 const { width, height } = Dimensions.get('window');
@@ -83,13 +73,15 @@ export function Camera(props) {
         <Image
           source={{ uri: props.photoUri }}
           style={{
-            position: 'absolute', left: 0, top: 0, width, height,
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width,
+            height
           }}
         />
         <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-          <TouchableOpacity
-            onPress={() => props.setPhotoModal(false)}
-          >
+          <TouchableOpacity onPress={() => props.setPhotoModal(false)}>
             <Text
               style={{
                 backgroundColor: 'transparent',
@@ -98,7 +90,7 @@ export function Camera(props) {
                 fontSize: 17 * factor,
                 zIndex: 100,
                 marginBottom: 20,
-                marginHorizontal: 20,
+                marginHorizontal: 20
               }}
             >
               Cancel
@@ -111,7 +103,7 @@ export function Camera(props) {
               if (props.backRoute === 'Manager' || props.backRoute === 'Questions') {
                 photos.push({
                   uri: props.photoUri,
-                  order: props.order,
+                  order: props.order
                 });
               } else {
                 photos.push(props.photoUri);
@@ -128,7 +120,7 @@ export function Camera(props) {
                 fontSize: 17 * factor,
                 zIndex: 100,
                 marginBottom: 20,
-                marginHorizontal: 20,
+                marginHorizontal: 20
               }}
             >
               Save
@@ -140,35 +132,24 @@ export function Camera(props) {
   }
 
   return (
-    <View
-      style={[
-        styles.container, { paddingTop: 8, paddingBottom: 8 },
-      ]}
-    >
+    <View style={[styles.container, { paddingTop: 8, paddingBottom: 8 }]}>
       <StatusBar hidden />
-      <TouchableOpacity
-        onPress={() => switchFlash()}
-        style={{ zIndex: 10 }}
-      >
+      <TouchableOpacity onPress={() => switchFlash()} style={{ zIndex: 10 }}>
         <Image
           source={flashIcon()}
           style={{
             width: 28,
             height: 28,
-            marginLeft: 32,
+            marginLeft: 32
           }}
         />
       </TouchableOpacity>
       <RNCamera
-        ref={(ref) => {
+        ref={ref => {
           myRef = ref;
         }}
         style={styles.preview}
-        type={
-          props.cameraType === 0
-            ? RNCamera.Constants.Type.back
-            : RNCamera.Constants.Type.front
-        }
+        type={props.cameraType === 0 ? RNCamera.Constants.Type.back : RNCamera.Constants.Type.front}
         flashMode={cameraFlash()}
         captureAudio={false}
       />
@@ -178,20 +159,17 @@ export function Camera(props) {
           flexDirection: 'row',
           justifyContent: 'space-around',
           alignItems: 'center',
-          zIndex: 10,
+          zIndex: 10
         }}
       >
         <TouchableOpacity
           activeOpacity={0.7}
           style={{
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}
           onPress={() => {
-            props.navigation.navigate(
-              props.backRoute,
-              { screenData: props.navigation.state.params.screenData },
-            );
+            props.navigation.navigate(props.backRoute, { screenData: props.navigation.state.params.screenData });
           }}
         >
           <Image
@@ -199,7 +177,7 @@ export function Camera(props) {
             style={{
               height: 24,
               width: 24,
-              resizeMode: 'contain',
+              resizeMode: 'contain'
             }}
           />
         </TouchableOpacity>
@@ -213,7 +191,7 @@ export function Camera(props) {
             borderWidth: 5 * factor,
             borderColor: '#ffffff',
             marginBottom: 12 * factor,
-            marginTop: 12 * factor,
+            marginTop: 12 * factor
           }}
           onPress={() => takePicture()}
           underlayColor="rgba(255, 255, 255, 0.5)"
@@ -225,19 +203,16 @@ export function Camera(props) {
               borderRadius: 24 * factor,
               borderWidth: 1,
               borderColor: '#ffffff',
-              backgroundColor: '#ffffff',
+              backgroundColor: '#ffffff'
             }}
           />
         </TouchableHighlight>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => switchType()}
-        >
+        <TouchableOpacity activeOpacity={0.7} onPress={() => switchType()}>
           <Image
             source={require('../../../assets/images/camera/ic_camera_rear_white.png')}
             style={{
               width: 32,
-              height: 32,
+              height: 32
             }}
           />
         </TouchableOpacity>
@@ -246,18 +221,17 @@ export function Camera(props) {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    backgroundColor: 'black',
+    backgroundColor: 'black'
   },
   preview: {
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    zIndex: 0,
+    zIndex: 0
   },
   capture: {
     flex: 0,
@@ -266,8 +240,8 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingHorizontal: 20,
     alignSelf: 'center',
-    margin: 20,
-  },
+    margin: 20
+  }
 });
 
-export default (Camera);
+export default Camera;

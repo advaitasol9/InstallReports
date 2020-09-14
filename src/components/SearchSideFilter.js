@@ -1,36 +1,19 @@
 // @flow
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Modal, ScrollView, Platform } from 'react-native';
 import { colors, width, height } from '../styles';
 import { Button, Accordion } from '../components';
 import { apiGetActivities } from '../core/api';
 
 export default props => (
-  <Modal
-    animationType="fade"
-    transparent
-    visible={props.filtersOpen}
-  >
-    <View
-      style={[
-        styles.sideFilterContainer,
-        { width, height, backgroundColor: 'rgba(0,0,0,0.75)' },
-      ]}
-    >
+  <Modal animationType="fade" transparent visible={props.filtersOpen}>
+    <View style={[styles.sideFilterContainer, { width, height, backgroundColor: 'rgba(0,0,0,0.75)' }]}>
       <View
         style={{
           width: width * 0.85,
           height,
           backgroundColor: colors.white,
-          paddingBottom: Platform.OS === 'android' ? 20 : 0,
+          paddingBottom: Platform.OS === 'android' ? 20 : 0
         }}
       >
         <View style={styles.sideFilterHeader}>
@@ -40,7 +23,7 @@ export default props => (
               onPress={async () => {
                 props.setIsLoaded(false);
                 props.setCitiesFilter([]);
-                props.setSearchText("");
+                props.setSearchText('');
                 props.setFiltersOpen(!props.filtersOpen);
                 const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
                 const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]' + statuses, props.token);
@@ -62,13 +45,12 @@ export default props => (
                 let searchRequests = [];
 
                 searchQueries = [];
-                props.setSearchText("");
+                props.setSearchText('');
 
-                let searchParams = '&search={"fields":['
-                  + '{"operator":"is_in","value": ["assigned","in_progress"],"field": "status"}';
+                let searchParams = '&search={"fields":[' + '{"operator":"is_in","value": ["assigned","in_progress"],"field": "status"}';
 
                 if (props.citiesFilter.length > 0) {
-                  props.citiesFilter.forEach(async (item) => {
+                  props.citiesFilter.forEach(async item => {
                     cities.push(item.title.split(', ')[0]);
                     states.push(item.title.split(', ')[1]);
                   });
@@ -85,43 +67,48 @@ export default props => (
 
                 //Project filter
                 if (props.itemsFilter.length > 0) {
-                  props.itemsFilter.forEach(async (item) => {
+                  props.itemsFilter.forEach(async item => {
                     items.push(item.title);
                   });
                   let uniqueItems = [...new Set(items)];
                   searchParams += ',{"operator":"is_in","value": ' + JSON.stringify(uniqueItems) + ',"field": "item.name"}';
-                };
+                }
 
                 //Client filter
                 if (props.clientsFilter.length > 0) {
-                  props.clientsFilter.forEach(async (item) => {
+                  props.clientsFilter.forEach(async item => {
                     accounts.push(item.title);
                   });
                   let uniqueAccounts = [...new Set(accounts)];
                   searchParams += ',{"operator":"is_in","value": ' + JSON.stringify(uniqueAccounts) + ',"field": "account.name"}';
-                };
+                }
 
                 searchParams += ']}';
                 searchRequests.push(apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + searchParams, props.token));
 
                 //Dates filter
                 if (props.datesFilter.length > 0) {
-                  props.datesFilter.forEach(async (item) => {
-                    const searchParams = '&search={"fields":[{"operator":"is_in","value": ["assigned","in_progress"],"field": "status"}],'
-                      + '"keyword": "' + (item.title).split(" ")[0] + '",'
-                      + '"search_keyword_in": ["activities.date_2"]'
-                      + '}';
-                    searchRequests.push(apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + searchParams, props.token));
+                  props.datesFilter.forEach(async item => {
+                    const searchParams =
+                      '&search={"fields":[{"operator":"is_in","value": ["assigned","in_progress"],"field": "status"}],' +
+                      '"keyword": "' +
+                      item.title.split(' ')[0] +
+                      '",' +
+                      '"search_keyword_in": ["activities.date_2"]' +
+                      '}';
+                    searchRequests.push(
+                      apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + searchParams, props.token)
+                    );
                   });
-                };
+                }
                 props.setFiltersOpen(false);
                 props.setIsLoaded(false);
                 await Promise.all(searchRequests)
-                  .then((res) => {
+                  .then(res => {
                     if (props.datesFilter.length > 0) {
                       let searchResults = [];
                       res[0].data.data.forEach(item => {
-                        if ((res[1].data.data.filter(i => i.id == item.id)).length > 0) {
+                        if (res[1].data.data.filter(i => i.id == item.id).length > 0) {
                           searchResults.push(item);
                         }
                       });
@@ -131,9 +118,8 @@ export default props => (
                       props.setSearchResult(res[0].data.data);
                       props.setIsLoaded(true);
                     }
-                  }).catch((err) => {
-
-                  });
+                  })
+                  .catch(err => {});
               }}
               caption="Done"
               textColor={colors.white}
@@ -157,14 +143,7 @@ export default props => (
             orderList={props.orderList}
             entity="activities"
           />
-          <Accordion
-            title="Project"
-            setFilters={props.setItemsFilter}
-            filter={props.itemsFilter}
-            column="name"
-            entity="items"
-            orderList={props.orderList}
-          />
+          <Accordion title="Project" setFilters={props.setItemsFilter} filter={props.itemsFilter} column="name" entity="items" orderList={props.orderList} />
           <Accordion
             title="Client"
             setFilters={props.setClientsFilter}
@@ -180,9 +159,8 @@ export default props => (
 );
 
 const styles = StyleSheet.create({
-
   sideFilterContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'flex-end'
   },
   sideFilterHeader: {
     flexDirection: 'row',
@@ -192,6 +170,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.black,
-    justifyContent: 'space-between',
-  },
+    justifyContent: 'space-between'
+  }
 });

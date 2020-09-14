@@ -15,13 +15,13 @@ export default compose(
       activityId: state.workOrder.activityId,
       connectionStatus: state.app.isConnected,
       orderList: state.workOrder.orderList,
-      photos: state.workOrderComment.photos,
+      photos: state.workOrderComment.photos
     }),
     dispatch => ({
       setActivityId: id => dispatch(setActivityId(id)),
       addPhoto: arr => dispatch(addCommentPhoto(arr)),
-      setChanges: arr => dispatch(setChanges(arr)),
-    }),
+      setChanges: arr => dispatch(setChanges(arr))
+    })
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
   withState('activityData', 'setActivityData', {}),
@@ -34,26 +34,21 @@ export default compose(
       console.log('refresh whole comments');
       clearInterval(this._interval);
 
-      if (this.props.navigation.state.params
-        && this.props.navigation.state.params.screenData.text) {
+      if (this.props.navigation.state.params && this.props.navigation.state.params.screenData.text) {
         this.props.setComment(this.props.navigation.state.params.screenData.text);
       }
 
       if (this.props.connectionStatus) {
-        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
-          .then((response) => {
-            this.props.setActivityData(response.data);
-            this.props.setIsloading(false);
-          });
+        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token).then(response => {
+          this.props.setActivityData(response.data);
+          this.props.setIsloading(false);
+        });
 
-        apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token)
-          .then((response) => {
-            this.props.setData(response.data.reverse());
-          });
+        apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token).then(response => {
+          this.props.setData(response.data.reverse());
+        });
       } else {
-        this.props.setActivityData(
-          this.props.orderList.filter(order => order.id === this.props.activityId)[0],
-        );
+        this.props.setActivityData(this.props.orderList.filter(order => order.id === this.props.activityId)[0]);
         this.props.setIsloading(false);
       }
     },
@@ -62,12 +57,11 @@ export default compose(
         if (this.props.activityId == null) {
           clearInterval(this._interval);
         } else {
-          apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token)
-            .then((response) => {
-              this.props.setData(response.data.reverse());
-            });
+          apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token).then(response => {
+            this.props.setData(response.data.reverse());
+          });
         }
       }, 10000);
     }
-  }),
+  })
 )(WorkOrderCommentView);

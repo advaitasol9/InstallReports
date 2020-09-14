@@ -12,21 +12,21 @@ export const apiPostComment = (method, body, token) => {
     body,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'apiPostComment'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -41,21 +41,21 @@ export const apiChangeStatus = (status, activityId, token) => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'apiChangeStatus'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -69,21 +69,21 @@ export const apiGetJson = (method, token, contentType = 'application/json') => {
     mode: 'cors',
     headers: {
       'Content-Type': contentType,
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'apiGetJson'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -97,21 +97,21 @@ export const apiGet = (method, token, contentType = 'application/json') => {
     mode: 'cors',
     headers: {
       'Content-Type': contentType,
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'apiGet'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -125,57 +125,56 @@ export const apiGetActivities = (method, token, contentType = 'application/json'
     mode: 'cors',
     headers: {
       'Content-Type': contentType,
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
-        return response.json().then(function (json) {
+        return response.json().then(function(json) {
           return {
-            "data": json,
-            "appContentFullCount": response.headers.get('app-content-full-count'),
+            data: json,
+            appContentFullCount: response.headers.get('app-content-full-count')
           };
         });
       }
 
       throw [response, CURL, 'apiGetActivities'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
     });
 };
 
-
 export const auth = (method, body) => {
   const url = `${API_PATH}/${method}`;
   const options = {
     method: 'POST',
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'multipart/form-data',
+      Accept: 'application/json',
+      'Content-Type': 'multipart/form-data'
     },
-    body,
+    body
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'auth'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error, {
-        401: { title: 'Login Failed', message: 'Your email or password was incorrect. Please try again.' },
+        401: { title: 'Login Failed', message: 'Your email or password was incorrect. Please try again.' }
       });
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -187,16 +186,16 @@ export const logout = (method, token) => {
   const options = {
     method: 'POST',
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'multipart/form-data',
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then(async (response) => {
+    .then(async response => {
       if (response && (response.status === 200 || response.status === 201)) {
         await AsyncStorage.removeItem('currentUserData');
         return response.json();
@@ -204,7 +203,7 @@ export const logout = (method, token) => {
 
       throw [response, CURL, 'logout'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -218,20 +217,20 @@ export const apiPostImage = (method, body, token) => {
     body,
     headers: {
       'Content-Type': 'multipart/form-data',
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'apiPostImage'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -244,22 +243,22 @@ export const apiPut = (method, token, body) => {
     method: 'PUT',
     headers: {
       'Content-Type': 'image/jpeg',
-      'security-token': token,
+      'security-token': token
     },
-    body,
+    body
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options, 15000)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'apiPut'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
@@ -272,23 +271,23 @@ export const apiPatchAnswers = (method, body, token) => {
     method: 'PATCH',
     body: JSON.stringify(body),
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         //console.log(response.json());
         return response;
       }
       throw [response, CURL, 'apiPatchAnswers'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       console.log(error);
       HttpErrorAlert(errorMsg);
@@ -302,23 +301,23 @@ export const apiPatch = (method, token, body) => {
     method: 'PATCH',
     body: JSON.stringify(body),
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'security-token': token,
-    },
+      'security-token': token
+    }
   };
 
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
-    .then((response) => {
+    .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
 
       throw [response, CURL, 'apiPatch'];
     })
-    .catch((error) => {
+    .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;

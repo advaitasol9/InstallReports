@@ -19,5 +19,5 @@ export default combineReducers({
   detailPartial,
   detailPreInstall,
   workOrderQuestion,
-  workOrderComment,
+  workOrderComment
 });

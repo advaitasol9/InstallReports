@@ -15,13 +15,9 @@ export default compose(
     componentDidMount() {
       this.props.setPhotos(this.props.navigation.state.params.photos);
       this.props.setBackRoute(this.props.navigation.state.params.screen);
-      if (
-        this.props.navigation.state.params.screen === 'Manager'
-        || this.props.navigation.state.params.screen === 'Questions'
-      ) {
+      if (this.props.navigation.state.params.screen === 'Manager' || this.props.navigation.state.params.screen === 'Questions') {
         this.props.setOrder(this.props.navigation.state.params.order);
       }
-    },
-  }),
-
+    }
+  })
 )(CameraView);

@@ -1,33 +1,23 @@
 import React from 'react';
 
-import {
-  TouchableOpacity, View, Text, Image, Dimensions,
-} from 'react-native';
-import {
-  DrawerActions,
-} from 'react-navigation';
-import {version} from "../../package.json";
+import { TouchableOpacity, View, Text, Image, Dimensions } from 'react-native';
+import { DrawerActions } from 'react-navigation';
+import { version } from '../../package.json';
 import { colors } from '../styles';
-
 
 const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
 export const screenWidth = width;
 
-export default function Header({
-  connectionStatus, changesNum, navigation, sortAndFilter, sideBar, indicator,title
-}) {
+export default function Header({ connectionStatus, changesNum, navigation, sortAndFilter, sideBar, indicator, title }) {
   let versionString = version;
   versionString = versionString.match(/^\d+\.\d+/g);
-  const formattedVersion = (versionString.length>0)?versionString[0]:'0.0';
-   
+  const formattedVersion = versionString.length > 0 ? versionString[0] : '0.0';
+
   return (
     <View style={styles.header}>
       <View style={{ alignItems: 'center' }}>
-        <Image
-          style={styles.logo}
-          source={require('../../assets/images/logo.png')}
-        />
+        <Image style={styles.logo} source={require('../../assets/images/logo.png')} />
       </View>
       <View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -38,23 +28,15 @@ export default function Header({
                 styles.connectionIndicator,
                 {
                   backgroundColor: connectionStatus ? 'green' : 'red',
-                  marginRight: connectionStatus ? 0 : 8,
-                },
+                  marginRight: connectionStatus ? 0 : 8
+                }
               ]}
             />
           )}
-          {indicator && !connectionStatus && (
-            <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum}</Text>
-          )}
+          {indicator && !connectionStatus && <Text style={{ color: connectionStatus ? 'green' : 'red' }}>{changesNum}</Text>}
           {sideBar && (
-            <TouchableOpacity
-              onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
-              style={{ marginLeft: 12, alignItems: 'center' }}
-            >
-              <Image
-                style={styles.burger}
-                source={require('../../assets/images/burger1.png')}
-              />
+            <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} style={{ marginLeft: 12, alignItems: 'center' }}>
+              <Image style={styles.burger} source={require('../../assets/images/burger1.png')} />
             </TouchableOpacity>
           )}
         </View>
@@ -64,9 +46,7 @@ export default function Header({
               navigation.navigate({ routeName: 'Search' });
             }}
           >
-            <Text style={{ textAlign: 'right', color: colors.primary }}>
-              SORT & FILTER
-            </Text>
+            <Text style={{ textAlign: 'right', color: colors.primary }}>SORT & FILTER</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -79,7 +59,7 @@ const styles = {
     width: 16,
     height: 16,
     borderRadius: 8,
-    marginLeft: 16,
+    marginLeft: 16
   },
   header: {
     width: '100%',
@@ -94,20 +74,20 @@ const styles = {
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 5
   },
   logo: {
     height: 40,
     aspectRatio: 4,
-    resizeMode: 'contain',
+    resizeMode: 'contain'
   },
   burger: {
     width: 32,
     height: 32,
-    resizeMode: 'contain',
-  },
+    resizeMode: 'contain'
+  }
 };

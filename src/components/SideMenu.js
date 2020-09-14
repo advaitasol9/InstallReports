@@ -1,8 +1,6 @@
 import React from 'react';
 import { NavigationActions } from 'react-navigation';
-import {
-  TouchableOpacity, Text, View, Alert,
-} from 'react-native';
+import { TouchableOpacity, Text, View, Alert } from 'react-native';
 
 import { colors } from '../styles';
 
@@ -10,7 +8,7 @@ function SideMenu(props) {
   const navigateToScreen = (route, params) => () => {
     const navigateAction = NavigationActions.navigate({
       routeName: route,
-      params,
+      params
     });
     props.navigation.dispatch(navigateAction);
   };
@@ -31,14 +29,14 @@ function SideMenu(props) {
             [
               {
                 text: 'Cancel',
-                style: 'cancel',
+                style: 'cancel'
               },
               {
                 text: 'OK',
-                onPress: navigateToScreen('LogIn', { logOut: true }),
-              },
+                onPress: navigateToScreen('LogIn', { logOut: true })
+              }
             ],
-            { cancelable: true },
+            { cancelable: true }
           );
         }}
       >
@@ -52,9 +50,8 @@ const styles = {
   text: {
     fontSize: 20,
     color: colors.black,
-    paddingVertical: 8,
-  },
+    paddingVertical: 8
+  }
 };
-
 
 export default SideMenu;

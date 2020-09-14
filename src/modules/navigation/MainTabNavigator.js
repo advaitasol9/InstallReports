@@ -1,8 +1,6 @@
 /* eslint-disable import/no-unresolved */
 import React from 'react';
-import {
-  Image, View, StyleSheet, Text, Alert,
-} from 'react-native';
+import { Image, View, StyleSheet, Text, Alert } from 'react-native';
 import { createBottomTabNavigator } from 'react-navigation';
 import FA from 'react-native-vector-icons/FontAwesome5';
 
@@ -21,20 +19,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: colors.white,
-    paddingHorizontal: 10,
+    paddingHorizontal: 10
   },
   tabBarIcon: {
     width: 23,
-    height: 23,
+    height: 23
   },
   tabBarIconFocused: {
-    tintColor: colors.primary,
+    tintColor: colors.primary
   },
   headerContainer: {
     height: 70,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingBottom: 10,
+    paddingBottom: 10
   },
   headerImage: {
     position: 'absolute',
@@ -42,13 +40,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: 70,
+    height: 70
   },
   headerCaption: {
     fontFamily: fonts.primaryRegular,
     color: colors.white,
-    fontSize: 18,
-  },
+    fontSize: 18
+  }
 });
 
 export default createBottomTabNavigator(
@@ -57,14 +55,8 @@ export default createBottomTabNavigator(
       screen: WorkOrderScreen,
       navigationOptions: {
         header: null,
-        headerBackground: (
-          <Image
-            style={{ flex: 1 }}
-            source={hederBackground}
-            resizeMode="cover"
-          />
-        ),
-      },
+        headerBackground: <Image style={{ flex: 1 }} source={hederBackground} resizeMode="cover" />
+      }
     },
     Search: {
       screen: SearchScreen,
@@ -74,34 +66,34 @@ export default createBottomTabNavigator(
             <Image style={styles.headerImage} source={hederBackground} />
             <Text style={styles.headerCaption}>Grids</Text>
           </View>
-        ),
-      },
+        )
+      }
     },
     Logout: {
       screen: Logout,
       navigationOptions: {
-        tabBarOnPress: (props) => {
+        tabBarOnPress: props => {
           Alert.alert(
             'Are you sure?',
             'This will log you out of the app and any unsaved data will be lost.',
             [
               {
                 text: 'Cancel',
-                style: 'cancel',
+                style: 'cancel'
               },
               {
                 text: 'OK',
                 onPress: () => {
                   props.navigation.navigate('LogIn', { logOut: true });
-                },
-              },
+                }
+              }
             ],
-            { cancelable: true },
+            { cancelable: true }
           );
         },
-        header: null,
-      },
-    },
+        header: null
+      }
+    }
   },
   {
     defaultNavigationOptions: ({ navigation }) => ({
@@ -126,7 +118,7 @@ export default createBottomTabNavigator(
           <View style={styles.tabBarItemContainer}>
             <FA
               style={{
-                fontSize: 20,
+                fontSize: 20
               }}
               name={iconName}
               backgroundColor="transparent"
@@ -134,7 +126,7 @@ export default createBottomTabNavigator(
             />
           </View>
         );
-      },
+      }
     }),
     tabBarPosition: 'bottom',
     animationEnabled: false,
@@ -145,8 +137,8 @@ export default createBottomTabNavigator(
       style: {
         backgroundColor: colors.white,
         borderTopWidth: 0.5,
-        borderTopColor: '#d6d6d6',
-      },
-    },
-  },
+        borderTopColor: '#d6d6d6'
+      }
+    }
+  }
 );

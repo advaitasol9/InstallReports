@@ -1,20 +1,17 @@
 import React from 'react';
 import { compose, withState, lifecycle } from 'recompose';
-import {
-  View, StyleSheet, Text, TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import FA from 'react-native-vector-icons/FontAwesome5';
 import moment from 'moment';
 
-
 import { colors } from '../styles';
 
-const checkFilter = (props) => {
+const checkFilter = props => {
   if (!props.checked) {
     const arr = props.filter;
     arr.push({
       title: props.title,
-      id: props.id,
+      id: props.id
     });
     props.setFilters(arr);
   } else {
@@ -41,17 +38,10 @@ const CheckBox = props => (
       }
     }}
   >
-    <View
-      style={[
-        styles.accordionChecbox,
-        { backgroundColor: props.checked ? colors.blue : colors.white },
-      ]}
-    >
+    <View style={[styles.accordionChecbox, { backgroundColor: props.checked ? colors.blue : colors.white }]}>
       <FA name="check" color={colors.white} style={{ fontSize: 10 }} />
     </View>
-    <Text style={{ marginLeft: 8 }}>
-      {props.date ? moment(props.title).format('MM/DD/YY') : props.title}
-    </Text>
+    <Text style={{ marginLeft: 8 }}>{props.date ? moment(props.title).format('MM/DD/YY') : props.title}</Text>
   </TouchableOpacity>
 );
 
@@ -60,7 +50,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 16
   },
   accordionChecbox: {
     height: 18,
@@ -68,8 +58,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.blue,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center'
+  }
 });
 
 export default compose(
@@ -77,7 +67,7 @@ export default compose(
   lifecycle({
     componentDidMount() {
       const arr = this.props.filter;
-      arr.forEach((item) => {
+      arr.forEach(item => {
         if (this.props.forQuestionList) {
           if (item === this.props.title) {
             this.props.setChecked(true);
@@ -86,6 +76,6 @@ export default compose(
           this.props.setChecked(true);
         }
       });
-    },
-  }),
+    }
+  })
 )(CheckBox);

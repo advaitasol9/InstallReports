@@ -3,9 +3,7 @@ import { connect } from 'react-redux';
 import { setOrderList, setActivityId, setItemId, setWorkOrdersFullCount } from './WorkOrderState';
 import { apiGetActivities } from '../../core/api';
 
-import {
-  Image,
-} from 'react-native';
+import { Image } from 'react-native';
 import WorkOrderScreen from './WorkOrderView';
 
 export default compose(
@@ -15,13 +13,13 @@ export default compose(
       connectionStatus: state.app.isConnected,
       changes: state.workOrder.changesInOffline,
       orderList: state.workOrder.orderList,
-      workOrdersFullCount: state.workOrder.workOrdersFullCount,
+      workOrdersFullCount: state.workOrder.workOrdersFullCount
     }),
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
       setActivityId: id => dispatch(setActivityId(id)),
-      setWorkOrdersFullCount: id => dispatch(setWorkOrdersFullCount(id)),
-    }),
+      setWorkOrdersFullCount: id => dispatch(setWorkOrdersFullCount(id))
+    })
   ),
   withState('changesInOffline', 'setChangesInOffline', 0),
   withState('isLoaded', 'setLoaded', false),
@@ -40,6 +38,6 @@ export default compose(
       this._subscribe = this.props.navigation.addListener('didFocus', () => {
         this.props.setChangesInOffline(this.props.changes.length);
       });
-    },
-  }),
+    }
+  })
 )(WorkOrderScreen);

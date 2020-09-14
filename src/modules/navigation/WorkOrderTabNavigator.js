@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-  View, StyleSheet, Dimensions,
-} from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { createBottomTabNavigator, createDrawerNavigator, createSwitchNavigator } from 'react-navigation';
 import FA from 'react-native-vector-icons/FontAwesome5';
 
@@ -29,20 +27,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: colors.white,
-    paddingHorizontal: 10,
+    paddingHorizontal: 10
   },
   tabBarIcon: {
     width: 23,
-    height: 23,
+    height: 23
   },
   tabBarIconFocused: {
-    tintColor: colors.primary,
+    tintColor: colors.primary
   },
   headerContainer: {
     height: 70,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingBottom: 10,
+    paddingBottom: 10
   },
   headerImage: {
     position: 'absolute',
@@ -50,40 +48,40 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: 70,
+    height: 70
   },
   headerCaption: {
     fontFamily: fonts.primaryRegular,
     color: colors.white,
-    fontSize: 18,
-  },
+    fontSize: 18
+  }
 });
 
 const DetailsStack = createSwitchNavigator({
   DetailsMain: {
     screen: DetailsScreen,
     navigationOptions: {
-      header: null,
-    },
+      header: null
+    }
   },
   DetailsPartial: {
     screen: DetailsScreenPartial,
     navigationOptions: {
-      header: null,
-    },
+      header: null
+    }
   },
   DetailsFail: {
     screen: DetailsScreenFailure,
     navigationOptions: {
-      header: null,
-    },
+      header: null
+    }
   },
   DetailsPreInstall: {
     screen: DetailsScreenPreInstall,
     navigationOptions: {
-      header: null,
-    },
-  },
+      header: null
+    }
+  }
 });
 
 const WorkOrder = createBottomTabNavigator(
@@ -91,33 +89,33 @@ const WorkOrder = createBottomTabNavigator(
     Details: {
       screen: DetailsStack,
       navigationOptions: {
-        header: null,
-      },
+        header: null
+      }
     },
     Docs: {
       screen: DocsScreen,
       navigationOptions: {
-        header: null,
-      },
+        header: null
+      }
     },
     Questions: {
       screen: QuestionsScreen,
       navigationOptions: {
-        header: null,
-      },
+        header: null
+      }
     },
     Message: {
       screen: CommentScreen,
       navigationOptions: {
-        header: null,
-      },
+        header: null
+      }
     },
     Manager: {
       screen: ManagerScreen,
       navigationOptions: {
-        header: null,
-      },
-    },
+        header: null
+      }
+    }
   },
   {
     defaultNavigationOptions: ({ navigation }) => ({
@@ -148,7 +146,7 @@ const WorkOrder = createBottomTabNavigator(
           <View style={styles.tabBarItemContainer}>
             <FA
               style={{
-                fontSize: 20,
+                fontSize: 20
               }}
               name={iconName}
               backgroundColor="transparent"
@@ -156,7 +154,7 @@ const WorkOrder = createBottomTabNavigator(
             />
           </View>
         );
-      },
+      }
     }),
     tabBarPosition: 'bottom',
     animationEnabled: false,
@@ -167,20 +165,22 @@ const WorkOrder = createBottomTabNavigator(
       style: {
         backgroundColor: colors.white,
         borderTopWidth: 0.5,
-        borderTopColor: '#d6d6d6',
-      },
-    },
-  },
+        borderTopColor: '#d6d6d6'
+      }
+    }
+  }
 );
 
-
-export default createDrawerNavigator({
-  HomeTabs: {
-    screen: WorkOrder,
+export default createDrawerNavigator(
+  {
+    HomeTabs: {
+      screen: WorkOrder
+    }
   },
-}, {
-  drawerWidth: screenWidth * 0.85,
-  backgroundColor: colors.grey,
-  drawerPosition: 'right',
-  contentComponent: props => <SideMenu {...props} />,
-});
+  {
+    drawerWidth: screenWidth * 0.85,
+    backgroundColor: colors.grey,
+    drawerPosition: 'right',
+    contentComponent: props => <SideMenu {...props} />
+  }
+);

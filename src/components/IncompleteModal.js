@@ -2,9 +2,7 @@ import React from 'react';
 import { compose } from 'recompose';
 import { connect } from 'react-redux';
 import { withNavigation } from 'react-navigation';
-import {
-  View, Dimensions, StyleSheet, Text, Modal,
-} from 'react-native';
+import { View, Dimensions, StyleSheet, Text, Modal } from 'react-native';
 
 import Button from './Button';
 import { setIncompleteModalVisible } from '../modules/AppState';
@@ -16,18 +14,13 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 const ManagerModal = props => (
-  <Modal
-    animationType="fade"
-    transparent
-    visible
-  >
+  <Modal animationType="fade" transparent visible>
     <View style={styles.modalContainer}>
       <View style={styles.background} />
       <View style={styles.modalForm}>
         <Text style={styles.modalTitle}>Work Order Incomplete</Text>
         <Text style={styles.modalText}>
-          All Installer Questions must be answered completely before you can
-          access this section. Please review and be sure all requested information and photos
+          All Installer Questions must be answered completely before you can access this section. Please review and be sure all requested information and photos
           have been provided.
         </Text>
         <View style={styles.buttonRow}>
@@ -58,7 +51,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 3,
+    zIndex: 3
   },
   background: {
     position: 'absolute',
@@ -67,7 +60,7 @@ const styles = StyleSheet.create({
     height: screenHeight,
     width: screenWidth,
     backgroundColor: colors.black,
-    opacity: 0.5,
+    opacity: 0.5
   },
   modalForm: {
     width: screenWidth * 0.9,
@@ -75,29 +68,29 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     paddingVertical: 32,
     paddingHorizontal: 16,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   modalTitle: {
-    fontSize: 28,
+    fontSize: 28
   },
   modalText: {
     fontSize: 16,
-    paddingTop: 32,
+    paddingTop: 32
   },
   buttonRow: {
     width: '100%',
     flexDirection: 'row',
-    paddingTop: 32,
-  },
+    paddingTop: 32
+  }
 });
 
 export default compose(
   connect(
     state => ({
-      isModalVisible: state.app.isIncompleteModal,
+      isModalVisible: state.app.isIncompleteModal
     }),
     dispatch => ({
-      setModalVisible: payload => dispatch(setIncompleteModalVisible(payload)),
-    }),
-  ),
+      setModalVisible: payload => dispatch(setIncompleteModalVisible(payload))
+    })
+  )
 )(withNavigation(ManagerModal));

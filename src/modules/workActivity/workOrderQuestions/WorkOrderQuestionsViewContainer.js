@@ -14,14 +14,14 @@ export default compose(
       activityId: state.workOrder.activityId,
       photos: state.workOrderQuestion.questionsPhotos,
       connectionStatus: state.app.isConnected,
-      orderList: state.workOrder.orderList,
+      orderList: state.workOrder.orderList
     }),
     dispatch => ({
       setActivityId: id => dispatch(setActivityId(id)),
       addPhoto: arr => dispatch(addQuestionPhoto(arr)),
       clearPhotos: () => dispatch(clearPhotos()),
-      setChanges: arr => dispatch(setChanges(arr)),
-    }),
+      setChanges: arr => dispatch(setChanges(arr))
+    })
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
   withState('activityData', 'setActivityData', {}),
@@ -31,21 +31,18 @@ export default compose(
   lifecycle({
     componentWillMount() {
       if (this.props.connectionStatus) {
-        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token)
-          .then((response) => {
-            this.props.setActivityData({
-              ...response.data,
-              installer_questions_answers: JSON.parse(response.data.installer_questions_answers),
-            });
-            this.props.clearPhotos();
-            this.props.setIsloading(false);
+        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token).then(response => {
+          this.props.setActivityData({
+            ...response.data,
+            installer_questions_answers: JSON.parse(response.data.installer_questions_answers)
           });
+          this.props.clearPhotos();
+          this.props.setIsloading(false);
+        });
       } else {
-        this.props.setActivityData(
-          this.props.orderList.filter(order => order.id === this.props.activityId)[0],
-        );
+        this.props.setActivityData(this.props.orderList.filter(order => order.id === this.props.activityId)[0]);
         this.props.setIsloading(false);
       }
-    },
-  }),
+    }
+  })
 )(WorkOrderQuestionsView);

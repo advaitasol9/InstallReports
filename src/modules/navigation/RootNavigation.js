@@ -11,50 +11,53 @@ const AuthStack = createStackNavigator({
   LogIn: {
     screen: AuthScreen,
     navigationOptions: {
-      header: null,
-    },
-  },
+      header: null
+    }
+  }
 });
 
 const PdfStack = createStackNavigator({
   PdfDoc: {
     screen: PdfScreen,
     navigationOptions: {
-      header: null,
-    },
-  },
+      header: null
+    }
+  }
 });
 
 const CameraStack = createStackNavigator({
   Camera: {
     screen: CameraScreen,
     navigationOptions: {
-      header: null,
-    },
-  },
+      header: null
+    }
+  }
 });
 
-const RootStack = createSwitchNavigator({
-  Auth: {
-    screen: AuthStack,
-    navigationOptions: {
-      header: null,
+const RootStack = createSwitchNavigator(
+  {
+    Auth: {
+      screen: AuthStack,
+      navigationOptions: {
+        header: null
+      }
     },
+    Home: {
+      screen: MainTabNavigator
+    },
+    WorkOrder: {
+      screen: WorkOrderTabNavigator
+    },
+    CameraStack: {
+      screen: CameraStack
+    },
+    PdfStack: {
+      screen: PdfStack
+    }
   },
-  Home: {
-    screen: MainTabNavigator,
-  },
-  WorkOrder: {
-    screen: WorkOrderTabNavigator,
-  },
-  CameraStack: {
-    screen: CameraStack,
-  },
-  PdfStack: {
-    screen: PdfStack,
-  },
-}, {
-  initialRouteName: 'Auth',
-});
+  {
+    initialRouteName: 'Auth'
+  }
+);
 
 export default createAppContainer(RootStack);

@@ -1,6 +1,4 @@
-import {
-  compose, withState, lifecycle,
-} from 'recompose';
+import { compose, withState, lifecycle } from 'recompose';
 import { connect } from 'react-redux';
 import { addFailPhoto } from './DetailFailState';
 
@@ -18,14 +16,14 @@ export default compose(
       activityId: state.workOrder.activityId,
       connectionStatus: state.app.isConnected,
       token: state.profile.security_token.token,
-      photos: state.detailFail.photos,
+      photos: state.detailFail.photos
     }),
     dispatch => ({
       setChanges: arr => dispatch(setChanges(arr)),
       setModalVisible: payload => dispatch(setFailedModalVisible(payload)),
       setActivityId: id => dispatch(setActivityId(id)),
-      addPhoto: arr => dispatch(addFailPhoto(arr)),
-    }),
+      addPhoto: arr => dispatch(addFailPhoto(arr))
+    })
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
   withState('comment', 'setComment', ''),
@@ -35,10 +33,9 @@ export default compose(
     componentDidMount() {
       this.props.setNumOfChanges(this.props.changes.length);
 
-      if (this.props.navigation.state.params
-        && this.props.navigation.state.params.screenData.text) {
+      if (this.props.navigation.state.params && this.props.navigation.state.params.screenData.text) {
         this.props.setComment(this.props.navigation.state.params.screenData.text);
       }
-    },
-  }),
+    }
+  })
 )(DetailFailView);
