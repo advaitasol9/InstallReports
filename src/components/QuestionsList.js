@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Text, TextInput, Image, Alert, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TextInput, FlatList, Image, Alert, TouchableOpacity } from 'react-native';
 import { compose, lifecycle } from 'recompose';
 import { Dropdown } from 'react-native-material-dropdown';
 import IO from 'react-native-vector-icons/Ionicons';
@@ -10,7 +10,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 
 import Button from './Button';
 import CheckBox from './CheckBox';
-import { colors } from '../styles';
+import { colors, commonStyles } from '../styles';
 
 const options = {
   quality: 1.0,
@@ -48,6 +48,25 @@ const QuestionsList = props => {
         </View>
       );
     }
+    return null;
+  };
+
+  const renderInstallerPhotos = (photo, index, order) => {
+    return (
+      <View style={{ position: 'relative' }} key={photo.file_id}>
+        <TouchableOpacity
+          style={styles.delPhoto}
+          onPress={async () => {
+            props.deleteInstallerPhotos(photo);
+            props.updateAnswers();
+          }}
+        >
+          <View style={styles.whiteBackground} />
+          <IO style={styles.delIcon} name="md-close-circle" />
+        </TouchableOpacity>
+        <Image source={{ uri: photo.url }} style={styles.photoBlock} />
+      </View>
+    );
     return null;
   };
 
@@ -109,7 +128,7 @@ const QuestionsList = props => {
     </View>
   );
 
-  const renderChecklist = item => {
+  const renderChecklist = (item, images) => {
     const answer = new Set(item.answers);
     let data = [];
     Object.keys(item.values).forEach(key => {
@@ -143,12 +162,13 @@ const QuestionsList = props => {
         })}
         {item.allow_photos && renderAddPhotoButton(item.order)}
         {item.allow_photos && <View style={styles.photoSection}>{props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}</View>}
+        {<View style={styles.photoSection}>{images.map((data, index) => renderInstallerPhotos(data, index, item.order))}</View>}
         {item.required && <Required />}
       </View>
     );
   };
 
-  const renderFreeform = item => (
+  const renderFreeform = (item, images) => (
     <View style={({ width: '100%' }, this.zebraStyle(item.order))} key={item.order}>
       <Text style={{ marginTop: 12, paddingBottom: 12 }}>
         {item.order}. {item.text}
@@ -166,11 +186,12 @@ const QuestionsList = props => {
       />
       {item.allow_photos && renderAddPhotoButton(item.order)}
       {item.allow_photos && <View style={styles.photoSection}>{props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}</View>}
+      {<View style={styles.photoSection}>{images.map((data, index) => renderInstallerPhotos(data, index, item.order))}</View>}
       {item.required && <Required />}
     </View>
   );
 
-  const renderDropdown = item => {
+  const renderDropdown = (item, images) => {
     let data = [];
     Object.keys(item.values).forEach(key => {
       data.push({ key: key, value: item.values[key] });
@@ -193,6 +214,7 @@ const QuestionsList = props => {
         />
         {item.allow_photos && renderAddPhotoButton(item.order)}
         {item.allow_photos && <View style={styles.photoSection}>{props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}</View>}
+        {<View style={styles.photoSection}>{images.map((data, index) => renderInstallerPhotos(data, index, item.order))}</View>}
         {item.required && <Required />}
       </View>
     );
@@ -222,7 +244,7 @@ const QuestionsList = props => {
     props.updateAnswers();
   };
 
-  const renderSignature = item => {
+  const renderSignature = (item, images) => {
     const signature = [];
     return (
       <View style={({ width: '100%' }, this.zebraStyle(item.order))} key={item.order}>
@@ -273,12 +295,17 @@ const QuestionsList = props => {
         />
         {item.allow_photos && renderAddPhotoButton(item.order)}
         {item.allow_photos && <View style={styles.photoSection}>{props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}</View>}
+        {/* {(
+          <View style={styles.photoSection}>
+            {images.map((data, index) => renderInstallerPhotos(data, index, item.order))}
+          </View>
+        )} */}
         {item.required && <Required />}
       </View>
     );
   };
 
-  const renderPhotoQuestion = item => {
+  const renderPhotoQuestion = (item, images) => {
     return (
       <View style={({ width: '100%' }, this.zebraStyle(item.order))} key={item.order}>
         <Text style={{ marginTop: 12, paddingBottom: 12 }}>
@@ -286,29 +313,40 @@ const QuestionsList = props => {
         </Text>
         {renderAddPhotoButton(item.order)}
         {<View style={styles.photoSection}>{props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}</View>}
+        {<View style={styles.photoSection}>{images.map((data, index) => renderInstallerPhotos(data, index, item.order))}</View>}
         {item.required && <Required />}
       </View>
     );
   };
 
+  const getImageUrlsByQuestonOrderId = (photo_data, orderId) => {
+    var data = [];
+    photo_data.map((item, index) => {
+      if (item.question_order_id == orderId) {
+        data = item.data;
+      }
+    });
+    return data;
+  };
+
   return (
     <View>
       {props.questions &&
-        props.questions.map(item => {
+        props.questions.map((item, index) => {
           if (item.type === 'checklist') {
-            return renderChecklist(item);
+            return renderChecklist(item, getImageUrlsByQuestonOrderId(props.questions_photos, item.order));
           }
           if (item.type === 'freeform') {
-            return renderFreeform(item);
+            return renderFreeform(item, getImageUrlsByQuestonOrderId(props.questions_photos, item.order));
           }
           if (item.type === 'dropdown') {
-            return renderDropdown(item);
+            return renderDropdown(item, getImageUrlsByQuestonOrderId(props.questions_photos, item.order));
           }
           if (item.type === 'signature') {
-            return renderSignature(item);
+            return renderSignature(item, getImageUrlsByQuestonOrderId(props.questions_photos, item.order));
           }
           if (item.type === 'photo') {
-            return renderPhotoQuestion(item);
+            return renderPhotoQuestion(item, getImageUrlsByQuestonOrderId(props.questions_photos, item.order));
           }
           return true;
         })}

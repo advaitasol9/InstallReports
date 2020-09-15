@@ -20,8 +20,8 @@ const ManagerModal = props => (
       <View style={styles.modalForm}>
         <Text style={styles.modalTitle}>Work Order Incomplete</Text>
         <Text style={styles.modalText}>
-          All Installer Questions must be answered completely before you can access this section. Please review and be sure all requested information and photos
-          have been provided.
+          All required Installer Questions must be answered and submitted using the 'Submit' button before you can access this section. Please review and be
+          sure all required information and photos have been provided.
         </Text>
         <View style={styles.buttonRow}>
           <Button

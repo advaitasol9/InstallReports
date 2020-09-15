@@ -282,7 +282,6 @@ export const apiPatchAnswers = (method, body, token) => {
   return fetch(url, options)
     .then(response => {
       if (response && (response.status === 200 || response.status === 201)) {
-        //console.log(response.json());
         return response;
       }
       throw [response, CURL, 'apiPatchAnswers'];

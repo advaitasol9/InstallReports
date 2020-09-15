@@ -68,8 +68,10 @@ export default compose(
     componentDidMount() {
       const arr = this.props.filter;
       arr.forEach(item => {
+        var setNewValue = this.props.title.replace(' ', '_');
+        const value = setNewValue.toLowerCase();
         if (this.props.forQuestionList) {
-          if (item === this.props.title) {
+          if (item === value) {
             this.props.setChecked(true);
           }
         } else if (item.id === this.props.id) {

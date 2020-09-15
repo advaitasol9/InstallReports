@@ -54,6 +54,13 @@ export default class WorkOrderManagerView extends Component {
     };
   }
 
+  componentDidMount() {
+    setTimeout(() => {
+      console.log('manager view');
+      this.updateAnswers();
+    }, 1000);
+  }
+
   updateAnswers = () => {
     let isAllRequiredQuestionsAnswered = true;
     const managerQuestions = this.props.activityData.manager_questions_answers;
@@ -141,14 +148,102 @@ export default class WorkOrderManagerView extends Component {
               if (this.props.connectionStatus) {
                 apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token).then(async response => {
                   const installerAnswers = JSON.parse(response.data.installer_questions_answers);
+
+                  var photoIds = [];
+                  var manager_answers_photos = [];
+
+                  JSON.parse(response.data.manager_questions_answers).map(questions => {
+                    if (questions.type == 'photo') {
+                      var tempIds = [];
+                      var dataArray = [];
+                      if (questions.answers != undefined) {
+                        questions.answers.map(item => {
+                          photoIds.push(item);
+                          tempIds.push(item);
+                        });
+                        tempIds.map(dataId => {
+                          dataArray.push({ file_id: dataId });
+                        });
+                        manager_answers_photos.push({
+                          question_order_id: questions.order,
+                          data: dataArray
+                        });
+                      }
+                    } else if (questions.type == 'signature') {
+                      if (questions.answers != undefined) {
+                        var tempIds = [];
+                        var dataArray = [];
+                        photoIds.push(questions.answers);
+                        tempIds.push(questions.answers);
+                        tempIds.map(dataId => {
+                          dataArray.push({ file_id: questions.answers });
+                        });
+                        manager_answers_photos.push({
+                          question_order_id: questions.order,
+                          data: dataArray
+                        });
+                      }
+                    } else {
+                      var tempIds = [];
+                      var dataArray = [];
+                      if (questions.photo != undefined) {
+                        questions.photo.map(item => {
+                          photoIds.push(item);
+                          tempIds.push(item);
+                        });
+                        tempIds.map(dataId => {
+                          dataArray.push({ file_id: dataId });
+                        });
+                        manager_answers_photos.push({
+                          question_order_id: questions.order,
+                          data: dataArray
+                        });
+                      }
+                    }
+                  });
+
+                  if (photoIds.length != 0) {
+                    await apiGet(`files?search={"id":[` + photoIds + `]}`, this.props.token).then(res => {
+                      if (res.data) {
+                        manager_answers_photos.map(questions => {
+                          questions.data.map((photo, index) => {
+                            res.data.filter(e => {
+                              e.id === photo.file_id ? (questions.data[index] = { url: e.s3_location, file_id: e.id }) : [];
+                            });
+                          });
+                        });
+                      }
+                    });
+                  }
+
                   this.props.setActivityData({
                     ...response.data,
-                    manager_questions_answers: JSON.parse(response.data.manager_questions_answers)
+                    manager_questions_answers: JSON.parse(response.data.manager_questions_answers),
+                    installer_questions_photos: manager_answers_photos
                   });
+                  this.props.clearPhotos();
                   this.props.setIsloading(false);
-                  if (installerAnswers.length == 0 || installerAnswers.filter(answer => answer.answers != '').length == 0) {
-                    this.props.setIsIncompleteOpen(true);
-                  }
+                  installerAnswers.map(question => {
+                    if (question.required) {
+                      if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
+                        if (question.allow_photos && !(question.photo != undefined ? question.photo.length > 0 : false)) {
+                          this.props.setIsIncompleteOpen(true);
+                        } else if (question.answers == '') {
+                          this.props.setIsIncompleteOpen(true);
+                        }
+                      } else if (question.type == 'photo') {
+                        if (!(question.answers != undefined ? question.answers.length > 0 : false)) {
+                          this.props.setIsIncompleteOpen(true);
+                        }
+                      } else if (question.type == 'signature') {
+                        console.log(question);
+                        if (!(question.answers != undefined ? question.answers != null : false)) {
+                          this.props.setIsIncompleteOpen(true);
+                        } else {
+                        }
+                      }
+                    }
+                  });
                 });
               } else {
                 this.props.setActivityData(this.props.orderList.filter(order => order.id === this.props.activityId)[0]);
@@ -173,6 +268,7 @@ export default class WorkOrderManagerView extends Component {
               <View style={[styles.scrollContainer, { borderBottomWidth: 0 }]}>
                 <QuestionsList
                   questions={this.props.activityData.manager_questions_answers}
+                  questions_photos={this.props.activityData.installer_questions_photos}
                   photos={this.props.photos}
                   addPhoto={this.props.addPhoto}
                   screen="Manager"
