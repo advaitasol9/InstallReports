@@ -38,6 +38,9 @@ export default compose(
       this._subscribe = this.props.navigation.addListener('didFocus', () => {
         this.props.setChangesInOffline(this.props.changes.length);
       });
+    },
+    async componentWillUnmount() {
+      this._subscribe.remove();
     }
   })
 )(WorkOrderScreen);

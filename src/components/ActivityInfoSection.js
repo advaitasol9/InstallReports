@@ -1,7 +1,8 @@
 // @flow
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-
+import { View, TouchableOpacity, Text, StyleSheet, Linking } from 'react-native';
+import Geocode from 'react-geocode';
+import RNLocation from 'react-native-location';
 import { colors } from '../styles';
 
 const ActivityInfoSection = props => (
@@ -26,7 +27,46 @@ const ActivityInfoSection = props => (
         {props.activityData.state && `${props.activityData.state} `}
         {props.activityData.zip && `${props.activityData.zip}`}
       </Text>
-      <TouchableOpacity style={{ width: 100, paddingTop: 8 }} onPress={() => props.navigation.navigate('Work Order')}>
+      <TouchableOpacity
+        style={{ width: 100, paddingTop: 8 }}
+        onPress={() => {
+          //console.log(props.activityData);
+          Geocode.setApiKey('AIzaSyBoupsj11qhEKGUVQeJpp9tx4dB-GG2YjI');
+          const destination = `${props.activityData.address_1},${props.activityData.city}, ${props.activityData.state} ${props.activityData.zip}`.replace(
+            /[ ,.]/g,
+            '+'
+          );
+          RNLocation.configure({
+            distanceFilter: 5.0
+          });
+
+          RNLocation.requestPermission({
+            ios: 'whenInUse',
+            android: {
+              detail: 'coarse'
+            }
+          }).then(granted => {
+            if (granted) {
+              const unsubscribe = RNLocation.subscribeToLocationUpdates(async locations => {
+                unsubscribe();
+                const currentLongitude = await JSON.stringify(locations[0].longitude);
+                const currentLatitude = await JSON.stringify(locations[0].latitude);
+
+                const geocodeRes = await Geocode.fromLatLng(currentLatitude, currentLongitude);
+                console.log(geocodeRes);
+                const address = geocodeRes.results[0].formatted_address.replace(/[ ,.]/g, '+');
+                const url = `https://www.google.com/maps/dir/${address}/${destination}`;
+
+                try {
+                  await Linking.openURL(url);
+                } catch (error) {
+                  console.log(error);
+                }
+              });
+            }
+          });
+        }}
+      >
         <Text style={styles.linkButton}>Directions</Text>
       </TouchableOpacity>
     </View>

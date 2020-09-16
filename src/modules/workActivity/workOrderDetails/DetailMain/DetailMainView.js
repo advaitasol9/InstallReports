@@ -36,6 +36,7 @@ export default class DetailMainView extends Component {
     }).then(granted => {
       if (granted) {
         const unsubscribe = RNLocation.subscribeToLocationUpdates(async locations => {
+          unsubscribe();
           const currentLongitude = await JSON.stringify(locations[0].longitude);
           const currentLatitude = await JSON.stringify(locations[0].latitude);
 
@@ -47,10 +48,6 @@ export default class DetailMainView extends Component {
             await Linking.openURL(url);
           } catch (error) {
             console.log(error);
-          }
-
-          if (unsubscribe) {
-            unsubscribe();
           }
         });
       }
@@ -83,7 +80,6 @@ export default class DetailMainView extends Component {
         </View>
       );
     }
-
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor={colors.lightGray} />
