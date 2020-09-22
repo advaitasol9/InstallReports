@@ -84,7 +84,7 @@ export default class AuthScreen extends React.Component {
           }
         });
       } else {
-        Alert.alert('Select Environment');
+        Alert.alert('Select Environment', 'Click the "Change environment" button and select the Environment');
       }
     }
   }
@@ -192,7 +192,7 @@ export default class AuthScreen extends React.Component {
                   </Text>
                 </TouchableOpacity>
               )}
-           
+
               {!this.state.isKeyboardVisible && !this.state.dropdownVisible && (
                 <Animated.View style={styles.dropdownNew}>
                   <Dropdown
@@ -212,7 +212,7 @@ export default class AuthScreen extends React.Component {
                   />
                 </Animated.View>
               )}
-                 {!this.state.isKeyboardVisible && (
+              {!this.state.isKeyboardVisible && (
                 <TouchableOpacity
                   onPress={() => {
                     this.dropDownRef.focus();
@@ -224,8 +224,8 @@ export default class AuthScreen extends React.Component {
                       color: colors.white,
                       fontFamily: fonts.primaryRegular,
                       flexDirection: 'column',
-                      marginTop:70,
-                      fontSize:11
+                      marginBottom: 70,
+                      fontSize: 11
                     }}
                   >
                     Change Environment
@@ -294,6 +294,6 @@ const styles = StyleSheet.create({
     alignSelf: 'auto',
     paddingBottom: Platform.OS === 'android' ? 30 : 0,
     width: 130,
-    color: 'white',
+    color: 'white'
   }
 });
