@@ -144,8 +144,8 @@ export default function WorkOrderCommentView(props) {
                     await props.addPhoto([]);
                     await props.setComment('');
                   } else {
-                    const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&undefined=`;
-                    await apiPostComment(`activities/${props.activityId}/comments`, data, props.token)
+                    const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=installer`;
+                    await apiPostComment(`spectrum/activities/${props.activityId}/comments`, data, props.token)
                       .then(resPostText => {
                         if (props.photos.length > 0) {
                           props.photos.forEach(item => {
@@ -227,11 +227,12 @@ export default function WorkOrderCommentView(props) {
                           />
                         );
                       }
-                      if (photo.file_type === 'pdf') {
+                      if (photo.file_type === 'pdf' || photo.file_type === 'application/pdf') {
                         return (
                           <TouchableOpacity
                             onPress={() => {
-                              props.navigation.navigate('PdfDoc', { uri: photo.s3_location });
+                              // props.navigation.navigate('PdfDoc', { uri: photo.s3_location });
+                              props.navigation.navigate('PdfDoc', { uri: photo.s3_location, name: photo.name, type: photo.file_type });
                             }}
                           >
                             <Image
