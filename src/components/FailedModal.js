@@ -114,8 +114,8 @@ class FailedModalComponent extends Component {
                       });
                     } else {
                       try {
-                        const data = `text=${this.props.mainProps.comment}&user_id=${this.props.mainProps.accountId}&channel=installer`;
-                        apiPostComment(`activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then(resPostText => {
+                        const data = `text=${this.props.mainProps.comment}&user_id=%5B${this.props.mainProps.accountId}%5D&channel=installer`;
+                        apiPostComment(`spectrum/activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then(resPostText => {
                           Promise.all([
                             apiChangeStatus('Failed', this.props.mainProps.activityId, this.props.token),
                             apiPatch(`activities/` + this.props.mainProps.activityId, this.props.token, {

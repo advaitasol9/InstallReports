@@ -120,7 +120,7 @@ class ParialModalComponent extends Component {
                       });
                     } else {
                       const data = `text=${this.props.mainProps.comment}&user_ids=[${this.props.mainProps.accountId}]&channel=installer`;
-                      await apiPostComment(`activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then(resPostText => {
+                      await apiPostComment(`spectrum/activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then(resPostText => {
                         Promise.all([
                           apiChangeStatus('Partial', this.props.mainProps.activityId, this.props.token),
                           apiPatch(`activities/` + this.props.mainProps.activityId, this.props.token, {
