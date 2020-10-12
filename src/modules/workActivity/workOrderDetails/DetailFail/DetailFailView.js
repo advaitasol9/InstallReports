@@ -20,7 +20,8 @@ const options = {
   maxWidth: 500,
   maxHeight: 500,
   storageOptions: {
-    skipBackup: true
+    skipBackup: true,
+    path: 'Install Reports'
   }
 };
 

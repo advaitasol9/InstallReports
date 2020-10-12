@@ -387,10 +387,13 @@ export default class WorkOrderQuestionsView extends Component {
                                   'security-token': this.props.token,
                                   'Content-Type': 'application/octet-stream'
                                 },
-                                RNFetchBlob.wrap(item.uri.replace('file://', ''))
+                                RNFetchBlob.wrap(decodeURI(item.uri.replace('file://', '')))
                               )
+
                                 .then(() => {
-                                  RNFetchBlob.fs.stat(item.uri.replace('file://', '')).then(stats => {
+                                  console.log(encodeURI(item.uri));
+                                  console.log(RNFetchBlob.wrap(item.uri));
+                                  RNFetchBlob.fs.stat(decodeURI(item.uri.replace('file://', ''))).then(stats => {
                                     const formData = new FormData();
                                     formData.append('file_type', 'image/jpeg');
                                     formData.append('name', stats.filename);
