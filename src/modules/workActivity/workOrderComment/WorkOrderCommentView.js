@@ -85,7 +85,7 @@ export default function WorkOrderCommentView(props) {
         />
         <ActivityStatus status={props.activityData.status} />
         <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
-        <ActivityTitle title="Comments" />
+        <ActivityTitle title="Messages" />
         <View
           style={{
             backgroundColor: colors.lightGray,

@@ -106,7 +106,7 @@ const WorkOrder = createBottomTabNavigator(
         header: null,
       },
     },
-    Comment: {
+    Message: {
       screen: CommentScreen,
       navigationOptions: {
         header: null,
@@ -135,7 +135,7 @@ const WorkOrder = createBottomTabNavigator(
           case 'Questions':
             iconName = 'question-circle';
             break;
-          case 'Comment':
+          case 'Message':
             iconName = 'comment-dots';
             break;
           case 'Manager':

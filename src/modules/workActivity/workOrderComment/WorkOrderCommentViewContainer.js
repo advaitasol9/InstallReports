@@ -31,7 +31,8 @@ export default compose(
   lifecycle({
     componentWillMount() {
       this.props.setNumOfChanges(this.props.changes.length);
-console.log('refresh whole comments');
+      console.log('refresh whole comments');
+      clearInterval(this._interval);
 
       if (this.props.navigation.state.params
         && this.props.navigation.state.params.screenData.text) {
@@ -56,5 +57,17 @@ console.log('refresh whole comments');
         this.props.setIsloading(false);
       }
     },
+    componentDidMount() {
+      this._interval = setInterval(() => {
+        if (this.props.activityId == null) {
+          clearInterval(this._interval);
+        } else {
+          apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token)
+            .then((response) => {
+              this.props.setData(response.data.reverse());
+            });
+        }
+      }, 10000);
+    }
   }),
 )(WorkOrderCommentView);
