@@ -119,7 +119,7 @@ class ParialModalComponent extends Component {
                         isLoading: false
                       });
                     } else {
-                      const data = `text=${this.props.mainProps.comment}&user_ids=[${this.props.mainProps.accountId}]`;
+                      const data = `text=${this.props.mainProps.comment}&user_ids=[${this.props.mainProps.accountId}]&channel=installer`;
                       await apiPostComment(`activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then(resPostText => {
                         Promise.all([
                           apiChangeStatus('Partial', this.props.mainProps.activityId, this.props.token),
