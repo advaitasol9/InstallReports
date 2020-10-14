@@ -3,9 +3,10 @@ import { HttpErrorHandler } from './handlers';
 import { HttpErrorAlert } from '../components';
 import fetchToCurl from 'fetch-to-curl';
 import AsyncStorage from '@react-native-community/async-storage';
+import { state } from '../core/mainEnv';
 
 export const apiPostComment = (method, body, token) => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'POST',
     followRedirects: true,
@@ -23,7 +24,6 @@ export const apiPostComment = (method, body, token) => {
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }
-
       throw [response, CURL, 'apiPostComment'];
     })
     .catch(error => {
@@ -34,7 +34,7 @@ export const apiPostComment = (method, body, token) => {
 };
 
 export const apiChangeStatus = (status, activityId, token) => {
-  const url = `${API_PATH}/spectrum/activities/${activityId}/status/${status}`;
+  const url = state.apiPath + `/spectrum/activities/${activityId}/status/${status}`;
   const options = {
     method: 'POST',
     followRedirects: true,
@@ -63,7 +63,7 @@ export const apiChangeStatus = (status, activityId, token) => {
 };
 
 export const apiGetJson = (method, token, contentType = 'application/json') => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'GET',
     mode: 'cors',
@@ -91,7 +91,7 @@ export const apiGetJson = (method, token, contentType = 'application/json') => {
 };
 
 export const apiGet = (method, token, contentType = 'application/json') => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'GET',
     mode: 'cors',
@@ -119,7 +119,7 @@ export const apiGet = (method, token, contentType = 'application/json') => {
 };
 
 export const apiGetActivities = (method, token, contentType = 'application/json') => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'GET',
     mode: 'cors',
@@ -152,7 +152,7 @@ export const apiGetActivities = (method, token, contentType = 'application/json'
 };
 
 export const auth = (method, body) => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'POST',
     headers: {
@@ -161,7 +161,6 @@ export const auth = (method, body) => {
     },
     body
   };
-
   const CURL = fetchToCurl(url, options);
 
   return fetch(url, options)
@@ -182,7 +181,7 @@ export const auth = (method, body) => {
 };
 
 export const logout = (method, token) => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'POST',
     headers: {
@@ -200,7 +199,6 @@ export const logout = (method, token) => {
         await AsyncStorage.removeItem('currentUserData');
         return response.json();
       }
-
       throw [response, CURL, 'logout'];
     })
     .catch(error => {
@@ -211,7 +209,7 @@ export const logout = (method, token) => {
 };
 
 export const apiPostImage = (method, body, token) => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'POST',
     body,
@@ -238,7 +236,7 @@ export const apiPostImage = (method, body, token) => {
 };
 
 export const apiPut = (method, token, body) => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'PUT',
     headers: {
@@ -266,7 +264,7 @@ export const apiPut = (method, token, body) => {
 };
 
 export const apiPatchAnswers = (method, body, token) => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'PATCH',
     body: JSON.stringify(body),
@@ -295,7 +293,7 @@ export const apiPatchAnswers = (method, body, token) => {
 };
 
 export const apiPatch = (method, token, body) => {
-  const url = `${API_PATH}/${method}`;
+  const url = state.apiPath + `/${method}`;
   const options = {
     method: 'PATCH',
     body: JSON.stringify(body),
@@ -315,6 +313,32 @@ export const apiPatch = (method, token, body) => {
       }
 
       throw [response, CURL, 'apiPatch'];
+    })
+    .catch(error => {
+      var errorMsg = HttpErrorHandler.generateErrorMessage(error);
+      HttpErrorAlert(errorMsg);
+      throw errorMsg;
+    });
+};
+export const getEnv = (contentType = 'application/json') => {
+  const url = API_PATH + '/spectrum/environments';
+  const options = {
+    method: 'GET',
+    mode: 'cors',
+    headers: {
+      'Content-Type': contentType
+    }
+  };
+
+  const CURL = fetchToCurl(url, options);
+
+  return fetch(url, options)
+    .then(response => {
+      if (response && (response.status === 200 || response.status === 201)) {
+        return response.json();
+      }
+
+      throw [response, CURL, 'apiGet'];
     })
     .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);

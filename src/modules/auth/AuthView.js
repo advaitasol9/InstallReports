@@ -2,15 +2,19 @@ import React from 'react';
 import { Alert, StyleSheet, View, Text, Animated, Keyboard, Platform, LayoutAnimation, TouchableOpacity, Linking } from 'react-native';
 import { version } from '../../../package.json';
 import { TextInput, Button } from '../../components';
-import { auth } from '../../core/api';
-import { fonts, colors } from '../../styles';
+import { auth, getEnv } from '../../core/api';
+import { Dropdown } from 'react-native-material-dropdown';
+import { fonts, colors, width } from '../../styles';
 import AsyncStorage from '@react-native-community/async-storage';
-
+import { API_PATH } from '../../../env';
+import { setNewPath, state } from '../../core/mainEnv';
 export default class AuthScreen extends React.Component {
   state = {
     anim: new Animated.Value(0),
     // Current visible form
-    isKeyboardVisible: false
+    isKeyboardVisible: false,
+    dropdownVisible: false,
+    env: []
   };
 
   constructor() {
@@ -21,7 +25,20 @@ export default class AuthScreen extends React.Component {
     this.state = { ...this.state, version: formattedVersion };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
+    getEnv()
+      .then(response => {
+        const endpoints = response.data;
+        let data = [];
+        Object.keys(endpoints).forEach(key => {
+          data.push({ key: endpoints[key].end_point_url, value: endpoints[key].name });
+        });
+        this.setState({ env: data });
+      })
+      .catch(err => {
+        // setNewPath(API_PATH);
+      });
+
     this.keyboardDidShowListener = Keyboard.addListener(
       Platform.select({ android: 'keyboardDidShow', ios: 'keyboardWillShow' }),
       this._keyboardDidShow.bind(this)
@@ -48,22 +65,27 @@ export default class AuthScreen extends React.Component {
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
-      auth('login/', formData).then(response => {
-        if (!this.props.connectionStatus) {
-          Alert.alert('There is no connection');
-        }
-        if (response.errorCode) {
-          Alert.alert('A valid email and password must be entered to log in.');
-          this.props.setPassword('');
-        } else {
-          this.props.setPassword('');
-          this.props.setEmail('');
-          this.storeUserData(response.data.user);
-          this.props.setUserInfo(response);
-          this.props.logIn();
-          this.props.navigation.navigate({ routeName: 'Home' });
-        }
-      });
+      if (state.apiPath != '' && state.apiPath != undefined) {
+        auth('login/', formData).then(response => {
+          if (!this.props.connectionStatus) {
+            Alert.alert('There is no connection');
+          }
+          if (response.errorCode) {
+            Alert.alert('A valid email and password must be entered to log in.');
+            this.props.setPassword('');
+          } else {
+            this.props.setPassword('');
+            this.props.setEmail('');
+            this.props.setApiPath(API_PATH);
+            this.storeUserData(response.data.user);
+            this.props.setUserInfo(response);
+            this.props.logIn();
+            this.props.navigation.navigate({ routeName: 'Home' });
+          }
+        });
+      } else {
+        Alert.alert('Select Environment');
+      }
     }
   }
 
@@ -146,12 +168,13 @@ export default class AuthScreen extends React.Component {
                 bgColor="white"
                 textColor={colors.primary}
                 rounded
-                style={{ alignSelf: 'stretch', marginBottom: 10 }}
+                style={{ alignSelf: 'stretch', marginBottom: 10, marginTop: 30 }}
                 caption="Login"
                 onPress={() => {
                   this.setFormData(this.props.password, this.props.email);
                 }}
               />
+
               {!this.state.isKeyboardVisible && (
                 <TouchableOpacity
                   onPress={() => {
@@ -166,6 +189,46 @@ export default class AuthScreen extends React.Component {
                     }}
                   >
                     Forgot your password?
+                  </Text>
+                </TouchableOpacity>
+              )}
+           
+              {!this.state.isKeyboardVisible && !this.state.dropdownVisible && (
+                <Animated.View style={styles.dropdownNew}>
+                  <Dropdown
+                    label="Environment"
+                    data={this.state.env}
+                    baseColor="rgba(255, 255, 255, 0.0)"
+                    value={state.name}
+                    ref={ref => (this.dropDownRef = ref)}
+                    style={{ color: 'rgba(255, 255, 255, 0.0)' }}
+                    dropdownOffset={{ top: 10, left: 0 }}
+                    shadeOpacity={0.12}
+                    onChangeText={text => {
+                      const selectedItem = this.state.env.filter(answer => answer.value == text)[0];
+                      setNewPath(null, selectedItem);
+                      return true;
+                    }}
+                  />
+                </Animated.View>
+              )}
+                 {!this.state.isKeyboardVisible && (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.dropDownRef.focus();
+                  }}
+                  style={{ paddingTop: 30, flexDirection: 'row' }}
+                >
+                  <Text
+                    style={{
+                      color: colors.white,
+                      fontFamily: fonts.primaryRegular,
+                      flexDirection: 'column',
+                      marginTop:70,
+                      fontSize:11
+                    }}
+                  >
+                    Change Environment
                   </Text>
                 </TouchableOpacity>
               )}
@@ -225,5 +288,12 @@ const styles = StyleSheet.create({
   socialButtonCenter: {
     marginLeft: 10,
     marginRight: 10
+  },
+  dropdownNew: {
+    flex: 1,
+    alignSelf: 'auto',
+    paddingBottom: Platform.OS === 'android' ? 30 : 0,
+    width: 130,
+    color: 'white',
   }
 });
