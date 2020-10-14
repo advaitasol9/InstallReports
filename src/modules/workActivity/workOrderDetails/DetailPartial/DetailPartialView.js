@@ -120,7 +120,11 @@ export default class DetailPartialView extends Component {
               multiline
               placeholder="Reason for partial installation"
               style={[styles.inputStyle, { height: 160 }]}
-              onChangeText={text => this.props.setComment(text)}
+              onChangeText={text => {
+                const regex = /(<([^>]+)>)/gi;
+                const result = text.replace(regex, '');
+                this.props.setComment(result);
+              }}
               value={this.props.comment}
             />
             <Required />

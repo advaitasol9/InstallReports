@@ -155,7 +155,11 @@ export default class DetailPartialView extends Component {
               multiline
               placeholder="Pre-Install Comments"
               style={[styles.inputStyle, { height: 160 }]}
-              onChangeText={text => this.props.setComment(text)}
+              onChangeText={text => {
+                const regex = /(<([^>]+)>)/gi;
+                const result = text.replace(regex, '');
+                this.props.setComment(result);
+              }}
               value={this.props.comment}
             />
             <View style={{ marginTop: 24 }}>

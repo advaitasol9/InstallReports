@@ -45,6 +45,12 @@ export default compose(
         });
 
         apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token).then(response => {
+          response.data.map(msg => {
+            const regex = /(<([^>]+)>)/gi;
+            const result = msg.text.replace(regex, '');
+            const result1 = result.replace('&nbsp;',' ');
+            msg.text = result1;
+          });
           this.props.setData(response.data.reverse());
         });
       } else {
@@ -58,6 +64,12 @@ export default compose(
           clearInterval(this._interval);
         } else {
           apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token).then(response => {
+            response.data.map(msg => {
+              const regex = /(<([^>]+)>)/gi;
+              const result = msg.text.replace(regex, '');
+              const result1 = result.replace('&nbsp;', ' ');
+              msg.text = result1;
+            });
             this.props.setData(response.data.reverse());
           });
         }
