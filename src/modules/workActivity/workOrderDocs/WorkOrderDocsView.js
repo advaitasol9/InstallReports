@@ -15,9 +15,14 @@ export default class WorkOrderDocsView extends Component {
     this.state = {
       isImageViewVisible: false
     };
+    
   }
 
+
+
+
   render() {
+    
     const requestLocationPermission = async () => {
       try {
         const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
@@ -61,7 +66,6 @@ export default class WorkOrderDocsView extends Component {
         />
       );
     }
-
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor={colors.lightGray} />
