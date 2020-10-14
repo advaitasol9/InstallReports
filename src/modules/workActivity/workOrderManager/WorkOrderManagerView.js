@@ -38,25 +38,41 @@ const keyboardBehavior = Platform.OS === "ios" ? "padding" : "";
 
 export default class WorkOrderManagerView extends Component {
   constructor(props) {
-    PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    ).then((res) => {
-      if (res === PermissionsAndroid.RESULTS.GRANTED) {
-        Geolocation.getCurrentPosition(
-          (info) => {
-            props.geoLocation.lat = info.coords.latitude;
-            props.geoLocation.lon = info.coords.longitude;
-          },
-          (error) => {
-            console.error("faled");
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-          }
-        );
-      }
-    });
+    if (Platform.OS === 'ios') {
+      Geolocation.requestAuthorization();
+      Geolocation.getCurrentPosition(
+        (position) => {
+          props.geoLocation.lat = position.coords.latitude;
+          props.geoLocation.lon = position.coords.longitude;
+        },
+        (error) => {
+          console.log("map error: ", error);
+          console.log(error.code, error.message);
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
+      );
+
+    } else if (Platform.OS === 'android') {
+      PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      ).then((res) => {
+        if (res === PermissionsAndroid.RESULTS.GRANTED) {
+          Geolocation.getCurrentPosition(
+            (info) => {
+              props.geoLocation.lat = info.coords.latitude;
+              props.geoLocation.lon = info.coords.longitude;
+            },
+            (error) => {
+              console.error("faled");
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+            }
+          );
+        }
+      });
+    }
 
     super(props);
     this.uploadedImagesCount = 0;
@@ -126,8 +142,7 @@ export default class WorkOrderManagerView extends Component {
       ).then((response) => {
         
         apiChangeStatus("Complete", this.props.activityId, this.props.token)
-          .then(async(response) => {
-            
+          .then(async (response) => {
             this.setState({
               isLoading: false,
             });
@@ -159,7 +174,7 @@ export default class WorkOrderManagerView extends Component {
             lat: this.props.geoLocation.lat,
             lon: this.props.geoLocation.lon,
           },
-        }) ,
+        }),
       });
     } catch (error) {
       console.error(error);
