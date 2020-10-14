@@ -48,7 +48,7 @@ export default compose(
                       apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
                         RNFetchBlob.fetch('PUT', res.data.url, {
                           'security-token': this.props.token,
-                          'Content-Type': 'application/octet-stream',
+                          'Content-Type': 'image/jpeg',
                         }, RNFetchBlob.wrap(photo.replace('file://', '')))
                           .then(() => {
                             RNFetchBlob.fs.stat(photo.replace('file://', ''))

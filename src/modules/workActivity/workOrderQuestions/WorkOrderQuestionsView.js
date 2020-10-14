@@ -133,7 +133,7 @@ export default class WorkOrderQuestionsView extends Component {
                           apiGet('aws-s3-presigned-urls', this.props.token).then((res) => {
                             RNFetchBlob.fetch('PUT', res.data.url, {
                               'security-token': this.props.token,
-                              'Content-Type': 'application/octet-stream',
+                              'Content-Type': 'image/jpeg',
                             }, RNFetchBlob.wrap(item.uri.replace('file://', '')))
                               .then(() => {
                                 RNFetchBlob.fs.stat(item.uri.replace('file://', ''))
