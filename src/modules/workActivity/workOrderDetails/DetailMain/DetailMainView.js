@@ -27,9 +27,50 @@ import { BackHandler } from 'react-native';
 
 export default class DetailMainView extends Component {
 
+  linkState = true;
+
   constructor(props) {
     super(props);
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+  }
+
+  handleDirectionLink = () => {
+    Geocode.setApiKey('AIzaSyBoupsj11qhEKGUVQeJpp9tx4dB-GG2YjI');
+                  const destination = `${this.props.activityData.address_1},${this.props.activityData.city}, ${this.props.activityData.state} ${this.props.activityData.zip}`.replace(/[ ,.]/g, '+');
+                  RNLocation.configure({
+                    distanceFilter: 5.0,
+                  });
+
+                  RNLocation.requestPermission({
+                    ios: 'whenInUse',
+                    android: {
+                      detail: 'coarse',
+                    },
+                  }).then((granted) => {
+                    if (granted) {
+                      const unsubscribe = RNLocation.subscribeToLocationUpdates(async (locations) => {
+                        const currentLongitude = await JSON.stringify(locations[0].longitude);
+                        const currentLatitude = await JSON.stringify(locations[0].latitude);
+                        
+                        const geocodeRes = await Geocode.fromLatLng(currentLatitude, currentLongitude);
+                        const address = geocodeRes.results[0].formatted_address.replace(/[ ,.]/g, '+');
+                        const url = `https://www.google.com/maps/dir/${address}/${destination}`;
+                        
+                        try{
+                          await Linking.openURL(url);
+                        }
+                        catch(error){
+                          console.log(error);
+                        }
+
+                        if(unsubscribe){
+                          unsubscribe();
+                        }
+
+                      });
+                      
+                    }
+                  });
   }
 
   handleBackButtonClick = () => {
@@ -126,37 +167,7 @@ export default class DetailMainView extends Component {
               </Text>
               <TouchableOpacity
                 style={{ width: 100, paddingTop: 8 }}
-                onPress={async () => {
-                  Geocode.setApiKey('AIzaSyBoupsj11qhEKGUVQeJpp9tx4dB-GG2YjI');
-                  const destination = `${this.props.activityData.address_1},${this.props.activityData.city}, ${this.props.activityData.state} ${this.props.activityData.zip}`.replace(/[ ,.]/g, '+');
-                  RNLocation.configure({
-                    distanceFilter: 5.0,
-                  });
-
-                  RNLocation.requestPermission({
-                    ios: 'whenInUse',
-                    android: {
-                      detail: 'coarse',
-                    },
-                  }).then((granted) => {
-                    if (granted) {
-                      RNLocation.subscribeToLocationUpdates(async (locations) => {
-                        const currentLongitude = await JSON.stringify(locations[0].longitude);
-                        const currentLatitude = await JSON.stringify(locations[0].latitude);
-                        Geocode.fromLatLng(currentLatitude, currentLongitude).then(
-                          (response) => {
-                            const address = response.results[0].formatted_address.replace(/[ ,.]/g, '+');
-                            const url = `https://www.google.com/maps/dir/${address}/${destination}`;
-                            Linking.openURL(url);
-                          },
-                          (error) => {
-                            console.error(error);
-                          },
-                        );
-                      });
-                    }
-                  });
-                }}
+                onPress={this.handleDirectionLink}
               >
                 <Text style={styles.linkButton}>
                   Directions
