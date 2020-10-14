@@ -108,16 +108,7 @@ export default class DetailFailedView extends Component {
         console.log(e.message)
       }
 
-      RNFetchBlob.fs.readFile(imageUri, 'base64')
-        .then((data) => {
-          this.props.setSignature([data]);
-          RNFetchBlob.fs
-            .unlink(imageUri)
-            .then(() => {
-            })
-            .catch(err => {
-            });
-        })
+      this.props.setSignature([imageUri]);
     }
 
     return (
@@ -229,7 +220,7 @@ export default class DetailFailedView extends Component {
                   folder: 'RNSketchCanvas',
                   filename: 'fail_sign',
                   transparent: false,
-                  imageType: 'jpg'
+                  imageType: 'png'
                 }
               }}
               onStrokeEnd={(path) => {
