@@ -69,7 +69,11 @@ export default function WorkOrderCommentView(props) {
               multiline
               placeholder="Add Comment..."
               style={[styles.inputStyle, { height: 160 }]}
-              onChangeText={text => props.setComment(text)}
+              onChangeText={text => {
+                const regex = /(<([^>]+)>)/gi;
+                const result = text.replace(regex, '');
+                props.setComment(result);
+              }}
               value={props.comment}
             />
             <View style={{ marginTop: 24 }}>
