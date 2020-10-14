@@ -114,6 +114,7 @@ export default class WorkOrderManagerView extends Component {
       this.uploadedImagesCount == this.props.photos.length &&
       this.isSignatureUploaded
     ) {
+      
       await apiPatchAnswers(
         `activities/${this.props.activityData.id}`,
         {
@@ -123,15 +124,19 @@ export default class WorkOrderManagerView extends Component {
         },
         this.props.token
       ).then((response) => {
+        
         apiChangeStatus("Complete", this.props.activityId, this.props.token)
           .then(async(response) => {
+            
             this.setState({
               isLoading: false,
             });
             await this.updateWorkOrderCompleteLocation();
+            this.state.isSubmitBtnDisabled = false;
             this.props.setModalVisible(true);
           })
           .catch((err) => {
+            this.state.isSubmitBtnDisabled = false;
             this.setState({
               isLoading: false,
             });
@@ -141,6 +146,12 @@ export default class WorkOrderManagerView extends Component {
   };
 
   async updateWorkOrderCompleteLocation(){
+    console.log(JSON.stringify({
+      complete: {
+        lat: this.props.geoLocation.lat,
+        lon: this.props.geoLocation.lon,
+      },
+    }));
     try {
       await apiPatch(`activities/` + this.props.activityId, this.props.token, {
         geo_locations: JSON.stringify({
@@ -232,6 +243,7 @@ export default class WorkOrderManagerView extends Component {
                     this.setState({
                       isLoading: true,
                     });
+                    this.state.isSubmitBtnDisabled = true;
                     this.uploadedImagesCount = 0;
                     if (this.props.photos.length > 0) {
                       this.props.photos.forEach((item, photoIndex) => {
