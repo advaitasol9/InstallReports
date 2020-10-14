@@ -39,9 +39,6 @@ const options = {
 };
 
 export default function WorkOrderCommentView(props) {
-
-  console.log("call 1");
-
   const [isLocading, setisLocading] = useState(false);
   const renderPhoto = (photo, index) => {
     const photosCopy = props.photos.slice();
@@ -219,7 +216,7 @@ export default function WorkOrderCommentView(props) {
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
-                caption="Submit 2"
+                caption="Submit"
                 isLoading={isLocading}
               />
             </View>
