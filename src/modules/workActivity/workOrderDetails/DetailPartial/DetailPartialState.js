@@ -1,6 +1,5 @@
-
 const initialState = {
-  photos: [],
+  photos: []
 };
 
 export const ADD_PARTIAL_PHOTO = 'ADD_PARTIAL_PHOTO';
@@ -8,7 +7,7 @@ export const ADD_PARTIAL_PHOTO = 'ADD_PARTIAL_PHOTO';
 export function addPartialPhoto(payload) {
   return {
     type: ADD_PARTIAL_PHOTO,
-    payload,
+    payload
   };
 }
 
@@ -17,7 +16,7 @@ export default function AppStateReducer(state = initialState, action) {
     case ADD_PARTIAL_PHOTO:
       return {
         ...state,
-        photos: action.payload,
+        photos: action.payload
       };
     default:
       return state;

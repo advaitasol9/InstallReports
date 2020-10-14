@@ -3,7 +3,7 @@ const initialState = {
   orderList: [],
   activityId: null,
   itemId: null,
-  workOrdersFullCount: null,
+  workOrdersFullCount: null
 };
 
 export const SET_CHANGES = 'SET_CHANGES';
@@ -15,35 +15,35 @@ export const SET_WORK_ORDERS_FULL_COUNT = 'SET_WORK_ORDERS_FULL_COUNT';
 export function setChanges(payload) {
   return {
     type: SET_CHANGES,
-    payload,
+    payload
   };
 }
 
 export function setOrderList(payload) {
   return {
     type: SET_ORDER_LIST,
-    payload,
+    payload
   };
 }
 
 export function setWorkOrdersFullCount(payload) {
   return {
     type: SET_WORK_ORDERS_FULL_COUNT,
-    payload,
+    payload
   };
 }
 
 export function setActivityId(payload) {
   return {
     type: SET_ACTIVITY_ID,
-    payload,
+    payload
   };
 }
 
 export function setItemId(payload) {
   return {
     type: SET_ITEM_ID,
-    payload,
+    payload
   };
 }
 
@@ -52,27 +52,27 @@ export default function AppStateReducer(state = initialState, action) {
     case SET_CHANGES:
       return {
         ...state,
-        changesInOffline: action.payload,
+        changesInOffline: action.payload
       };
     case SET_ORDER_LIST:
       return {
         ...state,
-        orderList: action.payload,
+        orderList: action.payload
       };
     case SET_ACTIVITY_ID:
       return {
         ...state,
-        activityId: action.payload,
+        activityId: action.payload
       };
     case SET_ITEM_ID:
       return {
         ...state,
-        itemId: action.payload,
+        itemId: action.payload
       };
     case SET_WORK_ORDERS_FULL_COUNT:
       return {
         ...state,
-        workOrdersFullCount: action.payload,
+        workOrdersFullCount: action.payload
       };
     default:
       return state;

@@ -1,6 +1,5 @@
-
 const initialState = {
-  photos: [],
+  photos: []
 };
 
 export const ADD_PREINSTALL_PHOTO = 'ADD_PREINSTALL_PHOTO';
@@ -8,7 +7,7 @@ export const ADD_PREINSTALL_PHOTO = 'ADD_PREINSTALL_PHOTO';
 export function addPreInstallPhoto(payload) {
   return {
     type: ADD_PREINSTALL_PHOTO,
-    payload,
+    payload
   };
 }
 
@@ -17,7 +16,7 @@ export default function AppStateReducer(state = initialState, action) {
     case ADD_PREINSTALL_PHOTO:
       return {
         ...state,
-        photos: action.payload,
+        photos: action.payload
       };
     default:
       return state;

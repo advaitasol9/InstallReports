@@ -9,13 +9,10 @@ export default function Loading() {
       style={{
         alignItems: 'center',
         justifyContent: 'center',
-        flex: 1,
+        flex: 1
       }}
     >
-      <ActivityIndicator
-        size="large"
-        color={colors.primary}
-      />
+      <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }

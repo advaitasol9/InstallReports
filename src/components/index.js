@@ -20,7 +20,6 @@ import CheckBox from './CheckBox';
 import Loading from './Loading';
 import HttpErrorAlert from './HttpErrorAlert';
 
-
 export {
   // ## Generator Components Exports
   QuestionsList,
@@ -42,5 +41,5 @@ export {
   Accordion,
   CheckBox,
   Loading,
-  HttpErrorAlert,
+  HttpErrorAlert
 };

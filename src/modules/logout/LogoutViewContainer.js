@@ -7,6 +7,6 @@ import LogoutView from './LogoutView';
 export default compose(
   connect(
     state => ({}),
-    dispatch => ({}),
-  ),
+    dispatch => ({})
+  )
 )(LogoutView);

@@ -1,6 +1,4 @@
-import {
-  compose, withState, lifecycle,
-} from 'recompose';
+import { compose, withState, lifecycle } from 'recompose';
 import { connect } from 'react-redux';
 import { addPreInstallPhoto } from './DetailPreInstallState';
 
@@ -17,19 +15,18 @@ export default compose(
       activityId: state.workOrder.activityId,
       connectionStatus: state.app.isConnected,
       token: state.profile.security_token.token,
-      photos: state.detailPreInstall.photos,
+      photos: state.detailPreInstall.photos
     }),
     dispatch => ({
       setChanges: arr => dispatch(setChanges(arr)),
       setActivityId: id => dispatch(setActivityId(id)),
-      addPhoto: arr => dispatch(addPreInstallPhoto(arr)),
-    }),
+      addPhoto: arr => dispatch(addPreInstallPhoto(arr))
+    })
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
   withState('activityData', 'setActivityData', {}),
   withState('comment', 'setComment', ''),
-  withState("geoLocation", "setLatLng",{ lat: "", lon: "" },
-  ),
+  withState('geoLocation', 'setLatLng', { lat: '', lon: '' }),
   lifecycle({
     componentWillMount() {
       this.props.setNumOfChanges(this.props.changes.length);
@@ -38,10 +35,9 @@ export default compose(
         this.props.setComment(this.props.navigation.state.params.screenData.text);
       }
 
-      apiGetJson(`activities/${this.props.activityId}`, this.props.token)
-        .then((response) => {
-          this.props.setActivityData(response.data);
-        });
-    },
-  }),
+      apiGetJson(`activities/${this.props.activityId}`, this.props.token).then(response => {
+        this.props.setActivityData(response.data);
+      });
+    }
+  })
 )(DetailPreInstallView);

@@ -4,12 +4,12 @@ type AppStateType = {
   isConnected: boolean,
   isPartModal: boolean,
   isManagerModal: boolean,
-  isIncompleteModal: boolean,
+  isIncompleteModal: boolean
 };
 
 type ActionType = {
   type: string,
-  payload?: any,
+  payload?: any
 };
 
 export const initialState: AppStateType = {
@@ -17,7 +17,7 @@ export const initialState: AppStateType = {
   isConnected: false,
   isPartModal: false,
   isManagerModal: false,
-  isIncompleteModal: false,
+  isIncompleteModal: false
 };
 
 export const LOG_IN = 'AppState/LOG_IN';
@@ -30,90 +30,87 @@ export const IS_INCOMPLETE_MODAL = 'AppState/IS_INCOMPLETE_MODAL';
 
 export function logIn(): ActionType {
   return {
-    type: LOG_IN,
+    type: LOG_IN
   };
 }
 
 export function logOut(): ActionType {
   return {
-    type: LOG_OUT,
+    type: LOG_OUT
   };
 }
 
 export function setConnection(payload): ActionType {
   return {
     type: IS_CONNECTED,
-    payload,
+    payload
   };
 }
 
 export function setPartModalVisible(payload): ActionType {
   return {
     type: IS_PART_MODAL,
-    payload,
+    payload
   };
 }
 
 export function setFailedModalVisible(payload): ActionType {
   return {
     type: IS_FAILED_MODAL,
-    payload,
+    payload
   };
 }
 
 export function setManagerModalVisible(payload): ActionType {
   return {
     type: IS_MANAGER_MODAL,
-    payload,
+    payload
   };
 }
 
 export function setIncompleteModalVisible(payload): ActionType {
   return {
     type: IS_INCOMPLETE_MODAL,
-    payload,
+    payload
   };
 }
 
-export default function AppStateReducer(
-  state: AppStateType = initialState,
-  action: ActionType,
-): AppStateType {
+export default function AppStateReducer(state: AppStateType = initialState, action: ActionType): AppStateType {
   switch (action.type) {
     case LOG_IN:
       return {
         ...state,
-        isLoggedIn: true,
+        isLoggedIn: true
       };
     case LOG_OUT:
       return {
         ...state,
-        isLoggedIn: false,
+        isLoggedIn: false
       };
     case IS_CONNECTED:
       return {
         ...state,
-        isConnected: action.payload,
+        isConnected: action.payload
       };
     case IS_PART_MODAL:
       return {
         ...state,
-        isPartModal: action.payload,
+        isPartModal: action.payload
       };
     case IS_FAILED_MODAL:
       return {
         ...state,
-        isPartModal: action.payload,
+        isPartModal: action.payload
       };
     case IS_MANAGER_MODAL:
       return {
         ...state,
-        isManagerModal: action.payload,
+        isManagerModal: action.payload
       };
     case IS_INCOMPLETE_MODAL:
       return {
         ...state,
-        isIncompleteModal: action.payload,
+        isIncompleteModal: action.payload
       };
     default:
       return state;

@@ -1,15 +1,6 @@
 import { Alert } from 'react-native';
 
-const changesInOffline = async (
-  changes,
-  setChanges,
-  setNumOfChanges,
-  comment,
-  activityId,
-  accountId,
-  photos,
-  status,
-) => {
+const changesInOffline = async (changes, setChanges, setNumOfChanges, comment, activityId, accountId, photos, status) => {
   const changesCopy = changes.slice();
   if (changesCopy.filter(item => item.id === activityId).length === 0) {
     await changesCopy.push({
@@ -20,19 +11,19 @@ const changesInOffline = async (
         {
           comment,
           photos,
-          changeStatus: status || null,
-        },
-      ],
+          changeStatus: status || null
+        }
+      ]
     });
-    Alert.alert('No Internet connection', 'You\'re now working offline');
+    Alert.alert('No Internet connection', "You're now working offline");
   } else {
-    await changesCopy.forEach((item) => {
+    await changesCopy.forEach(item => {
       if (item.id === activityId) {
         item.status = status || item.status || null;
         item.comments.push({
           comment,
           photos,
-          changeStatus: status || item.status || null,
+          changeStatus: status || item.status || null
         });
       }
     });

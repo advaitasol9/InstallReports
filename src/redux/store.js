@@ -11,17 +11,13 @@ const enhancers = [
     createLogger({
       collapsed: true,
       // eslint-disable-next-line no-undef
-      predicate: () => __DEV__,
-    }),
-  ),
+      predicate: () => __DEV__
+    })
+  )
 ];
 
 /* eslint-disable no-undef */
-const composeEnhancers =
-  (__DEV__ &&
-    typeof window !== 'undefined' &&
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
-  compose;
+const composeEnhancers = (__DEV__ && typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose;
 /* eslint-enable no-undef */
 
 const enhancer = composeEnhancers(...enhancers);
@@ -29,7 +25,7 @@ const enhancer = composeEnhancers(...enhancers);
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['detailFail', 'detailPreInstall', 'detailPartial', 'workOrderQuestion', 'workOrderComment'],
+  blacklist: ['detailFail', 'detailPreInstall', 'detailPartial', 'workOrderQuestion', 'workOrderComment']
 };
 
 const persistedReducer = persistReducer(persistConfig, reducer);

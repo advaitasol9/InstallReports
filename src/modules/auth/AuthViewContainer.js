@@ -5,7 +5,6 @@ import { logIn, logOut } from '../AppState';
 import { setUserInfo } from '../profile/ProfileState';
 import { logout } from '../../core/api';
 
-
 import AuthView from './AuthView';
 
 export default compose(
@@ -15,13 +14,13 @@ export default compose(
     state => ({
       authState: state.app,
       token: state.profile.security_token.token,
-      connectionStatus: state.app.isConnected,
+      connectionStatus: state.app.isConnected
     }),
     dispatch => ({
       logIn: () => dispatch(logIn()),
       logOut: () => dispatch(logOut()),
-      setUserInfo: data => dispatch(setUserInfo(data)),
-    }),
+      setUserInfo: data => dispatch(setUserInfo(data))
+    })
   ),
   lifecycle({
     componentDidMount() {
@@ -32,6 +31,6 @@ export default compose(
       } else if (this.props.authState.isLoggedIn) {
         this.props.navigation.navigate({ routeName: 'Home' });
       }
-    },
-  }),
+    }
+  })
 )(AuthView);

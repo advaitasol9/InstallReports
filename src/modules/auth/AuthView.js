@@ -1,50 +1,35 @@
 import React from 'react';
-import {
-  Alert,
-  StyleSheet,
-  View,
-  Text,
-  Animated,
-  Keyboard,
-  Platform,
-  LayoutAnimation,
-  TouchableOpacity,
-  Linking,
-} from 'react-native';
-import {version} from "../../../package.json";
+import { Alert, StyleSheet, View, Text, Animated, Keyboard, Platform, LayoutAnimation, TouchableOpacity, Linking } from 'react-native';
+import { version } from '../../../package.json';
 import { TextInput, Button } from '../../components';
 import { auth } from '../../core/api';
 import { fonts, colors } from '../../styles';
 import AsyncStorage from '@react-native-community/async-storage';
 
 export default class AuthScreen extends React.Component {
-
-  
-
   state = {
     anim: new Animated.Value(0),
     // Current visible form
-    isKeyboardVisible: false,
+    isKeyboardVisible: false
   };
 
-  constructor(){
+  constructor() {
     super();
     let versionString = version;
     versionString = versionString.match(/^\d+\.\d+/g);
-    const formattedVersion = (versionString.length>0)?versionString[0]:'0.0';
-    this.state = {...this.state,version: formattedVersion};
+    const formattedVersion = versionString.length > 0 ? versionString[0] : '0.0';
+    this.state = { ...this.state, version: formattedVersion };
   }
 
   componentWillMount() {
     this.keyboardDidShowListener = Keyboard.addListener(
       Platform.select({ android: 'keyboardDidShow', ios: 'keyboardWillShow' }),
-      this._keyboardDidShow.bind(this),
+      this._keyboardDidShow.bind(this)
     );
     this.keyboardDidHideListener = Keyboard.addListener(
       Platform.select({ android: 'keyboardDidHide', ios: 'keyboardWillHide' }),
-      this._keyboardDidHide.bind(this),
+      this._keyboardDidHide.bind(this)
     );
-    
   }
 
   componentDidMount() {
@@ -63,7 +48,7 @@ export default class AuthScreen extends React.Component {
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
-      auth('login/', formData).then((response) => {
+      auth('login/', formData).then(response => {
         if (!this.props.connectionStatus) {
           Alert.alert('There is no connection');
         }
@@ -82,12 +67,9 @@ export default class AuthScreen extends React.Component {
     }
   }
 
-  storeUserData = async (data) => {
-    await AsyncStorage.setItem(
-      'currentUserData',
-      JSON.stringify(data)
-    );
-  }
+  storeUserData = async data => {
+    await AsyncStorage.setItem('currentUserData', JSON.stringify(data));
+  };
 
   fadeIn(delay, from = 0) {
     const { anim } = this.state;
@@ -95,17 +77,17 @@ export default class AuthScreen extends React.Component {
       opacity: anim.interpolate({
         inputRange: [delay, Math.min(delay + 500, 3000)],
         outputRange: [0, 1],
-        extrapolate: 'clamp',
+        extrapolate: 'clamp'
       }),
       transform: [
         {
           translateY: anim.interpolate({
             inputRange: [delay, Math.min(delay + 500, 3000)],
             outputRange: [from, 0],
-            extrapolate: 'clamp',
-          }),
-        },
-      ],
+            extrapolate: 'clamp'
+          })
+        }
+      ]
     };
   }
 
@@ -125,7 +107,11 @@ export default class AuthScreen extends React.Component {
         <View style={styles.container}>
           <Text
             style={{
-              position: 'absolute', right: 32, top: 24, color: 'black', fontSize: 12,
+              position: 'absolute',
+              right: 32,
+              top: 24,
+              color: 'black',
+              fontSize: 12
             }}
           >
             v {this.state.version}
@@ -133,18 +119,12 @@ export default class AuthScreen extends React.Component {
           <View style={[styles.section, { paddingTop: 30 }]}>
             <Animated.Image
               resizeMode="contain"
-              style={[
-                styles.logo,
-                this.state.isKeyboardVisible && { height: 30 },
-                this.fadeIn(0),
-              ]}
+              style={[styles.logo, this.state.isKeyboardVisible && { height: 30 }, this.fadeIn(0)]}
               source={require('../../../assets/images/logo-white.png')}
             />
           </View>
 
-          <Animated.View
-            style={[styles.section, styles.middle, this.fadeIn(700, -20)]}
-          >
+          <Animated.View style={[styles.section, styles.middle, this.fadeIn(700, -20)]}>
             <TextInput
               placeholder="Email"
               style={styles.textInput}
@@ -161,9 +141,7 @@ export default class AuthScreen extends React.Component {
               onChangeText={text => this.props.setPassword(text)}
               value={this.props.password}
             />
-            <Animated.View
-              style={[styles.section, styles.bottom, this.fadeIn(700, -20)]}
-            >
+            <Animated.View style={[styles.section, styles.bottom, this.fadeIn(700, -20)]}>
               <Button
                 bgColor="white"
                 textColor={colors.primary}
@@ -184,7 +162,7 @@ export default class AuthScreen extends React.Component {
                   <Text
                     style={{
                       color: colors.white,
-                      fontFamily: fonts.primaryRegular,
+                      fontFamily: fonts.primaryRegular
                     }}
                   >
                     Forgot your password?
@@ -204,48 +182,48 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 30,
+    paddingHorizontal: 30
   },
   backgroundImage: {
     backgroundColor: '#808080',
-    flex: 1,
+    flex: 1
   },
   section: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   middle: {
     flex: 2,
     justifyContent: 'flex-start',
-    alignSelf: 'stretch',
+    alignSelf: 'stretch'
   },
   bottom: {
     flex: 1,
     alignSelf: 'stretch',
-    paddingBottom: Platform.OS === 'android' ? 30 : 0,
+    paddingBottom: Platform.OS === 'android' ? 30 : 0
   },
   last: {
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-end'
   },
   textInput: {
     alignSelf: 'stretch',
-    marginTop: 20,
+    marginTop: 20
   },
   logo: {
-    height: 40,
+    height: 40
   },
   socialLoginContainer: {
     flexDirection: 'row',
     alignSelf: 'stretch',
     marginTop: 15,
-    justifyContent: 'space-between',
+    justifyContent: 'space-between'
   },
   socialButton: {
-    flex: 1,
+    flex: 1
   },
   socialButtonCenter: {
     marginLeft: 10,
-    marginRight: 10,
-  },
+    marginRight: 10
+  }
 });

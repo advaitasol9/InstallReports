@@ -11,13 +11,13 @@ class RNSDropDown extends React.Component {
     placeholder: 'Please Select...',
     selectedIndex: -1,
     color: colors.primary,
-    borderColor: colors.primary,
+    borderColor: colors.primary
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      isOpened: false,
+      isOpened: false
     };
 
     this._openModal = this._openModal.bind(this);
@@ -42,12 +42,12 @@ class RNSDropDown extends React.Component {
           shadowColor: '#000000',
           shadowOffset: {
             width: 0,
-            height: 3,
+            height: 3
           },
           shadowRadius: 5,
-          shadowOpacity: 1.0,
+          shadowOpacity: 1.0
         }}
-        adjustFrame={(params) => {
+        adjustFrame={params => {
           // eslint-disable-next-line no-param-reassign
           params.left = 0;
           // eslint-disable-next-line no-param-reassign
@@ -61,25 +61,11 @@ class RNSDropDown extends React.Component {
         )}
         onSelect={this.props.onSelect}
       >
-        <View
-          style={[
-            styles.container,
-            this.props.style && this.props.style,
-            { borderColor: this.props.borderColor },
-          ]}
-        >
+        <View style={[styles.container, this.props.style && this.props.style, { borderColor: this.props.borderColor }]}>
           <Text style={{ color: this.props.color }}>
-            {this.props.selectedIndex > -1 &&
-            this.props.items[this.props.selectedIndex]
-              ? this.props.items[this.props.selectedIndex]
-              : this.props.placeholder}
+            {this.props.selectedIndex > -1 && this.props.items[this.props.selectedIndex] ? this.props.items[this.props.selectedIndex] : this.props.placeholder}
           </Text>
-          <Icon
-            name={this.state.isOpened ? 'angle-up' : 'angle-down'}
-            color={this.props.color}
-            size={20}
-            style={styles.icon}
-          />
+          <Icon name={this.state.isOpened ? 'angle-up' : 'angle-down'} color={this.props.color} size={20} style={styles.icon} />
         </View>
       </ModalDropdown>
     );
@@ -95,11 +81,11 @@ const styles = {
     justifyContent: 'space-between',
     paddingHorizontal: 10,
     flexDirection: 'row',
-    borderRadius: 5,
+    borderRadius: 5
   },
   icon: {
-    marginLeft: 10,
-  },
+    marginLeft: 10
+  }
 };
 
 export default RNSDropDown;

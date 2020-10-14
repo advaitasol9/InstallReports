@@ -1,17 +1,6 @@
 // @flow
 import React, { useRef, useEffect, Component } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Dimensions,
-  Image,
-  Alert,
-  StatusBar,
-} from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions, Image, Alert, StatusBar } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
 import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
@@ -30,8 +19,8 @@ const options = {
   maxWidth: 500,
   maxHeight: 500,
   storageOptions: {
-    skipBackup: true,
-  },
+    skipBackup: true
+  }
 };
 
 import { BackHandler } from 'react-native';
@@ -47,7 +36,7 @@ export default class DetailPartialView extends Component {
     this.props.addPhoto([]);
     this.props.navigation.navigate('DetailsMain');
     return true;
-  }
+  };
 
   componentWillUnmount() {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
@@ -58,20 +47,16 @@ export default class DetailPartialView extends Component {
   }
 
   render() {
-
     const Required = () => (
       <View style={styles.requiredBlock}>
-        <Text style={styles.requiredText}>
-          required
-      </Text>
+        <Text style={styles.requiredText}>required</Text>
       </View>
     );
 
     const renderPhoto = (photo, index) => {
       const photosCopy = this.props.photos.slice();
       return (
-        <View style={{ position: 'relative' }}
-          key={index}>
+        <View style={{ position: 'relative' }} key={index}>
           <TouchableOpacity
             style={styles.delPhoto}
             onPress={async () => {
@@ -80,10 +65,7 @@ export default class DetailPartialView extends Component {
             }}
           >
             <View style={styles.whiteBackground} />
-            <IO
-              style={styles.delIcon}
-              name="md-close-circle"
-            />
+            <IO style={styles.delIcon} name="md-close-circle" />
           </TouchableOpacity>
           <Image source={{ uri: photo }} style={styles.photoBlock} />
         </View>
@@ -100,52 +82,40 @@ export default class DetailPartialView extends Component {
           if (images.length > 0) {
             imageUri = [0].image.uri;
           } else {
-            console.log('Image path missing and no images in camera roll')
+            console.log('Image path missing and no images in camera roll');
             return;
           }
-
         } else {
-          imageUri = path
+          imageUri = path;
         }
       } catch (e) {
-        console.log(e.message)
+        console.log(e.message);
       }
 
-      RNFetchBlob.fs.readFile(imageUri, 'base64')
-        .then((data) => {
-          this.props.setSignature([data]);
-          RNFetchBlob.fs
-            .unlink(imageUri)
-            .then(() => {
-            })
-            .catch(err => {
-            });
-        })
-    }
+      RNFetchBlob.fs.readFile(imageUri, 'base64').then(data => {
+        this.props.setSignature([data]);
+        RNFetchBlob.fs
+          .unlink(imageUri)
+          .then(() => {})
+          .catch(err => {});
+      });
+    };
 
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor={colors.lightGray} />
-        <Header
-          connectionStatus={this.props.connectionStatus}
-          changesNum={this.props.changes.length}
-          navigation={this.props.navigation}
-          sideBar
-          indicator
-        />
+        <Header connectionStatus={this.props.connectionStatus} changesNum={this.props.changes.length} navigation={this.props.navigation} sideBar indicator />
         <View style={styles.partialInstallationsHeader}>
           <Text style={styles.partialInstallations}>Partial Installation</Text>
         </View>
         <ScrollView>
           <View style={styles.scrollContainer}>
             <Text style={{ fontSize: 16 }}>
-              A partial installation occurs when an installation cannot be completed
-              due to circumstances outside of your control.
-          </Text>
+              A partial installation occurs when an installation cannot be completed due to circumstances outside of your control.
+            </Text>
             <Text style={{ fontSize: 16, marginTop: 16 }}>
-              Please explain why the installation cannot be completed. Take photos to document the
-              situation, including any incorrect or damaged materials.
-          </Text>
+              Please explain why the installation cannot be completed. Take photos to document the situation, including any incorrect or damaged materials.
+            </Text>
             <TextInput
               multiline
               placeholder="Reason for partial installation"
@@ -165,7 +135,7 @@ export default class DetailPartialView extends Component {
                       {
                         text: 'Choose from gallery',
                         onPress: () => {
-                          ImagePicker.launchImageLibrary(options, (response) => {
+                          ImagePicker.launchImageLibrary(options, response => {
                             const { photos } = this.props;
                             if (!response.didCancel) {
                               photos.push(response.uri);
@@ -173,32 +143,29 @@ export default class DetailPartialView extends Component {
                               this.props.setNumOfChanges(this.props.numOfChanges);
                             }
                           });
-                        },
+                        }
                       },
                       {
                         text: 'Take a photo',
                         onPress: () => {
-                          this.props.navigation.navigate(
-                            'Camera',
-                            {
-                              photos: this.props.photos,
-                              addPhoto: arr => this.props.addPhoto(arr),
-                              screen: 'DetailsPartial',
-                              screenData: {
-                                text: this.props.comment,
-                                name: this.props.name,
-                                signature: this.props.pathes,
-                              },
-                            },
-                          );
-                        },
+                          this.props.navigation.navigate('Camera', {
+                            photos: this.props.photos,
+                            addPhoto: arr => this.props.addPhoto(arr),
+                            screen: 'DetailsPartial',
+                            screenData: {
+                              text: this.props.comment,
+                              name: this.props.name,
+                              signature: this.props.pathes
+                            }
+                          });
+                        }
                       },
                       {
                         text: 'Cancel',
-                        style: 'cancel',
-                      },
+                        style: 'cancel'
+                      }
                     ],
-                    { cancelable: true },
+                    { cancelable: true }
                   );
                 }}
                 textColor={colors.white}
@@ -207,32 +174,26 @@ export default class DetailPartialView extends Component {
               />
             </View>
             <Required />
-            <View style={styles.photoSection}>
-              {this.props.photos.map((photo, index) => renderPhoto(photo, index))}
-            </View>
-            <Text style={{ fontSize: 16, marginTop: 16 }}>
-              Manager on Duty Signature:
-          </Text>
+            <View style={styles.photoSection}>{this.props.photos.map((photo, index) => renderPhoto(photo, index))}</View>
+            <Text style={{ fontSize: 16, marginTop: 16 }}>Manager on Duty Signature:</Text>
             <RNSketchCanvas
-              ref={ref => this.canvas = ref}
+              ref={ref => (this.canvas = ref)}
               containerStyle={[
                 {
                   height: 200,
                   marginTop: 10,
-                  backgroundColor: colors.white,
-                },
+                  backgroundColor: colors.white
+                }
               ]}
               canvasStyle={{ backgroundColor: 'transparent', flex: 1 }}
               defaultStrokeIndex={0}
               defaultStrokeWidth={5}
               strokeColor={colors.primary}
-              clearComponent={(
+              clearComponent={
                 <View style={styles.functionButton}>
-                  <Text style={{ color: colors.primary }}>
-                    Clear
-                </Text>
+                  <Text style={{ color: colors.primary }}>Clear</Text>
                 </View>
-              )}
+              }
               onSketchSaved={(success, filePath) => {
                 onSave(success, filePath);
               }}
@@ -242,24 +203,19 @@ export default class DetailPartialView extends Component {
                   filename: 'partial_sign',
                   transparent: false,
                   imageType: 'jpg'
-                }
+                };
               }}
-              onStrokeEnd={(path) => {
+              onStrokeEnd={path => {
                 this.canvas.save();
               }}
             />
             <Required />
-            <TextInput
-              placeholder="Enter name..."
-              style={styles.inputStyle}
-              onChangeText={text => this.props.setName(text)}
-              value={this.props.name}
-            />
+            <TextInput placeholder="Enter name..." style={styles.inputStyle} onChangeText={text => this.props.setName(text)} value={this.props.name} />
             <Required />
             <View style={styles.buttonRow}>
               <Button
                 bgColor={
-                  (this.props.photos.length === 0 || this.props.name === '' || this.props.signature === '' || this.props.comment === '')
+                  this.props.photos.length === 0 || this.props.name === '' || this.props.signature === '' || this.props.comment === ''
                     ? '#b1cec1'
                     : colors.green
                 }
@@ -298,12 +254,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.lightGray
   },
   scrollContainer: {
     paddingTop: 24,
     paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingBottom: 32
   },
   inputStyle: {
     fontSize: 14,
@@ -312,19 +268,19 @@ const styles = StyleSheet.create({
     color: colors.black,
     paddingVertical: 12,
     paddingHorizontal: 12,
-    textAlignVertical: 'top',
+    textAlignVertical: 'top'
   },
   requiredBlock: {
     width: '100%',
-    alignItems: 'flex-end',
+    alignItems: 'flex-end'
   },
   requiredText: {
     fontSize: 12,
     marginTop: 8,
-    color: colors.darkGray,
+    color: colors.darkGray
   },
   photoSection: {
-    marginTop: 12,
+    marginTop: 12
   },
   photoBlock: {
     width: '100%',
@@ -332,18 +288,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 20
   },
   partialInstallations: {
     color: 'white',
     fontSize: 18,
-    paddingVertical: 12,
+    paddingVertical: 12
   },
   partialInstallationsHeader: {
     width: '100%',
     backgroundColor: colors.blue,
     alignItems: 'flex-start',
-    paddingHorizontal: 24,
+    paddingHorizontal: 24
   },
   modalContainer: {
     top: 0,
@@ -353,12 +309,12 @@ const styles = StyleSheet.create({
     width: screenWidth,
     backgroundColor: colors.black,
     opacity: 0.5,
-    zIndex: 100,
+    zIndex: 100
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 24,
+    marginTop: 24
   },
   functionButton: {
     margin: 16,
@@ -367,18 +323,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5,
+    borderRadius: 5
   },
   delPhoto: {
     position: 'absolute',
     top: 28,
     right: 16,
     zIndex: 10,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   delIcon: {
     color: colors.red,
-    fontSize: 48,
+    fontSize: 48
   },
   whiteBackground: {
     position: 'absolute',
@@ -386,6 +342,6 @@ const styles = StyleSheet.create({
     height: 32,
     top: 10,
     borderRadius: 16,
-    backgroundColor: 'white',
-  },
+    backgroundColor: 'white'
+  }
 });

@@ -10,12 +10,12 @@ export default compose(
     state => ({
       connectionStatus: state.app.isConnected,
       token: state.profile.security_token.token,
-      orderList: state.workOrder.orderList,
+      orderList: state.workOrder.orderList
     }),
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
-      setActivityId: id => dispatch(setActivityId(id)),
-    }),
+      setActivityId: id => dispatch(setActivityId(id))
+    })
   ),
   withState('searchResult', 'setSearchResult', []),
   withState('searchText', 'setSearchText', ''),
@@ -32,6 +32,6 @@ export default compose(
       result = data.data.data;
       this.props.setSearchResult(data.data.data);
       this.props.setIsLoaded(true);
-    },
-  }),
+    }
+  })
 )(SearchView);
