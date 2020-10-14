@@ -29,7 +29,11 @@ export default class AuthScreen extends React.Component {
     getEnv()
       .then(response => {
         const endpoints = response.data;
-        // setNewPath(endpoints[0].end_point_url, null);
+        console.log(endpoints);
+        if (state.apiPath == '') {
+          setNewPath(endpoints[0].end_point_url, null);
+        }
+
         if (endpoints.length > 0) {
           let data = [];
           Object.keys(endpoints).forEach(key => {
@@ -37,7 +41,9 @@ export default class AuthScreen extends React.Component {
           });
           this.setState({ env: data });
         } else {
-          setNewPath(API_PATH, null);
+          if (state.apiPath == '') {
+            setNewPath(API_PATH, null);
+          }
         }
       })
       .catch(err => {});
