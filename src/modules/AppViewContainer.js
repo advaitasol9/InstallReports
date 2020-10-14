@@ -38,7 +38,7 @@ export default compose(
             }
             item.comments.forEach(comment => {
               if (comment.changeStatus === 'In_Progress' || comment.changeStatus === item.status || comment.changeStatus === null) {
-                const data = `text=${comment.comment}&user_ids=%5B${item.accountId}%5D&undefined=`;
+                const data = `text=${comment.comment}&user_ids=%5B${item.accountId}%5D&channel=installer`;
                 apiPostComment(`activities/${item.id}/comments`, data, this.props.token).then(resPostText => {
                   if (comment.photos.length > 0) {
                     comment.photos.forEach(photo => {

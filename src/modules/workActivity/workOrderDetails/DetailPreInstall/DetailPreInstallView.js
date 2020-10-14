@@ -218,7 +218,7 @@ export default class DetailPartialView extends Component {
                   this.setState({
                     isLoading: true
                   });
-                  const data = `text=PRE INSTALL NOTES - ${this.props.comment}&user_id=${this.props.accountId}`;
+                  const data = `text=PRE INSTALL NOTES - ${this.props.comment}&user_id=${this.props.accountId}&channel=installer`;
                   if (!this.props.connectionStatus) {
                     setChangesInOffline(
                       this.props.changes,

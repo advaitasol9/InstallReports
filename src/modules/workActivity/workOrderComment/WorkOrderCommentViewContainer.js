@@ -44,11 +44,11 @@ export default compose(
           this.props.setIsloading(false);
         });
 
-        apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token).then(response => {
+        apiGetJson(`activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"installer","field":"channel"}]}`, this.props.token).then(response => {
           response.data.map(msg => {
             const regex = /(<([^>]+)>)/gi;
             const result = msg.text.replace(regex, '');
-            const result1 = result.replace('&nbsp;',' ');
+            const result1 = result.replace('&nbsp;', ' ');
             msg.text = result1;
           });
           this.props.setData(response.data.reverse());
@@ -63,7 +63,10 @@ export default compose(
         if (this.props.activityId == null) {
           clearInterval(this._interval);
         } else {
-          apiGetJson(`activities/${this.props.activityId}/comments`, this.props.token).then(response => {
+          apiGetJson(
+            `activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"installer","field":"channel"}]}`,
+            this.props.token
+          ).then(response => {
             response.data.map(msg => {
               const regex = /(<([^>]+)>)/gi;
               const result = msg.text.replace(regex, '');
