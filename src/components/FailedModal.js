@@ -185,12 +185,16 @@ class FailedModalComponent extends Component {
                             apiGet('aws-s3-presigned-urls', this.props.mainProps.token).then((res) => {
                               RNFetchBlob.fetch('PUT', res.data.url, {
                                 'security-token': this.props.mainProps.token,
-                                'Content-Type': 'image/jpeg',
-                              }, this.props.mainProps.signature[0])
+                                'Content-Type': 'image/png',
+                              }, 
+                                RNFetchBlob.wrap(
+                                  this.props.mainProps.signature[0].replace("file://", "")
+                                )
+                              )
                                 .then(() => {
                                   const formData = new FormData();
-                                  formData.append('file_type', 'image/jpeg');
-                                  formData.append('name', 'partial_sign.jpg');
+                                  formData.append('file_type', 'image/png');
+                                  formData.append('name', 'partial_sign.png');
                                   formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                                   formData.append('size', this.props.mainProps.signature[0].length);
                                   apiPostImage(
