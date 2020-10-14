@@ -50,34 +50,6 @@ export default class WorkOrderDocsView extends Component {
       }
     }
 
-    const downloadFile = (item) => {
-      const { dirs } = RNFetchBlob.fs;
-      const dirToSave = Platform.select({
-        ios: dirs.DownloadDir,
-        android: dirs.DownloadDir
-      });
-      const filePath = dirToSave + '/' + item.name;
-      RNFetchBlob
-        .config({
-          fileCache: true,
-          addAndroidDownloads: {
-            useDownloadManager: true,
-            notification: true,
-            path: filePath
-          },
-        })
-        .fetch('GET', item.s3_location, {})
-        .then((res) => {
-          RNFetchBlob.fs.writeFile(filePath, res.data, 'base64');
-          if (Platform.OS === 'ios') {
-            RNFetchBlob.ios.previewDocument(filePath);
-          }
-        })
-        .catch((errorMessage, statusCode) => {
-          console.log('error')
-        });
-    }
-
     if (this.props.isLoading === true) {
       return (
         <View style={styles.backgroundActivity}>
@@ -149,7 +121,8 @@ export default class WorkOrderDocsView extends Component {
                 )}
                 {
                   this.props.connectionStatus && this.props.docs.length > 0 && this.props.docs.map((item, index) => {
-                    if (item.file_type === 'image/jpeg') {
+                    console.log(item.file_type);
+                    if (item.file_type === 'image/jpeg' || item.file_type === "image/png" || item.file_type === "image/webp" || item.file_type === "image/gif" || item.file_type === "image/bmp") {
                       return (
                         <TouchableOpacity
                           key={index}
@@ -177,15 +150,13 @@ export default class WorkOrderDocsView extends Component {
                           </Text>
                         </TouchableOpacity>
                       );
-                    } else if (item.file_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                    } else if (item.file_type === "application/vnd.ms-excel" || item.file_type === "text/csv" || item.file_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
                       return (
                         <TouchableOpacity
                           key={index}
                           style={styles.documentContainer}
                           onPress={async () => {
-                            if (await requestLocationPermission()) {
-                              downloadFile(item);
-                            }
+                            this.props.navigation.navigate('PdfDoc', { uri: item.s3_location, name: item.name, type: item.file_type });
                           }}
                         >
                           <Image
@@ -199,15 +170,34 @@ export default class WorkOrderDocsView extends Component {
                           <Text style={{ paddingTop: 8, textAlign: 'center' }}>{item.name}</Text>
                         </TouchableOpacity>
                       );
-                    } else if (item.file_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                    } else if (item.file_type === "text/plain") {
                       return (
                         <TouchableOpacity
                           key={index}
                           style={styles.documentContainer}
                           onPress={async () => {
-                            if (await requestLocationPermission()) {
-                              downloadFile(item);
-                            }
+                            this.props.navigation.navigate('PdfDoc', { uri: item.s3_location, name: item.name, type: item.file_type });
+                          }
+                          }
+                        >
+                          <Image
+                            style={{
+                              height: 100,
+                              width: 100,
+                            }}
+                            resizeMode="contain"
+                            source={require('../../../../assets/images/text-x-generic-icon.png')}
+                          />
+                          <Text style={{ paddingTop: 8, textAlign: 'center' }}>{item.name}</Text>
+                        </TouchableOpacity>
+                      );
+                    } else if (item.file_type === "application/msword" || item.file_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.documentContainer}
+                          onPress={async () => {
+                            this.props.navigation.navigate('PdfDoc', { uri: item.s3_location, name: item.name, type: item.file_type });
                           }
                           }
                         >
@@ -228,7 +218,7 @@ export default class WorkOrderDocsView extends Component {
                           key={index}
                           style={styles.documentContainer}
                           onPress={() => {
-                            this.props.navigation.navigate('PdfDoc', { uri: item.s3_location, name: item.name });
+                            this.props.navigation.navigate('PdfDoc', { uri: item.s3_location, name: item.name, type: item.file_type });
                           }}
                         >
                           <Image
