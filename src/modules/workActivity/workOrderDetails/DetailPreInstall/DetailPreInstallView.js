@@ -1,6 +1,5 @@
 // @flow
 import React, { Component } from "react";
-
 import {
   StyleSheet,
   View,
@@ -12,6 +11,7 @@ import {
   Image,
   Alert,
   StatusBar,
+  Platform,
   WebView,
 } from "react-native";
 import ImagePicker from "react-native-image-picker";
@@ -48,26 +48,40 @@ import { BackHandler } from "react-native";
 
 export default class DetailPartialView extends Component {
   constructor(props) {
-    PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    ).then((res) => {
-      if (res === PermissionsAndroid.RESULTS.GRANTED) {
-        Geolocation.getCurrentPosition(
-          (info) => {
-            props.geoLocation.lat = info.coords.latitude;
-            props.geoLocation.lon = info.coords.longitude;
-          },
-          (error) => {
-            console.error("faled");
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-          }
-        );
-      }
-    });
-
+    if (Platform.OS === 'ios') {
+      Geolocation.requestAuthorization();
+      Geolocation.getCurrentPosition(
+        (position) => {
+          props.geoLocation.lat = position.coords.latitude;
+          props.geoLocation.lon = position.coords.longitude;
+        },
+        (error) => {
+          console.log("map error: ", error);
+          console.log(error.code, error.message);
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
+      );
+    } else if (Platform.OS === 'android') {
+      PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      ).then((res) => {
+        if (res === PermissionsAndroid.RESULTS.GRANTED) {
+          Geolocation.getCurrentPosition(
+            (info) => {
+              props.geoLocation.lat = info.coords.latitude;
+              props.geoLocation.lon = info.coords.longitude;
+            },
+            (error) => {
+              console.error("faled");
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+            }
+          );
+        }
+      });
+    }
     super(props);
     uploadedImagesCount = 0;
     this.state = {
@@ -100,7 +114,7 @@ export default class DetailPartialView extends Component {
             lat: this.props.geoLocation.lat,
             lon: this.props.geoLocation.lon,
           },
-        }) ,
+        }),
       });
 
       return;
@@ -276,7 +290,7 @@ export default class DetailPartialView extends Component {
                       this.props.activityId,
                       this.props.token
                     )
-                      .then(async() => {
+                      .then(async () => {
                         await this.updateWorkOrderBeginLocation();
                         apiPostComment(
                           `activities/${this.props.activityId}/comments`,
