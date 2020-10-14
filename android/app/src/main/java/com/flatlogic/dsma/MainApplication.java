@@ -2,6 +2,7 @@ package com.flatlogic.dsma;
 
 import android.app.Application;
 
+import com.reactnativecommunity.cameraroll.CameraRollPackage;
 import com.facebook.react.ReactApplication;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import org.reactnative.camera.RNCameraPackage;
@@ -48,7 +49,8 @@ public class MainApplication extends Application implements ReactApplication {
             new SvgPackage(),
             new VectorIconsPackage(),
             new LinearGradientPackage(),
-            new RNGestureHandlerPackage()
+            new RNGestureHandlerPackage(),
+            new CameraRollPackage()
       );
     }
 

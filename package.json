@@ -18,6 +18,7 @@
   "dependencies": {
     "@exponent/react-native-action-sheet": "^0.3.0",
     "@react-native-community/async-storage": "^1.11.0",
+    "@react-native-community/cameraroll": "^4.0.0",
     "@react-native-community/geolocation": "^2.0.2",
     "@react-native-community/netinfo": "5.9.2",
     "@terrylinla/react-native-sketch-canvas": "^0.8.0",

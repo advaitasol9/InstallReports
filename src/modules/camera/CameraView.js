@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions, TouchableOpacity, TouchableHighlight, Image, Text, StatusBar, CameraRoll } from 'react-native';
+import { View, StyleSheet, Dimensions, TouchableOpacity, TouchableHighlight, Image, Text, StatusBar } from 'react-native';
 import { RNCamera } from 'react-native-camera';
+import CameraRoll from '@react-native-community/cameraroll';
+import { Platform } from 'react-native';
+import { PermissionsAndroid } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 let factor;
@@ -97,8 +100,16 @@ export function Camera(props) {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => {
-              CameraRoll.saveToCameraRoll(props.photoUri);
+            onPress={async () => {
+              let permission = false;
+              if (Platform.OS == 'android') {
+                permission = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+              }
+
+              if (Platform.OS !== 'android' || permission) {
+                CameraRoll.save(props.photoUri, { album: 'Install Reports' });
+              }
+
               const { photos } = props;
               if (props.backRoute === 'Manager' || props.backRoute === 'Questions') {
                 photos.push({
