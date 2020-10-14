@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Text,
   StatusBar,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 import Pdf from 'react-native-pdf';
 import { Loading } from '../../components';
@@ -24,7 +25,7 @@ export default class PdfContainer extends Component {
   }
 
   handleBackButtonClick = () => {
-    this.props.addPhoto([]);
+    // this.props.addPhoto([]);
     this.props.navigation.navigate('Docs');
     return true;
   }
@@ -68,33 +69,45 @@ export default class PdfContainer extends Component {
           <TouchableOpacity
             style={{ width: '50%' }}
             onPress={async () => {
-              if (await requestLocationPermission()) {
-                const item = this.props.navigation.state.params;
-                const { dirs } = RNFetchBlob.fs;
-                const dirToSave = Platform.select({
-                  ios: dirs.DownloadDir,
-                  android: dirs.DownloadDir
-                });
-                const filePath = dirToSave + '/' + item.name;
+              if (Platform.OS === 'ios') {
+                const dirs = RNFetchBlob.fs.dirs;
                 RNFetchBlob
                   .config({
+                    path: dirs.DocumentDir + '/' + this.props.navigation.state.params.name,
                     fileCache: true,
-                    addAndroidDownloads: {
-                      useDownloadManager: true,
-                      notification: true,
-                      path: filePath
-                    },
                   })
-                  .fetch('GET', item.uri, {})
+                  .fetch('GET', this.props.navigation.state.params.uri, {})
                   .then((res) => {
-                    RNFetchBlob.fs.writeFile(filePath, res.data, 'base64');
-                    if (Platform.OS === 'ios') {
-                      RNFetchBlob.ios.previewDocument(filePath);
-                    }
+                    RNFetchBlob.ios.openDocument(res.data);
                   })
-                  .catch((errorMessage, statusCode) => {
-                    console.log('error')
+                  .catch((e) => {
+                    console.log('Error en el fetch: ', e);
+                  })
+              } else if (Platform.OS === 'android') {
+                if (await requestLocationPermission()) {
+                  const item = this.props.navigation.state.params;
+                  const { dirs } = RNFetchBlob.fs;
+                  const dirToSave = Platform.select({
+                    android: dirs.DownloadDir
                   });
+
+                  const filePath = dirToSave + '/' + this.props.navigation.state.params.name;
+                  RNFetchBlob
+                    .config({
+                      fileCache: true,
+                      addAndroidDownloads: {
+                        useDownloadManager: true,
+                        notification: true,
+                        path: filePath
+                      },
+                    })
+                    .fetch('GET', this.props.navigation.state.params.uri, {})
+                    .then((res) => {
+                    })
+                    .catch((errorMessage, statusCode) => {
+                      console.log('error')
+                    });
+                }
               }
             }}
           >
@@ -103,38 +116,120 @@ export default class PdfContainer extends Component {
         </View>
       </View >
     );
-    return (
-      <View style={styles.container}>
-        <StatusBar hidden />
-        <FixedHeader navigation={this.props.navigation} />
-        <Pdf
-          style={{ width, height: height - 64 }}
-          onError={error => console.log(error)}
-          onLoadComplete={() => this.props.setIsLoaded(true)}
-          source={{ uri: this.props.navigation.state.params.uri }}
-        />
-        {!this.props.isLoaded && (
-          <View
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              top: 100,
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Loading />
-          </View>
-        )}
-      </View>
-    );
+
+    if (this.props.navigation.state.params.type === "application/pdf") {
+      return (
+        <View style={styles.container}>
+          <StatusBar hidden />
+          <FixedHeader navigation={this.props.navigation} />
+          <Pdf
+            style={{ width, height: height - 64 }}
+            onError={error => console.log(error)}
+            onLoadComplete={() => this.props.setIsLoaded(true)}
+            source={{ uri: this.props.navigation.state.params.uri }}
+          />
+          {!this.props.isLoaded && (
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: 100,
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Loading />
+            </View>
+          )}
+        </View>
+      );
+    } else if (this.props.navigation.state.params.type === "application/vnd.ms-excel" || this.props.navigation.state.params.type === "text/csv" || this.props.navigation.state.params.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      return (
+        <View style={styles.container}>
+          <StatusBar hidden />
+          <FixedHeader navigation={this.props.navigation} />
+          {(
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: 100,
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Image style={styles.imageIcon} source={require('../../../assets/images/xlsx.png')} />
+              <Text>{this.props.navigation.state.params.name}</Text>
+            </View>
+          )}
+        </View>
+      );
+    } else if (this.props.navigation.state.params.type === "text/plain") {
+      return (
+
+        <View style={styles.container}>
+          <StatusBar hidden />
+          <FixedHeader navigation={this.props.navigation} />
+
+          {(
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: 100,
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Image style={styles.imageIcon} source={require('../../../assets/images/text-x-generic-icon.png')} />
+              <Text>{this.props.navigation.state.params.name}</Text>
+            </View>
+          )}
+        </View>
+      );
+    } else if (this.props.navigation.state.params.type === "application/msword" || this.props.navigation.state.params.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return (
+        <View style={styles.container}>
+          <StatusBar hidden />
+          <FixedHeader navigation={this.props.navigation} />
+          {(
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: 100,
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Image style={styles.imageIcon} source={require('../../../assets/images/docx.png')} />
+              <Text>{this.props.navigation.state.params.name}</Text>
+            </View>
+          )}
+        </View>
+      );
+    }
+    return null;
   }
 }
 
 const styles = StyleSheet.create({
+  imageIcon: {
+    width: 150,
+    height: 150,
+  },
   row: {
     flex: 1,
     flexDirection: 'row',
