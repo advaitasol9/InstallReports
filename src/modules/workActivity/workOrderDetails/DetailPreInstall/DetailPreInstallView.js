@@ -238,7 +238,7 @@ export default class DetailPartialView extends Component {
                     await apiChangeStatus('In_Progress', this.props.activityId, this.props.token)
                       .then(async () => {
                         await this.updateWorkOrderBeginLocation();
-                        apiPostComment(`activities/${this.props.activityId}/comments`, data, this.props.token)
+                        apiPostComment(`spectrum/activities/${this.props.activityId}/comments`, data, this.props.token)
                           .then(resPostText => {
                             this.props.photos.forEach((item, index) => {
                               apiGet('aws-s3-presigned-urls', this.props.token)
