@@ -29,15 +29,18 @@ export default class AuthScreen extends React.Component {
     getEnv()
       .then(response => {
         const endpoints = response.data;
-        let data = [];
-        Object.keys(endpoints).forEach(key => {
-          data.push({ key: endpoints[key].end_point_url, value: endpoints[key].name });
-        });
-        this.setState({ env: data });
+        setNewPath(endpoints[0].end_point_url, null);
+        if (endpoints.length > 0) {
+          let data = [];
+          Object.keys(endpoints).forEach(key => {
+            data.push({ key: endpoints[key].end_point_url, value: endpoints[key].name });
+          });
+          this.setState({ env: data });
+        } else {
+          setNewPath(API_PATH, null);
+        }
       })
-      .catch(err => {
-        // setNewPath(API_PATH);
-      });
+      .catch(err => {});
 
     this.keyboardDidShowListener = Keyboard.addListener(
       Platform.select({ android: 'keyboardDidShow', ios: 'keyboardWillShow' }),
@@ -192,7 +195,6 @@ export default class AuthScreen extends React.Component {
                   </Text>
                 </TouchableOpacity>
               )}
-
               {!this.state.isKeyboardVisible && !this.state.dropdownVisible && (
                 <Animated.View style={styles.dropdownNew}>
                   <Dropdown
@@ -204,8 +206,11 @@ export default class AuthScreen extends React.Component {
                     style={{ color: 'rgba(255, 255, 255, 0.0)' }}
                     dropdownOffset={{ top: 10, left: 0 }}
                     shadeOpacity={0.12}
+                    value="Production"
                     onChangeText={text => {
                       const selectedItem = this.state.env.filter(answer => answer.value == text)[0];
+                      console.log('selectedItem');
+                      console.log(selectedItem);
                       setNewPath(null, selectedItem);
                       return true;
                     }}
