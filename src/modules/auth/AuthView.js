@@ -1,13 +1,13 @@
-import React from 'react';
-import { Alert, StyleSheet, View, Text, Animated, Keyboard, Platform, LayoutAnimation, TouchableOpacity, Linking } from 'react-native';
-import { version } from '../../../package.json';
-import { TextInput, Button } from '../../components';
-import { auth, getEnv } from '../../core/api';
-import { Dropdown } from 'react-native-material-dropdown';
-import { fonts, colors, width } from '../../styles';
 import AsyncStorage from '@react-native-community/async-storage';
+import React from 'react';
+import { Alert, Animated, Keyboard, LayoutAnimation, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dropdown } from 'react-native-material-dropdown';
 import { API_PATH } from '../../../env';
+import { version } from '../../../package.json';
+import { Button, TextInput } from '../../components';
+import { auth, getEnv } from '../../core/api';
 import { setNewPath, state } from '../../core/mainEnv';
+import { colors, fonts } from '../../styles';
 export default class AuthScreen extends React.Component {
   state = {
     anim: new Animated.Value(0),
@@ -70,32 +70,30 @@ export default class AuthScreen extends React.Component {
   setFormData(password, email) {
     if (!this.props.connectionStatus) {
       Alert.alert('No Internet Connection');
-    } else {
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('password', password);
-      if (state.apiPath != '' && state.apiPath != undefined) {
-        auth('login/', formData).then(response => {
-          if (!this.props.connectionStatus) {
-            Alert.alert('There is no connection');
-          }
-          if (response.errorCode) {
-            Alert.alert('A valid email and password must be entered to log in.');
-            this.props.setPassword('');
-          } else {
-            this.props.setPassword('');
-            this.props.setEmail('');
-            this.props.setApiPath(API_PATH);
-            this.storeUserData(response.data.user);
-            this.props.setUserInfo(response);
-            this.props.logIn();
-            this.props.navigation.navigate({ routeName: 'Home' });
-          }
-        });
-      } else {
-        Alert.alert('Select Environment', 'Click the "Change environment" button and select the Environment');
-      }
+      return;
     }
+
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+    if (state.apiPath == '' || state.apiPath == undefined) {
+      Alert.alert('Select Environment', 'Click the "Change environment" button and select the Environment');
+      return;
+    }
+    auth('login/', formData)
+      .then(response => {
+        this.props.setPassword('');
+        this.props.setEmail('');
+        this.props.setApiPath(API_PATH);
+        this.storeUserData(response.data.user);
+        this.props.setUserInfo(response);
+        this.props.logIn();
+        this.props.navigation.navigate({ routeName: 'Home' });
+      })
+      .catch(e => {
+        Alert.alert('401 - Login Failed', 'Your email or password was incorrect. Please try again.', [{ text: 'Ok' }]);
+        this.props.setPassword('');
+      });
   }
 
   storeUserData = async data => {

@@ -175,7 +175,6 @@ export const auth = (method, body) => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error, {
         401: { title: 'Login Failed', message: 'Your email or password was incorrect. Please try again.' }
       });
-      HttpErrorAlert(errorMsg);
       throw errorMsg;
     });
 };
