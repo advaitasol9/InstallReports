@@ -141,10 +141,10 @@ class FailedModalComponent extends Component {
                                       'security-token': this.props.mainProps.token,
                                       'Content-Type': 'image/jpeg'
                                     },
-                                    RNFetchBlob.wrap(item.replace('file://', ''))
+                                    RNFetchBlob.wrap(decodeURI(item.replace('file://', '')))
                                   )
                                     .then(() => {
-                                      RNFetchBlob.fs.stat(item.replace('file://', '')).then(stats => {
+                                      RNFetchBlob.fs.stat(decodeURI(item.replace('file://', ''))).then(stats => {
                                         const formData = new FormData();
                                         formData.append('file_type', 'image/jpeg');
                                         formData.append('name', stats.filename);
