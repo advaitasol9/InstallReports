@@ -47,6 +47,8 @@
 	<string>We need a location permission so  we can build a route to order</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need a location permission so  we can build a route to order</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need a location permission so  we can build a route to order</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>App need access to the photo album in order to be able to select a pre-made photo</string>
 	<key>NSPhotoLibraryUsageDescription</key>
