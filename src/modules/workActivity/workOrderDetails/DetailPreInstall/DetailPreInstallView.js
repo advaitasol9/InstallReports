@@ -29,38 +29,6 @@ import { BackHandler } from 'react-native';
 
 export default class DetailPartialView extends Component {
   constructor(props) {
-    if (Platform.OS === 'ios') {
-      Geolocation.requestAuthorization();
-      Geolocation.getCurrentPosition(
-        position => {
-          props.geoLocation.lat = position.coords.latitude;
-          props.geoLocation.lon = position.coords.longitude;
-        },
-        error => {
-          console.log('map error: ', error);
-          console.log(error.code, error.message);
-        },
-        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
-      );
-    } else if (Platform.OS === 'android') {
-      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(res => {
-        if (res === PermissionsAndroid.RESULTS.GRANTED) {
-          Geolocation.getCurrentPosition(
-            info => {
-              props.geoLocation.lat = info.coords.latitude;
-              props.geoLocation.lon = info.coords.longitude;
-            },
-            error => {
-              console.error('faled');
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000
-            }
-          );
-        }
-      });
-    }
     super(props);
     uploadedImagesCount = 0;
     this.state = {
@@ -108,6 +76,42 @@ export default class DetailPartialView extends Component {
   }
 
   componentWillMount() {
+    if (Platform.OS === 'ios') {
+      Geolocation.requestAuthorization();
+      Geolocation.getCurrentPosition(
+        position => {
+          this.props.setLatLng({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+        },
+        error => {
+          console.log('map error: ', error);
+          console.log(error.code, error.message);
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
+      );
+    } else if (Platform.OS === 'android') {
+      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(res => {
+        if (res === PermissionsAndroid.RESULTS.GRANTED) {
+          Geolocation.getCurrentPosition(
+            info => {
+              this.props.setLatLng({
+                lat: info.coords.latitude,
+                lon: info.coords.longitude
+              });
+            },
+            error => {
+              console.error('faled');
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000
+            }
+          );
+        }
+      });
+    }
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
   }
 
