@@ -1,6 +1,6 @@
 // @flow
 import React, { Component } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Image, Dimensions } from 'react-native';
 import moment from 'moment';
 
 export default class OrderListTile extends Component {
@@ -9,12 +9,16 @@ export default class OrderListTile extends Component {
     this.state = {
       height: 10
     };
+    
   }
 
   componentWillMount() {
     if (this.props.item.accounts.length > 0 && this.props.item.accounts[0].logo_thumb_file_url) {
       Image.getSize(this.props.item.accounts[0].logo_thumb_file_url, (width, height) => {
-        this.setState({ height: height / 2 });
+        const windowWidth = Dimensions.get('window').width;
+        const availableWidth = windowWidth / 10;
+        const ratio = availableWidth / width;
+        this.setState({ width: availableWidth,height: height * ratio });
       });
     }
   }
@@ -30,7 +34,7 @@ export default class OrderListTile extends Component {
       >
         <View style={styles.tileLogoContainer}>
           {this.props.item.accounts.length > 0 && this.props.item.accounts[0].logo_thumb_file_url ? (
-            <Image style={{ width: 50, height: this.state.height }} source={{ uri: this.props.item.accounts[0].logo_thumb_file_url }} />
+            <Image style={{ width: this.state.width, height: this.state.height, flex: 1,resizeMode: 'contain' }} source={{ uri: this.props.item.accounts[0].logo_thumb_file_url }} />
           ) : null}
         </View>
         <View style={styles.tileInfoContainer}>
