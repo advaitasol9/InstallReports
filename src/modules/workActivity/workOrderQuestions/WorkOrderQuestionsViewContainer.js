@@ -36,7 +36,7 @@ export default compose(
           var photoIds = [];
           var installer_answers_photos = [];
 
-          JSON.parse(response.data.installer_questions_answers).map(questions => {
+          (JSON.parse(response.data.installer_questions_answers) ?? []).map(questions => {
             if (questions.type == 'photo') {
               var tempIds = [];
               var dataArray = [];

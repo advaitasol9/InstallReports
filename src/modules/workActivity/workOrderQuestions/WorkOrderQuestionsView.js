@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, StatusBar, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { StyleSheet, View, StatusBar, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Alert, Text } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 
 import { colors, commonStyles } from '../../../styles';
@@ -31,72 +31,41 @@ export default class WorkOrderQuestionsView extends Component {
   }
 
   updateAnswers = () => {
-    let isAllRequiredQuestionsAnswered = true;
     const installerQuestions = this.props.activityData.installer_questions_answers;
-    installerQuestions.forEach(question => {
-      if (question.required) {
-        if (question.type === 'signature' && this.props.signature.length == 0 && !question.answers) {
-          isAllRequiredQuestionsAnswered = false;
-        } else if (
-          question.allow_photos &&
-          this.props.photos.filter(photo => photo.order == question.order).length == 0 &&
-          (this.props.activityData.installer_questions_photos.filter(data => {
-            if (data.question_order_id == question.order) {
-              return data;
-            }
-          })[0] == undefined
-            ? true
-            : this.props.activityData.installer_questions_photos.filter(dataz => {
-                if (dataz.question_order_id == question.order) {
-                  return dataz;
-                }
-              })[0].data.length == 0)
-        ) {
-          isAllRequiredQuestionsAnswered = false;
-        } else if (
-          question.type === 'photo' &&
-          this.props.photos.filter(photo => photo.order == question.order).length == 0 &&
-          (this.props.activityData.installer_questions_photos.filter(data => {
-            if (data.question_order_id == question.order) {
-              return data;
-            }
-          })[0] == undefined
-            ? true
-            : this.props.activityData.installer_questions_photos.filter(dataz => {
-                if (dataz.question_order_id == question.order) {
-                  return dataz;
-                }
-              })[0].data.length == 0)
-        ) {
-          isAllRequiredQuestionsAnswered = false;
-        }
-        if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
-          if (!question.answers || question.answers == '' || question.answers.length == 0) {
-            isAllRequiredQuestionsAnswered = false;
-          } else if (
-            question.allow_photos &&
-            this.props.photos.filter(photo => photo.order == question.order).length == 0 &&
-            (this.props.activityData.installer_questions_photos.filter(data => {
-              if (data.question_order_id == question.order) {
-                return data;
-              }
-            })[0] == undefined
-              ? true
-              : this.props.activityData.installer_questions_photos.filter(dataz => {
-                  if (dataz.question_order_id == question.order) {
-                    return dataz;
-                  }
-                })[0].data.length == 0)
-          ) {
-            isAllRequiredQuestionsAnswered = false;
-          }
-        }
+    if (!installerQuestions?.length) {
+      return;
+    }
+
+    for (let i = 0; i < installerQuestions.length; i++) {
+      const question = installerQuestions[i];
+      if (!question.required) {
+        continue;
       }
-    });
-    this.setState({
-      isSubmitBtnDisabled: !isAllRequiredQuestionsAnswered,
-      showButton: !isAllRequiredQuestionsAnswered
-    });
+
+      if (question.type == 'signature' && !this.props.signature.length && !question.answers) {
+        this.setState({ isSubmitBtnDisabled: true });
+        return;
+      }
+
+      const noNewPhotos = this.props.photos.findIndex(p => p.order == question.order) != -1;
+      const noExistingPhotos = !this.props.activityData.installer_questions_photos.find(p => p.order == question.order)?.data?.length;
+      if (question.allow_photos && noNewPhotos && noExistingPhotos) {
+        this.setState({ isSubmitBtnDisabled: true });
+        return;
+      }
+
+      if (question.type == 'photo' && noNewPhotos && noExistingPhotos) {
+        this.setState({ isSubmitBtnDisabled: true });
+        return;
+      }
+
+      if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
+        this.setState({ isSubmitBtnDisabled: true });
+        return;
+      }
+    }
+
+    this.setState({ isSubmitBtnDisabled: false });
   };
 
   deleteInstallerPhotos = photo_data => {
@@ -351,284 +320,7 @@ export default class WorkOrderQuestionsView extends Component {
             <ActivityStatus status={this.props.activityData.status} />
             <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
             <ActivityTitle title="Installer Questions" />
-            <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
-              <View style={styles.scrollContainer}>
-                <QuestionsList
-                  questions={this.props.activityData.installer_questions_answers}
-                  questions_photos={this.props.activityData.installer_questions_photos}
-                  photos={this.props.photos}
-                  addPhoto={this.props.addPhoto}
-                  screen="Questions"
-                  setUpdate={this.props.setUpdate}
-                  update={this.props.update}
-                  updateAnswers={this.updateAnswers}
-                  deleteInstallerPhotos={this.deleteInstallerPhotos}
-                  setSignature={this.props.setSignature}
-                />
-                <View style={{ marginTop: 24 }}>
-                  <Button
-                    textColor={colors.white}
-                    textStyle={{ fontSize: 20 }}
-                    caption="Update"
-                    isLoading={this.state.isUpdateLoading}
-                    bgColor={this.state.isUpdateLoading ? '#b1cec1' : colors.blue}
-                    onPress={async () => {
-                      this.setState({
-                        isUpdateLoading: true
-                      });
-                      if (this.props.photos.length > 0) {
-                        this.props.photos.forEach((item, photoIndex) => {
-                          apiGet('aws-s3-presigned-urls', this.props.token)
-                            .then(res => {
-                              RNFetchBlob.fetch(
-                                'PUT',
-                                res.data.url,
-                                {
-                                  'security-token': this.props.token,
-                                  'Content-Type': 'application/octet-stream'
-                                },
-                                RNFetchBlob.wrap(decodeURI(item.uri.replace('file://', '')))
-                              )
-
-                                .then(() => {
-                                  console.log(encodeURI(item.uri));
-                                  console.log(RNFetchBlob.wrap(item.uri));
-                                  RNFetchBlob.fs.stat(decodeURI(item.uri.replace('file://', ''))).then(stats => {
-                                    const formData = new FormData();
-                                    formData.append('file_type', 'image/jpeg');
-                                    formData.append('name', stats.filename);
-                                    formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                    formData.append('size', stats.size);
-                                    apiPostImage(`files`, formData, this.props.token)
-                                      .then(fileRes => {
-                                        this.props.activityData.installer_questions_answers.forEach((question, index) => {
-                                          if (question.order === item.order) {
-                                            if (question.type == 'photo') {
-                                              if (
-                                                this.props.activityData.installer_questions_answers[index].answers == undefined ||
-                                                this.props.activityData.installer_questions_answers[index].answers == ''
-                                              ) {
-                                                this.props.activityData.installer_questions_answers[index].answers = [fileRes.data.id];
-                                              } else {
-                                                this.props.activityData.installer_questions_answers[index].answers.push(fileRes.data.id);
-                                              }
-                                            } else {
-                                              if (
-                                                this.props.activityData.installer_questions_answers[index].photo == undefined ||
-                                                this.props.activityData.installer_questions_answers[index].photo == ''
-                                              ) {
-                                                this.props.activityData.installer_questions_answers[index].photo = [fileRes.data.id];
-                                              } else {
-                                                this.props.activityData.installer_questions_answers[index].photo.push(fileRes.data.id);
-                                              }
-                                            }
-                                          }
-                                        });
-                                        this.uploadedImagesCount += 1;
-                                        this.updateInstallerQuestionAnswers();
-                                      })
-                                      .catch(err => {
-                                        this.setState({
-                                          isUpdateLoading: false
-                                        });
-                                      });
-                                  });
-                                })
-                                .catch(err => {
-                                  this.setState({
-                                    isUpdateLoading: false
-                                  });
-                                  console.log(err);
-                                });
-                            })
-                            .catch(err => {
-                              this.setState({
-                                isUpdateLoading: false
-                              });
-                            });
-                        });
-                      }
-                      if (this.props.signature.length == 1) {
-                        let signatureQuestionIndex = this.props.activityData.installer_questions_answers.findIndex(question => question.type == 'signature');
-                        let signatureQuestion = this.props.activityData.installer_questions_answers[signatureQuestionIndex];
-                        if (signatureQuestionIndex != -1) {
-                          apiGet('aws-s3-presigned-urls', this.props.token).then(res => {
-                            RNFetchBlob.fetch(
-                              'PUT',
-                              res.data.url,
-                              {
-                                'security-token': this.props.token,
-                                'Content-Type': 'image/png'
-                              },
-                              RNFetchBlob.wrap(this.props.signature[0].replace('file://', ''))
-                            )
-                              .then(() => {
-                                RNFetchBlob.fs.stat(this.props.signature[0].replace('file://', '')).then(stats => {
-                                  const formData = new FormData();
-                                  formData.append('file_type', 'image/jpeg');
-                                  formData.append('name', stats.filename);
-                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                  formData.append('size', stats.size);
-                                  apiPostImage(`files`, formData, this.props.token)
-                                    .then(fileRes => {
-                                      signatureQuestion.answers = fileRes.data.id;
-                                      this.isSignatureUploaded = true;
-                                      this.updateInstallerQuestionAnswers();
-                                    })
-                                    .catch(err => {
-                                      this.setState({
-                                        isUpdateLoading: false
-                                      });
-                                    });
-                                });
-                              })
-                              .catch(err => {
-                                this.setState({
-                                  isUpdateLoading: false
-                                });
-                                console.log(err);
-                              });
-                          });
-                        }
-                      } else {
-                        this.isSignatureUploaded = true;
-                        this.updateInstallerQuestionAnswers();
-                      }
-                    }}
-                  />
-                  <Button
-                    style={{ marginTop: 15 }}
-                    onPress={async () => {
-                      this.setState({
-                        isLoading: true
-                      });
-                      this.state.isSubmitBtnDisabled = true;
-                      if (this.props.photos.length > 0) {
-                        this.props.photos.forEach((item, photoIndex) => {
-                          apiGet('aws-s3-presigned-urls', this.props.token)
-                            .then(res => {
-                              RNFetchBlob.fetch(
-                                'PUT',
-                                res.data.url,
-                                {
-                                  'security-token': this.props.token,
-                                  'Content-Type': 'image/jpeg'
-                                },
-                                RNFetchBlob.wrap(item.uri.replace('file://', ''))
-                              )
-                                .then(() => {
-                                  RNFetchBlob.fs.stat(item.uri.replace('file://', '')).then(stats => {
-                                    const formData = new FormData();
-                                    formData.append('file_type', 'image/jpeg');
-                                    formData.append('name', stats.filename);
-                                    formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                    formData.append('size', stats.size);
-                                    apiPostImage(`files`, formData, this.props.token)
-                                      .then(fileRes => {
-                                        this.props.activityData.installer_questions_answers.forEach((question, index) => {
-                                          if (question.order === item.order) {
-                                            if (question.type == 'photo') {
-                                              if (
-                                                this.props.activityData.installer_questions_answers[index].answers == undefined ||
-                                                this.props.activityData.installer_questions_answers[index].answers == ''
-                                              ) {
-                                                this.props.activityData.installer_questions_answers[index].answers = [fileRes.data.id];
-                                              } else {
-                                                this.props.activityData.installer_questions_answers[index].answers.push(fileRes.data.id);
-                                              }
-                                            } else {
-                                              if (
-                                                this.props.activityData.installer_questions_answers[index].photo == undefined ||
-                                                this.props.activityData.installer_questions_answers[index].photo == ''
-                                              ) {
-                                                this.props.activityData.installer_questions_answers[index].photo = [fileRes.data.id];
-                                              } else {
-                                                this.props.activityData.installer_questions_answers[index].photo.push(fileRes.data.id);
-                                              }
-                                            }
-                                          }
-                                        });
-                                        this.uploadedImagesCount += 1;
-                                        this.saveInstallerQuestionAnswers();
-                                      })
-                                      .catch(err => {
-                                        this.setState({
-                                          isLoading: false
-                                        });
-                                      });
-                                  });
-                                })
-                                .catch(err => {
-                                  this.setState({
-                                    isLoading: false
-                                  });
-                                  console.log(err);
-                                });
-                            })
-                            .catch(err => {
-                              this.setState({
-                                isLoading: false
-                              });
-                            });
-                        });
-                      }
-                      if (this.props.signature.length == 1) {
-                        let signatureQuestionIndex = this.props.activityData.installer_questions_answers.findIndex(question => question.type == 'signature');
-                        let signatureQuestion = this.props.activityData.installer_questions_answers[signatureQuestionIndex];
-                        if (signatureQuestionIndex != -1) {
-                          apiGet('aws-s3-presigned-urls', this.props.token).then(res => {
-                            RNFetchBlob.fetch(
-                              'PUT',
-                              res.data.url,
-                              {
-                                'security-token': this.props.token,
-                                'Content-Type': 'image/png'
-                              },
-                              RNFetchBlob.wrap(this.props.signature[0].replace('file://', ''))
-                            )
-                              .then(() => {
-                                RNFetchBlob.fs.stat(this.props.signature[0].replace('file://', '')).then(stats => {
-                                  const formData = new FormData();
-                                  formData.append('file_type', 'image/jpeg');
-                                  formData.append('name', stats.filename);
-                                  formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                  formData.append('size', stats.size);
-                                  apiPostImage(`files`, formData, this.props.token)
-                                    .then(fileRes => {
-                                      signatureQuestion.answers = fileRes.data.id;
-                                      this.isSignatureUploaded = true;
-                                      this.saveInstallerQuestionAnswers();
-                                    })
-                                    .catch(err => {
-                                      this.setState({
-                                        isLoading: false
-                                      });
-                                    });
-                                });
-                              })
-                              .catch(err => {
-                                this.setState({
-                                  isLoading: false
-                                });
-                                console.log(err);
-                              });
-                          });
-                        }
-                      } else {
-                        this.isSignatureUploaded = true;
-                        this.saveInstallerQuestionAnswers();
-                      }
-                    }}
-                    textColor={colors.white}
-                    textStyle={{ fontSize: 20 }}
-                    caption="Submit"
-                    isLoading={this.state.isLoading}
-                    bgColor={this.state.isSubmitBtnDisabled ? '#b1cec1' : colors.green}
-                    disabled={this.state.isSubmitBtnDisabled}
-                  />
-                </View>
-              </View>
-            </View>
+            <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>{this.renderQuestionForm()}</View>
           </ScrollView>
         </KeyboardAvoidingView>
       );
@@ -639,6 +331,294 @@ export default class WorkOrderQuestionsView extends Component {
         </View>
       );
     }
+  }
+
+  renderQuestionForm() {
+    if (!this.props.activityData.installer_questions_answers?.length) {
+      return (
+        <View style={styles.scrollContainer}>
+          <Text>No questions have been posted to this work order.</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.scrollContainer}>
+        <QuestionsList
+          questions={this.props.activityData.installer_questions_answers}
+          questions_photos={this.props.activityData.installer_questions_photos}
+          photos={this.props.photos}
+          addPhoto={this.props.addPhoto}
+          screen="Questions"
+          setUpdate={this.props.setUpdate}
+          update={this.props.update}
+          updateAnswers={this.updateAnswers}
+          deleteInstallerPhotos={this.deleteInstallerPhotos}
+          setSignature={this.props.setSignature}
+        />
+        <View style={{ marginTop: 24 }}>
+          <Button
+            textColor={colors.white}
+            textStyle={{ fontSize: 20 }}
+            caption="Update"
+            isLoading={this.state.isUpdateLoading}
+            bgColor={this.state.isUpdateLoading ? '#b1cec1' : colors.blue}
+            onPress={async () => {
+              this.setState({
+                isUpdateLoading: true
+              });
+              if (this.props.photos.length > 0) {
+                this.props.photos.forEach((item, photoIndex) => {
+                  apiGet('aws-s3-presigned-urls', this.props.token)
+                    .then(res => {
+                      RNFetchBlob.fetch(
+                        'PUT',
+                        res.data.url,
+                        {
+                          'security-token': this.props.token,
+                          'Content-Type': 'application/octet-stream'
+                        },
+                        RNFetchBlob.wrap(decodeURI(item.uri.replace('file://', '')))
+                      )
+
+                        .then(() => {
+                          console.log(encodeURI(item.uri));
+                          console.log(RNFetchBlob.wrap(item.uri));
+                          RNFetchBlob.fs.stat(decodeURI(item.uri.replace('file://', ''))).then(stats => {
+                            const formData = new FormData();
+                            formData.append('file_type', 'image/jpeg');
+                            formData.append('name', stats.filename);
+                            formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                            formData.append('size', stats.size);
+                            apiPostImage(`files`, formData, this.props.token)
+                              .then(fileRes => {
+                                this.props.activityData.installer_questions_answers.forEach((question, index) => {
+                                  if (question.order === item.order) {
+                                    if (question.type == 'photo') {
+                                      if (
+                                        this.props.activityData.installer_questions_answers[index].answers == undefined ||
+                                        this.props.activityData.installer_questions_answers[index].answers == ''
+                                      ) {
+                                        this.props.activityData.installer_questions_answers[index].answers = [fileRes.data.id];
+                                      } else {
+                                        this.props.activityData.installer_questions_answers[index].answers.push(fileRes.data.id);
+                                      }
+                                    } else {
+                                      if (
+                                        this.props.activityData.installer_questions_answers[index].photo == undefined ||
+                                        this.props.activityData.installer_questions_answers[index].photo == ''
+                                      ) {
+                                        this.props.activityData.installer_questions_answers[index].photo = [fileRes.data.id];
+                                      } else {
+                                        this.props.activityData.installer_questions_answers[index].photo.push(fileRes.data.id);
+                                      }
+                                    }
+                                  }
+                                });
+                                this.uploadedImagesCount += 1;
+                                this.updateInstallerQuestionAnswers();
+                              })
+                              .catch(err => {
+                                this.setState({
+                                  isUpdateLoading: false
+                                });
+                              });
+                          });
+                        })
+                        .catch(err => {
+                          this.setState({
+                            isUpdateLoading: false
+                          });
+                          console.log(err);
+                        });
+                    })
+                    .catch(err => {
+                      this.setState({
+                        isUpdateLoading: false
+                      });
+                    });
+                });
+              }
+              if (this.props.signature.length == 1) {
+                let signatureQuestionIndex = this.props.activityData.installer_questions_answers.findIndex(question => question.type == 'signature');
+                let signatureQuestion = this.props.activityData.installer_questions_answers[signatureQuestionIndex];
+                if (signatureQuestionIndex != -1) {
+                  apiGet('aws-s3-presigned-urls', this.props.token).then(res => {
+                    RNFetchBlob.fetch(
+                      'PUT',
+                      res.data.url,
+                      {
+                        'security-token': this.props.token,
+                        'Content-Type': 'image/png'
+                      },
+                      RNFetchBlob.wrap(this.props.signature[0].replace('file://', ''))
+                    )
+                      .then(() => {
+                        RNFetchBlob.fs.stat(this.props.signature[0].replace('file://', '')).then(stats => {
+                          const formData = new FormData();
+                          formData.append('file_type', 'image/jpeg');
+                          formData.append('name', stats.filename);
+                          formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                          formData.append('size', stats.size);
+                          apiPostImage(`files`, formData, this.props.token)
+                            .then(fileRes => {
+                              signatureQuestion.answers = fileRes.data.id;
+                              this.isSignatureUploaded = true;
+                              this.updateInstallerQuestionAnswers();
+                            })
+                            .catch(err => {
+                              this.setState({
+                                isUpdateLoading: false
+                              });
+                            });
+                        });
+                      })
+                      .catch(err => {
+                        this.setState({
+                          isUpdateLoading: false
+                        });
+                        console.log(err);
+                      });
+                  });
+                }
+              } else {
+                this.isSignatureUploaded = true;
+                this.updateInstallerQuestionAnswers();
+              }
+            }}
+          />
+          <Button
+            style={{ marginTop: 15 }}
+            onPress={async () => {
+              this.setState({
+                isLoading: true
+              });
+              this.state.isSubmitBtnDisabled = true;
+              if (this.props.photos.length > 0) {
+                this.props.photos.forEach((item, photoIndex) => {
+                  apiGet('aws-s3-presigned-urls', this.props.token)
+                    .then(res => {
+                      RNFetchBlob.fetch(
+                        'PUT',
+                        res.data.url,
+                        {
+                          'security-token': this.props.token,
+                          'Content-Type': 'image/jpeg'
+                        },
+                        RNFetchBlob.wrap(item.uri.replace('file://', ''))
+                      )
+                        .then(() => {
+                          RNFetchBlob.fs.stat(item.uri.replace('file://', '')).then(stats => {
+                            const formData = new FormData();
+                            formData.append('file_type', 'image/jpeg');
+                            formData.append('name', stats.filename);
+                            formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                            formData.append('size', stats.size);
+                            apiPostImage(`files`, formData, this.props.token)
+                              .then(fileRes => {
+                                this.props.activityData.installer_questions_answers.forEach((question, index) => {
+                                  if (question.order === item.order) {
+                                    if (question.type == 'photo') {
+                                      if (
+                                        this.props.activityData.installer_questions_answers[index].answers == undefined ||
+                                        this.props.activityData.installer_questions_answers[index].answers == ''
+                                      ) {
+                                        this.props.activityData.installer_questions_answers[index].answers = [fileRes.data.id];
+                                      } else {
+                                        this.props.activityData.installer_questions_answers[index].answers.push(fileRes.data.id);
+                                      }
+                                    } else {
+                                      if (
+                                        this.props.activityData.installer_questions_answers[index].photo == undefined ||
+                                        this.props.activityData.installer_questions_answers[index].photo == ''
+                                      ) {
+                                        this.props.activityData.installer_questions_answers[index].photo = [fileRes.data.id];
+                                      } else {
+                                        this.props.activityData.installer_questions_answers[index].photo.push(fileRes.data.id);
+                                      }
+                                    }
+                                  }
+                                });
+                                this.uploadedImagesCount += 1;
+                                this.saveInstallerQuestionAnswers();
+                              })
+                              .catch(err => {
+                                this.setState({
+                                  isLoading: false
+                                });
+                              });
+                          });
+                        })
+                        .catch(err => {
+                          this.setState({
+                            isLoading: false
+                          });
+                          console.log(err);
+                        });
+                    })
+                    .catch(err => {
+                      this.setState({
+                        isLoading: false
+                      });
+                    });
+                });
+              }
+              if (this.props.signature.length == 1) {
+                let signatureQuestionIndex = this.props.activityData.installer_questions_answers.findIndex(question => question.type == 'signature');
+                let signatureQuestion = this.props.activityData.installer_questions_answers[signatureQuestionIndex];
+                if (signatureQuestionIndex != -1) {
+                  apiGet('aws-s3-presigned-urls', this.props.token).then(res => {
+                    RNFetchBlob.fetch(
+                      'PUT',
+                      res.data.url,
+                      {
+                        'security-token': this.props.token,
+                        'Content-Type': 'image/png'
+                      },
+                      RNFetchBlob.wrap(this.props.signature[0].replace('file://', ''))
+                    )
+                      .then(() => {
+                        RNFetchBlob.fs.stat(this.props.signature[0].replace('file://', '')).then(stats => {
+                          const formData = new FormData();
+                          formData.append('file_type', 'image/jpeg');
+                          formData.append('name', stats.filename);
+                          formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+                          formData.append('size', stats.size);
+                          apiPostImage(`files`, formData, this.props.token)
+                            .then(fileRes => {
+                              signatureQuestion.answers = fileRes.data.id;
+                              this.isSignatureUploaded = true;
+                              this.saveInstallerQuestionAnswers();
+                            })
+                            .catch(err => {
+                              this.setState({
+                                isLoading: false
+                              });
+                            });
+                        });
+                      })
+                      .catch(err => {
+                        this.setState({
+                          isLoading: false
+                        });
+                        console.log(err);
+                      });
+                  });
+                }
+              } else {
+                this.isSignatureUploaded = true;
+                this.saveInstallerQuestionAnswers();
+              }
+            }}
+            textColor={colors.white}
+            textStyle={{ fontSize: 20 }}
+            caption="Submit"
+            isLoading={this.state.isLoading}
+            bgColor={this.state.isSubmitBtnDisabled ? '#b1cec1' : colors.green}
+            disabled={this.state.isSubmitBtnDisabled}
+          />
+        </View>
+      </View>
+    );
   }
 }
 
