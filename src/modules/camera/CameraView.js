@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Dimensions, TouchableOpacity, TouchableHighlight, Image, Text, StatusBar } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 import CameraRoll from '@react-native-community/cameraroll';
+//import React, { CameraRoll } from 'react-native';
 import { Platform } from 'react-native';
 import { PermissionsAndroid } from 'react-native';
 
@@ -107,7 +108,17 @@ export function Camera(props) {
               }
 
               if (Platform.OS !== 'android' || permission) {
-                CameraRoll.save(props.photoUri, { album: 'Install Reports' });
+                  try{
+                      
+                      CameraRoll.save(props.photoUri, { album: 'Install Reports' }).then(()=>{
+                          console.log('success');
+                      }).catch((e)=>{
+                          console.log(e);
+                      });
+                  }
+                  catch(e){
+                      console.log(e);
+                  }
               }
 
               const { photos } = props;
@@ -119,8 +130,11 @@ export function Camera(props) {
               } else {
                 photos.push(props.photoUri);
               }
-              props.navigation.state.params.addPhoto(photos);
-              props.setPhotoModal(false);
+        console.log('closing this');
+        await props.navigation.state.params.addPhoto(photos);
+            props.setPhotoModal(false);
+        props.navigation.navigate(props.backRoute, { screenData: props.navigation.state.params.screenData });
+              
             }}
           >
             <Text
