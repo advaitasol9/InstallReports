@@ -24,9 +24,10 @@ export default class WorkOrderScreen extends Component {
         this.setState({
           isDataLoading: true
         });
+        
         const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
         const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=' + (this.page + 1) + '&count=10' + statuses, this.props.token);
-
+        
         const result = this.props.orderList;
 
         if (data.data.data.length > 0) {
@@ -85,7 +86,6 @@ export default class WorkOrderScreen extends Component {
                     const statuses =
                       '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
                     const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=1&count=10' + statuses, this.props.token);
-
                     const result = [];
 
                     if (data.data.data.length > 0) {

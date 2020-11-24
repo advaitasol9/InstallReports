@@ -1,3 +1,4 @@
+
 const { AsyncStorage } = require('react-native');
 
 this.state = {
@@ -6,13 +7,16 @@ this.state = {
 };
 
 const setNewPath = async (newPath,secondApiPath) => {
+  
   if(newPath==null){
     this.state.apiPath = secondApiPath.key;
     this.state.name = secondApiPath.value;
     await AsyncStorage.setItem('apipaths', JSON.stringify(String(secondApiPath.key)));
   }else{
+    
     this.state.apiPath = newPath;
     await AsyncStorage.setItem('apipaths', JSON.stringify(String(newPath)));
+    
   }
 };
 

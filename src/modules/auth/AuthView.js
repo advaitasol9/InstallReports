@@ -9,27 +9,25 @@ import { auth, getEnv } from '../../core/api';
 import { setNewPath, state } from '../../core/mainEnv';
 import { colors, fonts } from '../../styles';
 export default class AuthScreen extends React.Component {
-  state = {
-    anim: new Animated.Value(0),
+    
+  state = {...state,anim: new Animated.Value(0),
     // Current visible form
     isKeyboardVisible: false,
     dropdownVisible: false,
-    env: []
-  };
-
+    env: []};
   constructor() {
     super();
     let versionString = version;
     versionString = versionString.match(/^\d+\.\d+/g);
     const formattedVersion = versionString.length > 0 ? versionString[0] : '0.0';
     this.state = { ...this.state, version: formattedVersion };
+    
   }
 
-  async componentWillMount() {
+  componentWillMount() {
     getEnv()
       .then(response => {
         const endpoints = response.data;
-        console.log(endpoints);
         if (state.apiPath == '') {
           setNewPath(endpoints[0].end_point_url, null);
         }
@@ -39,6 +37,7 @@ export default class AuthScreen extends React.Component {
           Object.keys(endpoints).forEach(key => {
             data.push({ key: endpoints[key].end_point_url, value: endpoints[key].name });
           });
+          
           this.setState({ env: data });
         } else {
           if (state.apiPath == '') {
@@ -46,7 +45,7 @@ export default class AuthScreen extends React.Component {
           }
         }
       })
-      .catch(err => {});
+      .catch(err => {console.log(err)});
 
     this.keyboardDidShowListener = Keyboard.addListener(
       Platform.select({ android: 'keyboardDidShow', ios: 'keyboardWillShow' }),
@@ -65,6 +64,7 @@ export default class AuthScreen extends React.Component {
   componentWillUnmount() {
     this.keyboardDidShowListener.remove();
     this.keyboardDidHideListener.remove();
+    
   }
 
   setFormData(password, email) {
@@ -84,10 +84,11 @@ export default class AuthScreen extends React.Component {
       .then(response => {
         this.props.setPassword('');
         this.props.setEmail('');
-        this.props.setApiPath(API_PATH);
         this.storeUserData(response.data.user);
         this.props.setUserInfo(response);
-        this.props.logIn();
+        this.storeAuthResponse(response);
+        this.storeSelectedAPI(state);
+        this.props.logIn(state);
         this.props.navigation.navigate({ routeName: 'Home' });
       })
       .catch(e => {
@@ -99,6 +100,14 @@ export default class AuthScreen extends React.Component {
   storeUserData = async data => {
     await AsyncStorage.setItem('currentUserData', JSON.stringify(data));
   };
+
+  storeSelectedAPI = async selectedAPI => {
+    await AsyncStorage.setItem('selectedEndpoint',JSON.stringify(selectedAPI));
+  }
+
+  storeAuthResponse = async response => {
+    await AsyncStorage.setItem('savedAuthResponse',JSON.stringify(response));
+  }
 
   fadeIn(delay, from = 0) {
     const { anim } = this.state;
@@ -131,121 +140,124 @@ export default class AuthScreen extends React.Component {
   }
 
   render() {
-    return (
-      <View style={styles.backgroundImage}>
-        <View style={styles.container}>
-          <Text
-            style={{
-              position: 'absolute',
-              right: 32,
-              top: 24,
-              color: 'black',
-              fontSize: 12
-            }}
-          >
-            v {this.state.version}
-          </Text>
-          <View style={[styles.section, { paddingTop: 30 }]}>
-            <Animated.Image
-              resizeMode="contain"
-              style={[styles.logo, this.state.isKeyboardVisible && { height: 30 }, this.fadeIn(0)]}
-              source={require('../../../assets/images/logo-white.png')}
-            />
-          </View>
 
-          <Animated.View style={[styles.section, styles.middle, this.fadeIn(700, -20)]}>
-            <TextInput
-              placeholder="Email"
-              style={styles.textInput}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              onChangeText={text => this.props.setEmail(text)}
-              value={this.props.email}
-            />
-            <TextInput
-              placeholder="Password"
-              secureTextEntry
-              style={styles.textInput}
-              onChangeText={text => this.props.setPassword(text)}
-              value={this.props.password}
-            />
-            <Animated.View style={[styles.section, styles.bottom, this.fadeIn(700, -20)]}>
-              <Button
-                bgColor="white"
-                textColor={colors.primary}
-                rounded
-                style={{ alignSelf: 'stretch', marginBottom: 10, marginTop: 30 }}
-                caption="Login"
-                onPress={() => {
-                  this.setFormData(this.props.password, this.props.email);
-                }}
+    if(!this.props.authState.isLoggedIn){
+      return (
+        <View style={styles.backgroundImage}>
+          <View style={styles.container}>
+            <Text
+              style={{
+                position: 'absolute',
+                right: 32,
+                top: 24,
+                color: 'black',
+                fontSize: 12
+              }}
+            >
+              v {this.state.version}
+            </Text>
+            <View style={[styles.section, { paddingTop: 30 }]}>
+              <Animated.Image
+                resizeMode="contain"
+                style={[styles.logo, this.state.isKeyboardVisible && { height: 30 }, this.fadeIn(0)]}
+                source={require('../../../assets/images/logo-white.png')}
               />
-
-              {!this.state.isKeyboardVisible && (
-                <TouchableOpacity
+            </View>
+  
+            <Animated.View style={[styles.section, styles.middle, this.fadeIn(700, -20)]}>
+              <TextInput
+                placeholder="Email"
+                style={styles.textInput}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                onChangeText={text => this.props.setEmail(text)}
+                value={this.props.email}
+              />
+              <TextInput
+                placeholder="Password"
+                secureTextEntry
+                style={styles.textInput}
+                onChangeText={text => this.props.setPassword(text)}
+                value={this.props.password}
+              />
+              <Animated.View style={[styles.section, styles.bottom, this.fadeIn(700, -20)]}>
+                <Button
+                  bgColor="white"
+                  textColor={colors.primary}
+                  rounded
+                  style={{ alignSelf: 'stretch', marginBottom: 10, marginTop: 30 }}
+                  caption="Login"
                   onPress={() => {
-                    Linking.openURL('https://installreports.com/reset-password');
+                    this.setFormData(this.props.password, this.props.email);
                   }}
-                  style={{ paddingTop: 30, flexDirection: 'row' }}
-                >
-                  <Text
-                    style={{
-                      color: colors.white,
-                      fontFamily: fonts.primaryRegular
+                />
+  
+                {!this.state.isKeyboardVisible && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      Linking.openURL('https://installreports.com/reset-password');
                     }}
+                    style={{ paddingTop: 30, flexDirection: 'row' }}
                   >
-                    Forgot your password?
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {!this.state.isKeyboardVisible && !this.state.dropdownVisible && (
-                <Animated.View style={styles.dropdownNew}>
-                  <Dropdown
-                    label="Environment"
-                    data={this.state.env}
-                    baseColor="rgba(255, 255, 255, 0.0)"
-                    value={state.name}
-                    ref={ref => (this.dropDownRef = ref)}
-                    style={{ color: 'rgba(255, 255, 255, 0.0)' }}
-                    dropdownOffset={{ top: 10, left: 0 }}
-                    shadeOpacity={0.12}
-                    value="Production"
-                    onChangeText={text => {
-                      const selectedItem = this.state.env.filter(answer => answer.value == text)[0];
-                      console.log('selectedItem');
-                      console.log(selectedItem);
-                      setNewPath(null, selectedItem);
-                      return true;
+                    <Text
+                      style={{
+                        color: colors.white,
+                        fontFamily: fonts.primaryRegular
+                      }}
+                    >
+                      Forgot your password?
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {!this.state.isKeyboardVisible && !this.state.dropdownVisible && (
+                  <Animated.View style={styles.dropdownNew}>
+                    <Dropdown
+                      label="Environment"
+                      data={this.state.env}
+                      baseColor="rgba(255, 255, 255, 0.0)"
+                      value={state.name}
+                      ref={ref => (this.dropDownRef = ref)}
+                      style={{ color: 'rgba(255, 255, 255, 0.0)' }}
+                      dropdownOffset={{ top: 10, left: 0 }}
+                      shadeOpacity={0.12}
+                      value="Production"
+                      onChangeText={text => {
+                        const selectedItem = this.state.env.filter(answer => answer.value == text)[0];
+                        setNewPath(null, selectedItem);
+                        return true;
+                      }}
+                    />
+                  </Animated.View>
+                )}
+                {!this.state.isKeyboardVisible && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.dropDownRef.focus();
                     }}
-                  />
-                </Animated.View>
-              )}
-              {!this.state.isKeyboardVisible && (
-                <TouchableOpacity
-                  onPress={() => {
-                    this.dropDownRef.focus();
-                  }}
-                  style={{ paddingTop: 30, flexDirection: 'row' }}
-                >
-                  <Text
-                    style={{
-                      color: colors.white,
-                      fontFamily: fonts.primaryRegular,
-                      flexDirection: 'column',
-                      marginBottom: 70,
-                      fontSize: 11
-                    }}
+                    style={{ paddingTop: 30, flexDirection: 'row' }}
                   >
-                    Change Environment
-                  </Text>
-                </TouchableOpacity>
-              )}
+                    <Text
+                      style={{
+                        color: colors.white,
+                        fontFamily: fonts.primaryRegular,
+                        flexDirection: 'column',
+                        marginBottom: 70,
+                        fontSize: 11
+                      }}
+                    >
+                      Change Environment
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </Animated.View>
             </Animated.View>
-          </Animated.View>
+          </View>
         </View>
-      </View>
-    );
+      );
+    }else{
+      return null;
+    }
   }
 }
 
