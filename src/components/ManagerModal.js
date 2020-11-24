@@ -28,8 +28,8 @@ const ManagerModal = props => {
               <Button
                 bgColor={colors.green}
                 style={{ width: '100%' }}
-                onPress={() => {
-                  props.setModalVisible(false);
+                onPress={async () => {
+                  await props.setModalVisible(false);
                   props.navigation.navigate('Work Order');
                 }}
                 textColor={colors.white}

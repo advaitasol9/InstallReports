@@ -108,7 +108,7 @@ export default compose(
       let photoIds = [];
       const managerQuestions = JSON.parse(workOrder.manager_questions_answers);
 
-      const managerQuestionsPhotos = managerQuestions.map(question => {
+      const managerQuestionsPhotos = (managerQuestions ?? []).map(question => {
         let photos;
         if (question.type == 'photo') {
           photos = question.answers;
