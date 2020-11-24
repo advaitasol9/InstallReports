@@ -1,16 +1,14 @@
+import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
 import React from 'react';
-import { View, StyleSheet, Text, TextInput, FlatList, Image, Alert, TouchableOpacity } from 'react-native';
-import { compose, lifecycle } from 'recompose';
+import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import ImagePicker from 'react-native-image-picker';
 import { Dropdown } from 'react-native-material-dropdown';
 import IO from 'react-native-vector-icons/Ionicons';
-import ImagePicker from 'react-native-image-picker';
 import { withNavigation } from 'react-navigation';
-import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
-import RNFetchBlob from 'rn-fetch-blob';
-
+import { compose, lifecycle } from 'recompose';
+import { colors } from '../styles';
 import Button from './Button';
 import CheckBox from './CheckBox';
-import { colors, commonStyles } from '../styles';
 
 const options = {
   quality: 1.0,
@@ -321,13 +319,8 @@ const QuestionsList = props => {
   };
 
   const getImageUrlsByQuestonOrderId = (photo_data, orderId) => {
-    var data = [];
-    photo_data.map((item, index) => {
-      if (item.question_order_id == orderId) {
-        data = item.data;
-      }
-    });
-    return data;
+    const data = photo_data.find(item => item.question_order_id == orderId);
+    return data?.data ?? [];
   };
 
   return (

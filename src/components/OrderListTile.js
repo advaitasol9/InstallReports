@@ -38,8 +38,10 @@ export default class OrderListTile extends Component {
           ) : null}
         </View>
         <View style={styles.tileInfoContainer}>
-          <Text style={styles.infoCompany}>{this.props.item.account_name}</Text>
-          <Text style={styles.infoTitle}>{this.props.item.item_name}</Text>
+          {this.props.connectionStatus && <Text style={styles.infoCompany}>{this.props.item.account_name}</Text>}
+          {!this.props.connectionStatus && <Text style={styles.infoCompany}>{this.props.item.accounts[0].name}</Text>}
+          {this.props.connectionStatus && <Text style={styles.infoTitle}>{this.props.item.item_name}</Text>}
+          {!this.props.connectionStatus && <Text style={styles.infoTitle}>{this.props.item.items[0].name}</Text>}
           <View style={styles.infoBottomSection}>
             <View style={{ flexDirection: 'row' }}>
               <Text style={[styles.infoBottomText, { marginRight: 20 }]}>#{this.props.item.id}</Text>

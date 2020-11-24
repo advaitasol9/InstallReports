@@ -1,6 +1,6 @@
 // @flow
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, StatusBar, Platform, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, StatusBar, Platform, Image, Alert } from 'react-native';
 import Pdf from 'react-native-pdf';
 import { Loading } from '../../components';
 import { colors, width, height } from '../../styles';
@@ -10,6 +10,7 @@ import { BackHandler } from 'react-native';
 import { PermissionsAndroid } from 'react-native';
 
 export default class PdfContainer extends Component {
+  
   constructor(props) {
     super(props);
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
@@ -17,7 +18,11 @@ export default class PdfContainer extends Component {
 
   handleBackButtonClick = () => {
     // this.props.addPhoto([]);
-    this.props.navigation.navigate('Docs');
+    if(this.props.navigation.state.params.route=="comment"){
+      this.props.navigation.navigate('Message');
+    }else{
+      this.props.navigation.navigate('Docs');
+    }
     return true;
   };
 
@@ -50,7 +55,11 @@ export default class PdfContainer extends Component {
           <TouchableOpacity
             style={{ width: '50%' }}
             onPress={() => {
-              this.props.navigation.navigate('Docs');
+              if(this.props.navigation.state.params.route=="comment"){
+                this.props.navigation.navigate('Message');
+              }else{
+                this.props.navigation.navigate('Docs');
+              }
             }}
           >
             <Text>Back</Text>
@@ -58,43 +67,77 @@ export default class PdfContainer extends Component {
           <TouchableOpacity
             style={{ width: '50%' }}
             onPress={async () => {
-              if (Platform.OS === 'ios') {
-                const dirs = RNFetchBlob.fs.dirs;
-                RNFetchBlob.config({
-                  path: dirs.DocumentDir + '/' + this.props.navigation.state.params.name,
-                  fileCache: true
-                })
-                  .fetch('GET', this.props.navigation.state.params.uri, {})
-                  .then(res => {
-                    RNFetchBlob.ios.openDocument(res.data);
-                  })
-                  .catch(e => {
-                    console.log('Error en el fetch: ', e);
-                  });
-              } else if (Platform.OS === 'android') {
-                if (await requestLocationPermission()) {
-                  const item = this.props.navigation.state.params;
-                  const { dirs } = RNFetchBlob.fs;
-                  const dirToSave = Platform.select({
-                    android: dirs.DownloadDir
-                  });
-
-                  const filePath = dirToSave + '/' + this.props.navigation.state.params.name;
+              
+              if(this.props.connectionStatus){
+                if (Platform.OS === 'ios') {
+                  const dirs = RNFetchBlob.fs.dirs;
                   RNFetchBlob.config({
-                    fileCache: true,
-                    addAndroidDownloads: {
-                      useDownloadManager: true,
-                      notification: true,
-                      path: filePath
-                    }
+                    path: dirs.DocumentDir + '/' + this.props.navigation.state.params.name,
+                    fileCache: true
                   })
                     .fetch('GET', this.props.navigation.state.params.uri, {})
-                    .then(res => {})
-                    .catch((errorMessage, statusCode) => {
-                      console.log('error');
+                    .then(res => {
+                      RNFetchBlob.ios.openDocument(res.data);
+                    })
+                    .catch(e => {
+                      console.log('Error en el fetch: ', e);
                     });
+                } else if (Platform.OS === 'android') {
+                  if (await requestLocationPermission()) {
+                    const item = this.props.navigation.state.params;
+                    const { dirs } = RNFetchBlob.fs;
+                    const dirToSave = Platform.select({
+                      android: dirs.DownloadDir
+                    });
+
+                    const filePath = dirToSave + '/' + this.props.navigation.state.params.name;
+                    RNFetchBlob.config({
+                      fileCache: true,
+                      addAndroidDownloads: {
+                        useDownloadManager: true,
+                        notification: true,
+                        path: filePath
+                      }
+                    })
+                      .fetch('GET', this.props.navigation.state.params.uri, {})
+                      .then(res => {})
+                      .catch((errorMessage, statusCode) => {
+                        console.log('error');
+                      });
+                  }
                 }
-              }
+            }
+            else{
+
+              const destination = `${RNFetchBlob.fs.dirs.DocumentDir}/Install Reports/${this.props.navigation.state.params.name}`;
+              console.log(`File opening from ${this.props.navigation.state.params.uri} to ${destination}`);
+                if(Platform.OS == 'android'){
+                    const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+                    if(granted){
+                        RNFetchBlob.fs.cp(this.props.navigation.state.params.uri,destination).then(()=>{
+                            Alert.alert("File Copied!","The document was copied into Documents folder",[{ text: 'Ok' }]);
+                            console.log(`File copied: from ${this.props.navigation.state.params.uri} to ${destination}`);
+                        }).catch((error)=>{
+                            Alert.alert("File copying failed!","An error occured",[{ text: 'Ok' }]);
+                            console.log(error);
+                            console.log(`File copying failed: from ${this.props.navigation.state.params.uri} to ${destination}`);
+                        });
+                    }
+                  
+                }
+                else if(Platform.OS == 'ios'){
+                    console.log('iOS showing interaction menu for file: '+destination);
+                  try{
+                      
+                    RNFetchBlob.ios.openDocument(destination);
+                  }
+                  catch(exception){
+                    console.log(exception);
+                  }
+                    
+                }
+
+            }
             }}
           >
             <Text style={{ textAlign: 'right' }}>Download</Text>

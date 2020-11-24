@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, StatusBar, TextInput, Platform, Image } from 'react-native';
+import { FlatList, Image, Platform, StatusBar, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-import { apiGetActivities } from '../../core/api';
 import { OrderListTile, SearchSideFilter } from '../../components';
 import { Text } from '../../components/StyledText';
 import { colors } from '../../styles';
@@ -15,16 +13,14 @@ export default class WorkOrderScreen extends Component {
   }
 
   render() {
-    const SearhHeader = ({ connectionStatus, orderList, setSearchResult, searchResult, setFiltersOpen, filtersOpen, token, searchText, setSearchText }) => (
+    const SearhHeader = () => (
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
           <View style={styles.headerInputContainer}>
             <TextInput
               placeholder="Enter activity name"
               defaultValue={this.props.searchText}
-              onChangeText={text => {
-                this.searchText = text;
-              }}
+              onChangeText={text => this.props.setSearchText(text)}
               style={{
                 width: '90%',
                 fontSize: 16,
@@ -39,48 +35,15 @@ export default class WorkOrderScreen extends Component {
               style={{ height: 29, textAlignVertical: 'center' }}
               backgroundColor="#3b5998"
               iconStyle={{ marginLeft: 5 }}
-              onPress={async () => {
-                this.props.setSearchText(this.searchText);
-                const text = this.searchText;
-                this.props.setIsLoaded(false);
-                if (text === '') {
-                  const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}';
-                  const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + statuses, this.props.token);
-                  await setSearchResult(data.data.data);
-                  this.props.setIsLoaded(true);
-                } else if (connectionStatus) {
-                  const searchParams =
-                    '&search={"fields":[{"operator":"is_in","value": ["assigned","in_progress"],"field": "status"}],' +
-                    '"keyword": "' +
-                    text +
-                    '",' +
-                    '"search_keyword_in": ["items.name","accounts.name","activities.id","activities.address_1","activities.city","activities.state","activities.date_2"]' +
-                    '}';
-                  const data = await apiGetActivities(
-                    'spectrum/activities?with=["items","accounts"]&sort_by=id&sort_order=asc' + searchParams,
-                    this.props.token
-                  );
-                  await setSearchResult(data.data.data);
-                  this.props.setIsLoaded(true);
-                } else if (orderList !== [] && !connectionStatus) {
-                  const newResult = [];
-                  orderList.forEach(item => {
-                    const n = item.notes.search(text);
-                    if (n !== -1) {
-                      newResult.push(item);
-                    }
-                  });
-                  setSearchResult(newResult);
-                }
-              }}
+              onPress={() => this.props.search()}
             />
           </View>
         </View>
         <View style={styles.headerBottom}>
-          {this.props.isLoaded === true ? <Text>{searchResult.length} Results</Text> : <Text>Searching...</Text>}
+          {this.props.isLoaded === true ? <Text>{this.props.searchResult.length} Results</Text> : <Text>Searching...</Text>}
           <TouchableOpacity
             onPress={() => {
-              setFiltersOpen(!filtersOpen);
+              this.props.setFiltersOpen(!this.props.filtersOpen);
             }}
           >
             <Text style={{ textAlign: 'right', color: colors.primary }}>SORT & FILTER</Text>
@@ -88,23 +51,14 @@ export default class WorkOrderScreen extends Component {
         </View>
       </View>
     );
+
     const renderTile = (item, index) => <OrderListTile index={index} item={item} setActivityId={this.props.setActivityId} navigation={this.props.navigation} />;
 
     return (
       <React.Fragment>
         <View style={styles.container}>
           <StatusBar backgroundColor={colors.lightGray} barStyle="dark-content" />
-          <SearhHeader
-            connectionStatus={this.props.connectionStatus}
-            searchText={this.props.searchText}
-            setSearchText={this.props.setSearchText}
-            orderList={this.props.orderList}
-            setSearchResult={this.props.setSearchResult}
-            searchResult={this.props.searchResult}
-            setFiltersOpen={this.props.setFiltersOpen}
-            filtersOpen={this.props.filtersOpen}
-            token={this.props.token}
-          />
+          {SearhHeader()}
           {this.props.orderList === [] && this.props.connectionStatus ? (
             <View style={styles.containerIndicator}>
               <Text>There is no connection</Text>
