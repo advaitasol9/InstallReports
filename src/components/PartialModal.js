@@ -54,7 +54,8 @@ const ParialModal = compose(
       token: state.profile.security_token.token,
       isPartModalVisible: state.app.isPartModal,
       photos: state.detailPartial.photos,
-      activityId: state.workOrder.activityId
+      activityId: state.workOrder.activityId,
+      userRole: state.profile.user_roles[0].name,
     }),
     dispatch => ({
       setModalVisible: payload => dispatch(setPartModalVisible(payload)),
@@ -119,7 +120,7 @@ class ParialModalComponent extends Component {
                         isLoading: false
                       });
                     } else {
-                      const data = `text=${this.props.mainProps.comment}&user_ids=[${this.props.mainProps.accountId}]&channel=installer`;
+                      const data = `text=${this.props.mainProps.comment}&user_ids=[${this.props.mainProps.accountId}]&channel=${props.userRole}`;
                       await apiPostComment(`spectrum/activities/${this.props.mainProps.activityId}/comments`, data, this.props.mainProps.token).then(resPostText => {
                         Promise.all([
                           apiChangeStatus('Partial', this.props.mainProps.activityId, this.props.token),

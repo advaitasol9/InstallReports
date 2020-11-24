@@ -1,16 +1,25 @@
 // @flow
-import React, { Component } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions, Image, Alert, StatusBar, Platform, WebView } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
-import RNFetchBlob from 'rn-fetch-blob';
-import IO from 'react-native-vector-icons/Ionicons';
-
-import { colors } from '../../../../styles';
-import { Button, Header } from '../../../../components';
-import setChangesInOffline from '../../../../core/setChanges';
-import { apiChangeStatus, apiGet, apiPostImage, apiPostComment, apiPatch } from '../../../../core/api';
 import Geolocation from '@react-native-community/geolocation';
-import { PermissionsAndroid } from 'react-native';
+import React, { Component } from 'react';
+import {
+  Alert,
+  BackHandler,
+  Dimensions,
+  Image,
+  PermissionsAndroid,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import ImagePicker from 'react-native-image-picker';
+import IO from 'react-native-vector-icons/Ionicons';
+import { Button, Header } from '../../../../components';
+import { colors } from '../../../../styles';
 
 const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
@@ -25,26 +34,11 @@ const options = {
   }
 };
 
-import { BackHandler } from 'react-native';
-
 export default class DetailPartialView extends Component {
   constructor(props) {
     super(props);
     uploadedImagesCount = 0;
-    this.state = {
-      isLoading: false
-    };
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
-  }
-
-  isLastImageUploaded() {
-    if (this.uploadedImagesCount == this.props.photos.length) {
-      this.setState({
-        isLoading: false
-      });
-      this.props.addPhoto([]);
-      this.props.navigation.navigate('DetailsMain');
-    }
   }
 
   handleBackButtonClick = () => {
@@ -52,24 +46,6 @@ export default class DetailPartialView extends Component {
     this.props.navigation.navigate('DetailsMain');
     return true;
   };
-
-  async updateWorkOrderBeginLocation() {
-    try {
-      await apiPatch(`activities/` + this.props.activityId, this.props.token, {
-        geo_locations: JSON.stringify({
-          start: {
-            lat: this.props.geoLocation.lat,
-            lon: this.props.geoLocation.lon
-          }
-        })
-      });
-
-      return;
-    } catch (error) {
-      console.error(error);
-      return;
-    }
-  }
 
   componentWillUnmount() {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
@@ -102,6 +78,7 @@ export default class DetailPartialView extends Component {
               });
             },
             error => {
+              console.log(error);
               console.error('faled');
             },
             {
@@ -218,88 +195,11 @@ export default class DetailPartialView extends Component {
                 bgColor={this.props.photos.length === 0 || this.props.comment === '' ? colors.grey : colors.green}
                 style={{ width: '48%' }}
                 disabled={this.props.photos.length === 0 || this.props.comment === ''}
-                onPress={async () => {
-                  this.setState({
-                    isLoading: true
-                  });
-                  const data = `text=PRE INSTALL NOTES - ${this.props.comment}&user_id=${this.props.accountId}&channel=installer`;
-                  if (!this.props.connectionStatus) {
-                    setChangesInOffline(
-                      this.props.changes,
-                      this.props.setChanges,
-                      this.props.setNumOfChanges,
-                      `PRE INSTALL NOTES - ${this.props.comment}`,
-                      this.props.activityId,
-                      this.props.accountId,
-                      this.props.photos,
-                      'In_Progress'
-                    );
-                    this.setState({
-                      isLoading: false
-                    });
-                    this.props.navigation.navigate('DetailsMain');
-                  } else {
-                    await apiChangeStatus('In_Progress', this.props.activityId, this.props.token)
-                      .then(async () => {
-                        await this.updateWorkOrderBeginLocation();
-                        apiPostComment(`spectrum/activities/${this.props.activityId}/comments`, data, this.props.token)
-                          .then(resPostText => {
-                            this.props.photos.forEach((item, index) => {
-                              apiGet('aws-s3-presigned-urls', this.props.token)
-                                .then(res => {
-                                  RNFetchBlob.fetch(
-                                    'PUT',
-                                    res.data.url,
-                                    {
-                                      'security-token': this.props.token,
-                                      'Content-Type': 'application/octet-stream'
-                                    },
-                                    RNFetchBlob.wrap(item.replace('file://', ''))
-                                  )
-                                    .then(() => {
-                                      RNFetchBlob.fs.stat(item.replace('file://', '')).then(stats => {
-                                        const formData = new FormData();
-                                        formData.append('file_type', 'image/jpeg');
-                                        formData.append('name', stats.filename);
-                                        formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                        formData.append('size', stats.size);
-
-                                        apiPostImage(`activities/${this.props.activityId}/comments/${resPostText.data.id}/files`, formData, this.props.token);
-                                        this.uploadedImagesCount = index + 1;
-                                        this.isLastImageUploaded();
-                                      });
-                                    })
-                                    .catch(err => {
-                                      this.setState({
-                                        isLoading: false
-                                      });
-                                      console.log(err);
-                                    });
-                                })
-                                .catch(err => {
-                                  this.setState({
-                                    isLoading: false
-                                  });
-                                });
-                            });
-                          })
-                          .catch(err => {
-                            this.setState({
-                              isLoading: false
-                            });
-                          });
-                      })
-                      .catch(err => {
-                        this.setState({
-                          isLoading: false
-                        });
-                      });
-                  }
-                }}
+                onPress={() => this.props.onSubmit()}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
                 caption="Submit"
-                isLoading={this.state.isLoading}
+                isLoading={this.props.isLoading}
               />
               <Button
                 bgColor={colors.red}
@@ -318,6 +218,48 @@ export default class DetailPartialView extends Component {
       </View>
     );
   }
+
+  onPreInstallSubmit = async () => {
+    this.setState({ isLoading: true });
+    const data = `text=PRE INSTALL NOTES - ${this.props.comment}&user_id=${this.props.accountId}`;
+
+    try {
+      await apiChangeStatus('In_Progress', this.props.activityId, this.props.token);
+      await this.updateWorkOrderBeginLocation();
+      const resPostText = await apiPostComment(`activities/${this.props.activityId}/comments`, data, this.props.token);
+      const promises = this.props.photos.map(async item => {
+        try {
+          const res = await apiGet('aws-s3-presigned-urls', this.props.token);
+          await RNFetchBlob.fetch(
+            'PUT',
+            res.data.url,
+            {
+              'security-token': this.props.token,
+              'Content-Type': 'application/octet-stream'
+            },
+            RNFetchBlob.wrap(item.replace('file://', ''))
+          );
+          const stats = await RNFetchBlob.fs.stat(item.replace('file://', ''));
+          const formData = new FormData();
+          formData.append('file_type', 'image/jpeg');
+          formData.append('name', stats.filename);
+          formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
+          formData.append('size', stats.size);
+
+          return apiPostImage(`activities/${this.props.activityId}/comments/${resPostText.data.id}/files`, formData, this.props.token);
+        } catch (e) {
+          return false;
+        }
+      });
+      const res = await Promise.all(promises);
+      console.log(res);
+      this.setState({ isLoading: false });
+      this.props.addPhoto([]);
+      this.props.navigation.navigate('DetailsMain');
+    } catch (err) {
+      this.setState({ isLoading: false });
+    }
+  };
 }
 
 const styles = StyleSheet.create({

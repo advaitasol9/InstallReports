@@ -1,12 +1,14 @@
 // @flow
-import { compose, withState, lifecycle } from 'recompose';
 import { connect } from 'react-redux';
-
-import { apiGetJson, apiGet } from '../../../core/api';
-import WorkOrderManagerView from './WorkOrderManagerView';
+import { compose, lifecycle, withHandlers, withState } from 'recompose';
+import { apiGet, apiGetJson } from '../../../core/api';
+import { saveManagerQuestionAnswers } from '../../../redux/actions/workOrderManagerActions';
+import { updateWorkOrderGeoLocation, updateWorkOrderStatus } from '../../../redux/actions/workOrderPreInsallActions';
+import { setIncompleteModalVisible, setManagerModalVisible } from '../../AppState';
+import { addOfflineWorkorderChanges } from '../../offlineWorkorderState';
 import { setActivityId } from '../../workOrder/WorkOrderState';
-import { setManagerModalVisible, setIncompleteModalVisible } from '../../AppState';
 import { addManagerPhoto, clearPhotos } from '../workOrderQuestions/WorkOrderQuestionsState';
+import WorkOrderManagerView from './WorkOrderManagerView';
 
 export default compose(
   connect(
@@ -15,14 +17,21 @@ export default compose(
       activityId: state.workOrder.activityId,
       connectionStatus: state.app.isConnected,
       orderList: state.workOrder.orderList,
-      photos: state.workOrderQuestion.managerPhotos
+      photos: state.workOrderQuestion.managerPhotos,
+      offlineWorkOrders: state.offlineWorkOrder.workOrders,
+      offlinePhotos: state.offlineWorkOrder.photos,
+      offlineChanges: state.offlineWorkOrder.workOrderChanges
     }),
     dispatch => ({
-      setModalVisible: payload => dispatch(setManagerModalVisible(payload)),
+      showWOCompleteModal: payload => dispatch(setManagerModalVisible(payload)),
       setIncompleteModalVisible: payload => dispatch(setIncompleteModalVisible(payload)),
       setActivityId: id => dispatch(setActivityId(id)),
       addPhoto: arr => dispatch(addManagerPhoto(arr)),
-      clearPhotos: () => dispatch(clearPhotos())
+      clearPhotos: () => dispatch(clearPhotos()),
+      updateMangerAnswers: (id, answerData, token) => dispatch(saveManagerQuestionAnswers(id, answerData, token)),
+      updateWorkOrderStatus: (id, status, token) => dispatch(updateWorkOrderStatus(id, status, token)),
+      updateWorkOrderGeoLocation: (id, geoLocation, token) => dispatch(updateWorkOrderGeoLocation(id, geoLocation, token)),
+      saveOfflineChanges: (workOrderId, changes) => dispatch(addOfflineWorkorderChanges({ workOrderId, changes }))
     })
   ),
   withState('inProgress', 'setInProgress', false),
@@ -34,113 +43,189 @@ export default compose(
   withState('update', 'setUpdate', true),
   withState('photos', 'addPhotos', []),
   withState('geoLocation', 'setLatLng', { lat: '', lon: '' }),
-  lifecycle({
-    componentWillMount() {
-      if (this.props.connectionStatus) {
-        apiGetJson(`activities/${this.props.activityId}?with=["items"]`, this.props.token).then(async response => {
-          const installerAnswers = JSON.parse(response.data.installer_questions_answers);
+  withState('answersValid', 'setAnswersValid', true),
+  withState('submitButtonLoading', 'setSubmitButtonLoading', false),
 
-          var photoIds = [];
-          var manager_answers_photos = [];
+  withHandlers({
+    validateAnswers: props => () => {
+      const managerQuestions = props.activityData.manager_questions_answers;
 
-          JSON.parse(response.data.manager_questions_answers).map(questions => {
-            if (questions.type == 'photo') {
-              var tempIds = [];
-              var dataArray = [];
-              if (questions.answers != undefined) {
-                questions.answers.map(item => {
-                  photoIds.push(item);
-                  tempIds.push(item);
-                });
-                tempIds.map(dataId => {
-                  dataArray.push({ file_id: dataId });
-                });
-                manager_answers_photos.push({
-                  question_order_id: questions.order,
-                  data: dataArray
-                });
-              }
-            } else if (questions.type == 'signature') {
-              if (questions.answers != undefined) {
-                var tempIds = [];
-                var dataArray = [];
-                photoIds.push(questions.answers);
-                tempIds.push(questions.answers);
-                tempIds.map(dataId => {
-                  dataArray.push({ file_id: questions.answers });
-                });
-                manager_answers_photos.push({
-                  question_order_id: questions.order,
-                  data: dataArray
-                });
-              }
-            } else {
-              var tempIds = [];
-              var dataArray = [];
-              if (questions.photo != undefined) {
-                questions.photo.map(item => {
-                  photoIds.push(item);
-                  tempIds.push(item);
-                });
-                tempIds.map(dataId => {
-                  dataArray.push({ file_id: dataId });
-                });
-                manager_answers_photos.push({
-                  question_order_id: questions.order,
-                  data: dataArray
-                });
-              }
-            }
-          });
+      for (let i = 0; i < managerQuestions.length; i++) {
+        const question = managerQuestions[i];
 
-          if (photoIds.length != 0) {
-            await apiGet(`files?search={"id":[` + photoIds + `]}`, this.props.token).then(res => {
-              if (res.data) {
-                manager_answers_photos.map(questions => {
-                  questions.data.map((photo, index) => {
-                    res.data.filter(e => {
-                      e.id === photo.file_id ? (questions.data[index] = { url: e.s3_location, file_id: e.id }) : [];
-                    });
-                  });
-                });
-              }
-            });
+        if (question.required) {
+          if (question.type === 'signature' && props.signature.length == 0) {
+            props.setAnswersValid(true);
+            return;
           }
-
-          this.props.setActivityData({
-            ...response.data,
-            manager_questions_answers: JSON.parse(response.data.manager_questions_answers),
-            installer_questions_photos: manager_answers_photos
-          });
-
-          this.props.clearPhotos();
-          this.props.setIsloading(false);
-          installerAnswers.map(question => {
-            if (question.required) {
-              if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
-                if (question.allow_photos && !(question.photo != undefined ? question.photo.length > 0 : false)) {
-                  this.props.setIsIncompleteOpen(true);
-                } else if (question.answers == '') {
-                  this.props.setIsIncompleteOpen(true);
-                }
-              } else if (question.type == 'photo') {
-                if (!(question.answers != undefined ? question.answers.length > 0 : false)) {
-                  this.props.setIsIncompleteOpen(true);
-                }
-              } else if (question.type == 'signature') {
-                console.log(question);
-                if (!(question.answers != undefined ? question.answers != null : false)) {
-                  this.props.setIsIncompleteOpen(true);
-                } else {
-                }
-              }
+          if (question.allow_photos && props.photos.filter(photo => photo.order == question.order).length == 0) {
+            props.setAnswersValid(true);
+            return;
+          }
+          if (question.type === 'photo' && props.photos.filter(photo => photo.order == question.order).length == 0) {
+            props.setAnswersValid(true);
+            return;
+          }
+          if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
+            if (!question.answers || question.answers == '' || question.answers.length == 0) {
+              props.setAnswersValid(true);
+              return;
+            } else if (question.allow_photos && props.photos.filter(photo => photo.order == question.order).length == 0) {
+              props.setAnswersValid(true);
+              return;
             }
-          });
-        });
-      } else {
-        this.props.setActivityData(this.props.orderList.filter(order => order.id === this.props.activityId)[0]);
-        this.props.setIsloading(false);
+          }
+        }
       }
+      props.setAnswersValid(false);
+    },
+
+    initWorkOrder: props => async () => {
+      let workOrder;
+
+      if (props.connectionStatus) {
+        const response = await apiGetJson(`activities/${props.activityId}?with=["items"]`, props.token);
+        workOrder = response.data;
+      } else {
+        workOrder = props.offlineWorkOrders[props.activityId];
+      }
+
+      var installerAnswers = [];
+
+      if (props.connectionStatus) {
+        installerAnswers = JSON.parse(workOrder.installer_questions_answers);
+      } else {
+        if (props.offlineChanges[props.activityId] != undefined) {
+          if ((props.offlineChanges[props.activityId].length != 0)) {
+            var wo = props.offlineChanges[props.activityId].pop();
+            installerAnswers = wo.payload.answers;
+          }
+        } else {
+          installerAnswers = JSON.parse(workOrder.installer_questions_answers);
+        }
+      }
+
+      let photoIds = [];
+      const managerQuestions = JSON.parse(workOrder.manager_questions_answers);
+
+      const managerQuestionsPhotos = managerQuestions.map(question => {
+        let photos;
+        if (question.type == 'photo') {
+          photos = question.answers;
+        } else if (question.type == 'signature') {
+          photos = [question.answers];
+        } else if (question.allow_photos) {
+          photos = question.photos;
+        }
+
+        photoIds = [...photoIds, photos ?? []];
+
+        photos = (photos ?? []).map(photo => {
+          const localPath = props.offlinePhotos[photo]?.local_path;
+          return { file_id: photo, url: localPath };
+        });
+
+        return { question_order_id: question.order, data: photos };
+      });
+
+      if (props.connectionStatus && photoIds.length != 0) {
+        const res = await apiGet(`files?search={"id":` + photoIds + `]}`, props.token);
+        if (res.data) {
+          managerQuestionPhotos = managerQuestionsPhotos.map(questions => {
+            const data = questions.data.map((photo, index) => {
+              res.data.filter(e => {
+                e.id === photo.file_id ? (questions.data[index] = { url: e.s3_location, file_id: e.id }) : [];
+              });
+            });
+
+            return { ...questions, data };
+          });
+        }
+      }
+
+      props.setActivityData({
+        ...workOrder,
+        manager_questions_answers: managerQuestions,
+        installer_questions_photos: managerQuestionsPhotos
+      });
+
+      props.clearPhotos();
+
+      const offlineChanges = props.offlineChanges[props.activityId];
+
+      const installerChangeIndex = (offlineChanges ?? []).findIndex(change => change.type == 'question_answer_update');
+
+      if (installerChangeIndex !== -1) {
+        return;
+      }
+
+      for (let i = 0; i < installerAnswers.length; i++) {
+        const question = installerAnswers[i];
+        if (question.required) {
+          if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
+            if (question.allow_photos && (question.photo == undefined || !question.photo.length)) {
+              props.setIsIncompleteOpen(true);
+              return;
+            }
+            if (question.answers == '') {
+              props.setIsIncompleteOpen(true);
+              return;
+            }
+          } else if (question.type == 'photo') {
+            if (question.answers == undefined || !question.answers.length) {
+              props.setIsIncompleteOpen(true);
+              return;
+            }
+          } else if (question.type == 'signature') {
+            if ((question.answers = undefined || question.answers == null)) {
+              props.setIsIncompleteOpen(true);
+              return;
+            }
+          }
+        }
+      }
+    },
+
+    onSubmit: props => async () => {
+      props.setSubmitButtonLoading(true);
+
+      try {
+        if (props.connectionStatus) {
+          await props.updateMangerAnswers(
+            props.activityId,
+            { answers: props.activityData.manager_questions_answers, photos: props.photos, signature: props.signature[0] },
+            props.token
+          );
+
+          await props.updateWorkOrderStatus(props.activityId, 'Complete', props.token);
+
+          await props.updateWorkOrderGeoLocation(props.activityId, { complete: props.geoLocation }, props.token);
+        } else {
+          const changes = [
+            {
+              type: 'manager_questions_save',
+              payload: { answers: props.activityData.manager_questions_answers, photos: props.photos, signature: props.signature[0] }
+            },
+            { type: 'status', payload: 'Complete' },
+            { type: 'geo_locations', payload: { complete: props.geoLocation } }
+          ];
+
+          props.saveOfflineChanges(props.activityId, changes);
+        }
+        props.setSubmitButtonLoading(false);
+        props.clearPhotos();
+        props.setSignature([]);
+        props.showWOCompleteModal(true);
+      } catch (e) {
+        console.log(e);
+        props.setSubmitButtonLoading(false);
+      }
+    }
+  }),
+  lifecycle({
+    async componentWillMount() {
+      await this.props.initWorkOrder();
+      this.props.setIsloading(false);
     }
   })
 )(WorkOrderManagerView);

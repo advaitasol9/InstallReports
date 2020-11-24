@@ -1,14 +1,11 @@
 // @flow
 import React, { Component } from 'react';
-
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, StatusBar, ActivityIndicator, Linking } from 'react-native';
 import Geocode from 'react-geocode';
+import { Alert } from 'react-native';
+import { ActivityIndicator, BackHandler, Linking, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import RNLocation from 'react-native-location';
-
+import { ActivityStatus, ActivityTitle, Button, Header } from '../../../../components';
 import { colors } from '../../../../styles';
-import { Button, PartialModal, Header, ActivityTitle, ActivityStatus } from '../../../../components';
-
-import { BackHandler } from 'react-native';
 
 export default class DetailMainView extends Component {
   linkState = true;
@@ -80,6 +77,38 @@ export default class DetailMainView extends Component {
         </View>
       );
     }
+
+    if (!this.props.activityData) {
+      return (
+        <View style={styles.container}>
+          <StatusBar backgroundColor={colors.lightGray} />
+          <Header connectionStatus={this.props.connectionStatus} changesNum={this.props.changes.length} navigation={this.props.navigation} sideBar indicator />
+          <View style={styles.detailStatic}>
+            <View style={{ width: '100%', height: '100%' }}>
+              <View style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row' }}>
+                <TouchableOpacity
+                  style={{ width: '100%' }}
+                  onPress={() => {
+                    this.props.setActivityId(null);
+                    this.props.navigation.navigate('Work Order');
+                  }}
+                >
+                  <Text style={styles.linkButton}>Back to list</Text>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <Text style={{ paddingTop: 8 }}>Cannot display this work order while offline.</Text>
+                <Text style={{ paddingTop: 8 }}>
+                  You do not currently have an online connection and this work order has not been previously downloaded. You will need to resume an online
+                  connection before you can view this work order's details.
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      );
+    }
+
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor={colors.lightGray} />
@@ -87,15 +116,33 @@ export default class DetailMainView extends Component {
         <ScrollView style={{ width: '100%' }}>
           <View style={styles.detailStatic}>
             <View style={{ width: '100%', justifyContent: 'flex-start' }}>
-              <TouchableOpacity
-                style={{ width: 100 }}
-                onPress={() => {
-                  this.props.setActivityId(null);
-                  this.props.navigation.navigate('Work Order');
-                }}
-              >
-                <Text style={styles.linkButton}>Back to list</Text>
-              </TouchableOpacity>
+              <View style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row' }}>
+                <TouchableOpacity
+                  style={{ width: 'auto' }}
+                  onPress={() => {
+                    this.props.setActivityId(null);
+                    this.props.navigation.navigate('Work Order');
+                  }}
+                >
+                  <Text style={styles.linkButton}>Back to list</Text>
+                </TouchableOpacity>
+                {this.props.connectionStatus && (
+                  <TouchableOpacity
+                    style={{ width: 'auto' }}
+                    onPress={async () => {
+                      try {
+                        await this.props.saveWorkOrder(this.props.activityData);
+                        Alert.alert('Success', 'Work Order Downloaded', [{ text: 'Ok' }]);
+                      } catch (e) {
+                        console.log(e);
+                        Alert.alert('Error', 'Work Order Download failed', [{ text: 'Ok' }]);
+                      }
+                    }}
+                  >
+                    <Text style={styles.linkButton}>Download for offline</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
               <Text style={styles.activityHeader}>Work Order #{this.props.activityData.id}</Text>
               <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
                 Project: {this.props.activityData.items.length > 0 ? this.props.activityData.items[0].name : null}
