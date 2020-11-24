@@ -119,6 +119,7 @@ export const apiGet = (method, token, contentType = 'application/json') => {
 };
 
 export const apiGetActivities = (method, token, contentType = 'application/json') => {
+
   const url = state.apiPath + `/${method}`;
   const options = {
     method: 'GET',
@@ -285,7 +286,6 @@ export const apiPatchAnswers = (method, body, token) => {
     })
     .catch(error => {
       var errorMsg = HttpErrorHandler.generateErrorMessage(error);
-      console.log(error);
       HttpErrorAlert(errorMsg);
       throw errorMsg;
     });

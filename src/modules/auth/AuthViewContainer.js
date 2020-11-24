@@ -12,31 +12,43 @@ export default compose(
   withState('password', 'setPassword', ''),
   withState('email', 'setEmail', ''),
   withState('apiPath', 'setApiPath', ''),
+  withState('cancleRendering','setCancleRendering',true),
   connect(
     state => ({
       authState: state.app,
       token: state.profile.security_token.token,
-      connectionStatus: state.app.isConnected
+      connectionStatus: state.app.isConnected,
+      selectedEndpoint: state.app.selectedEndpoint
     }),
     dispatch => ({
-      logIn: () => dispatch(logIn()),
+      logIn: (selectedEndpoint) => dispatch(logIn(selectedEndpoint)),
       logOut: () => dispatch(logOut()),
       setUserInfo: data => dispatch(setUserInfo(data))
     })
   ),
   lifecycle({
-    async componentDidMount() {
-      const data = await AsyncStorage.getItem('apipaths');
-      await setNewPath(JSON.parse(data),null)
-      const itemId = this.props.navigation.getParam('logOut', null);
-      if (itemId) {
-        AsyncStorage.removeItem('apipaths');
-        this.props.logOut();
-        setNewPath("");
-        logout('logout/', this.props.token);
-      } else if (this.props.authState.isLoggedIn) {
-        this.props.navigation.navigate({ routeName: 'Home' });
+    async componentWillMount() {
+        
+      
+      const authData = JSON.parse(await AsyncStorage.getItem('savedAuthResponse'));
+      const isLoggedOut = (await this.props.navigation.getParam('logOut', false));
+      
+      if(isLoggedOut){
+        this.props.setCancleRendering = false;
+        await this.props.logOut();
+        await AsyncStorage.removeItem('apipaths');
       }
-    }
+
+      if(this.props.authState.isLoggedIn){
+        await setNewPath(null,{key:this.props.selectedEndpoint.apiPath,value:this.props.selectedEndpoint.name});
+        await this.props.setUserInfo(authData);
+        await this.props.navigation.navigate({ routeName: 'Home' });
+      }
+      else{
+        this.props.setCancleRendering = false;
+      }
+            
+    },
+
   })
 )(AuthView);
