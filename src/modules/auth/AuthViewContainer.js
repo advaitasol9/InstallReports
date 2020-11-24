@@ -9,8 +9,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { setNewPath, state } from '../../core/mainEnv';
 
 export default compose(
-  withState('password', 'setPassword', '111111'),
-  withState('email', 'setEmail', 'admin1@gmail.com'),
+  withState('password', 'setPassword', ''),
+  withState('email', 'setEmail', ''),
   withState('apiPath', 'setApiPath', ''),
   withState('cancleRendering','setCancleRendering',true),
   connect(
