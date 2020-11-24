@@ -1,50 +1,16 @@
 // @flow
-import React, { Component } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions, Image, StatusBar, Alert } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
-import IO from 'react-native-vector-icons/Ionicons';
-
 import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
-import RNFetchBlob from 'rn-fetch-blob';
-
-import { colors } from '../../../../styles';
+import React, { Component } from 'react';
+import { Dimensions, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import IO from 'react-native-vector-icons/Ionicons';
 import { Button, FailedModal, Header } from '../../../../components';
-import { BackHandler } from 'react-native';
+import { colors } from '../../../../styles';
 
 const { height, width } = Dimensions.get('window');
 export const screenHeight = height;
 export const screenWidth = width;
 
-const options = {
-  quality: 1.0,
-  maxWidth: 500,
-  maxHeight: 500,
-  storageOptions: {
-    skipBackup: true,
-    path: 'Install Reports'
-  }
-};
-
 export default class DetailFailedView extends Component {
-  constructor(props) {
-    super(props);
-    this.props.setModalVisible(false);
-    this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
-  }
-
-  handleBackButtonClick = () => {
-    this.props.addPhoto([]);
-    this.props.navigation.navigate('DetailsMain');
-    return true;
-  };
-
-  componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
-  }
-
-  componentWillMount() {
-    BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
-  }
   render() {
     const Required = () => (
       <View style={styles.requiredBlock}>
@@ -97,7 +63,7 @@ export default class DetailFailedView extends Component {
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor={colors.lightGray} />
-        <Header connectionStatus={this.props.connectionStatus} changesNum={this.props.changes.length} navigation={this.props.navigation} sideBar indicator />
+        <Header connectionStatus={this.props.connectionStatus} navigation={this.props.navigation} sideBar indicator />
         <View style={styles.partialInstallationsHeader}>
           <Text style={styles.partialInstallations}>Failed Attempt</Text>
         </View>
@@ -119,45 +85,7 @@ export default class DetailFailedView extends Component {
             <View style={{ marginTop: 24 }}>
               <Button
                 bgColor={colors.blue}
-                onPress={() => {
-                  Alert.alert(
-                    'Add photo',
-                    '',
-                    [
-                      {
-                        text: 'Choose from gallery',
-                        onPress: () => {
-                          ImagePicker.launchImageLibrary(options, response => {
-                            const { photos } = this.props;
-                            if (!response.didCancel) {
-                              photos.push(response.uri);
-                              this.props.addPhoto(photos);
-                              this.props.setNumOfChanges(this.props.numOfChanges);
-                            }
-                          });
-                        }
-                      },
-                      {
-                        text: 'Take a photo',
-                        onPress: () => {
-                          ImagePicker.launchCamera(options, response => {
-                            const { photos } = this.props;
-                            if (!response.didCancel) {
-                              photos.push(response.uri);
-                              this.props.addPhoto(photos);
-                              this.props.setNumOfChanges(this.props.numOfChanges);
-                            }
-                          });
-                        }
-                      },
-                      {
-                        text: 'Cancel',
-                        style: 'cancel'
-                      }
-                    ],
-                    { cancelable: true }
-                  );
-                }}
+                onPress={() => this.props.openImageSelector()}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
                 caption="Add Photo(s)"
@@ -206,7 +134,7 @@ export default class DetailFailedView extends Component {
                 disabled={this.props.photos.length === 0 || this.props.comment === ''}
                 style={{ width: '48%' }}
                 onPress={async () => {
-                  this.props.setModalVisible(true);
+                  this.props.setConfirmModalOpened(true);
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
@@ -215,11 +143,7 @@ export default class DetailFailedView extends Component {
               <Button
                 bgColor={colors.red}
                 style={{ width: '48%' }}
-                onPress={() => {
-                  this.props.addPhoto([]);
-                  this.props.setSignature([]);
-                  this.props.navigation.navigate('DetailsMain');
-                }}
+                onPress={() => this.props.cancel()}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
                 caption="Cancel"
@@ -227,7 +151,7 @@ export default class DetailFailedView extends Component {
             </View>
           </View>
         </ScrollView>
-        <FailedModal mainProps={this.props} />
+        <FailedModal mainProps={this.props} onSubmit={this.props.saveFailedDetails} />
       </View>
     );
   }

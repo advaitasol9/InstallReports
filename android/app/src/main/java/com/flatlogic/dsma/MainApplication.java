@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.reactnativecommunity.cameraroll.CameraRollPackage;
 import com.facebook.react.ReactApplication;
+import com.rnfs.RNFSPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.github.reactnativecommunity.location.RNLocationPackage;
@@ -37,6 +38,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNFSPackage(),
             new AsyncStoragePackage(),
             new RNCameraPackage(),
             new RNLocationPackage(),

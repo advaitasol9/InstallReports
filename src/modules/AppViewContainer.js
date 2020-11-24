@@ -1,23 +1,32 @@
+import NetInfo from '@react-native-community/netinfo';
+import { Platform, StatusBar, UIManager } from 'react-native';
 import { connect } from 'react-redux';
 import { compose, lifecycle } from 'recompose';
-import { Platform, UIManager, StatusBar, Alert } from 'react-native';
-import NetInfo from '@react-native-community/netinfo';
-import RNFetchBlob from 'rn-fetch-blob';
-
+import { saveWorkOrderFailedAttempts } from '../redux/actions/workOrderFailedAttemptActions';
+import { saveManagerQuestionAnswers } from '../redux/actions/workOrderManagerActions';
+import { updateWorkOrderComment, updateWorkOrderGeoLocation, updateWorkOrderStatus } from '../redux/actions/workOrderPreInsallActions';
+import { updateWorkOrderQuestionAnswers } from '../redux/actions/workOrderQuestionsActions';
 import { setConnection } from './AppState';
-import { setChanges } from './workOrder/WorkOrderState';
 import AppView from './AppView';
-import { apiChangeStatus, apiGet, apiPostImage, apiPostComment } from '../core/api';
+import { updateOfflineWorkOrderChanges } from './offlineWorkorderState';
+import { setChanges } from './workOrder/WorkOrderState';
 
 export default compose(
   connect(
     state => ({
-      changes: state.workOrder.changesInOffline,
+      changes: state.offlineWorkOrder.workOrderChanges,
       token: state.profile.security_token.token
     }),
     dispatch => ({
       setConnection: mode => dispatch(setConnection(mode)),
-      setChanges: arr => dispatch(setChanges(arr))
+      setChanges: arr => dispatch(setChanges(arr)),
+      updateWorkOrderStatus: (id, status, token) => dispatch(updateWorkOrderStatus(id, status, token)),
+      updateWorkOrderGeoLocation: (id, geoLocation, token) => dispatch(updateWorkOrderGeoLocation(id, geoLocation, token)),
+      updateWorkOrderComment: (id, comment, token) => dispatch(updateWorkOrderComment(id, comment, token)),
+      updateOfflineWorkOrderChanges: changes => dispatch(updateOfflineWorkOrderChanges(changes)),
+      updateWorkOrderQuestionAnswers: (id, answerData, token) => dispatch(updateWorkOrderQuestionAnswers(id, answerData, token)),
+      updateWorkOrderManagerQuestions: (id, answerData, token) => dispatch(saveManagerQuestionAnswers(id, answerData, token)),
+      saveWorkOrderFailedAttempt: (id, payload, token) => dispatch(saveWorkOrderFailedAttempts(id, payload, token))
     })
   ),
   lifecycle({
@@ -31,48 +40,38 @@ export default compose(
     componentDidMount() {
       this.unsubscribe = NetInfo.addEventListener(async state => {
         this.props.setConnection(state.isConnected);
-        if (state.isConnected && this.props.changes.length !== 0) {
-          await this.props.changes.forEach(item => {
-            if (item.status !== null) {
-              apiChangeStatus(item.status, item.id, this.props.token);
-            }
-            item.comments.forEach(comment => {
-              if (comment.changeStatus === 'In_Progress' || comment.changeStatus === item.status || comment.changeStatus === null) {
-                const data = `text=${comment.comment}&user_ids=%5B${item.accountId}%5D&channel=installer`;
-                apiPostComment(`spectrum/activities/${item.id}/comments`, data, this.props.token).then(resPostText => {
-                  if (comment.photos.length > 0) {
-                    comment.photos.forEach(photo => {
-                      apiGet('aws-s3-presigned-urls', this.props.token).then(res => {
-                        RNFetchBlob.fetch(
-                          'PUT',
-                          res.data.url,
-                          {
-                            'security-token': this.props.token,
-                            'Content-Type': 'image/jpeg'
-                          },
-                          RNFetchBlob.wrap(photo.replace('file://', ''))
-                        )
-                          .then(() => {
-                            RNFetchBlob.fs.stat(photo.replace('file://', '')).then(stats => {
-                              const formData = new FormData();
-                              formData.append('file_type', 'image/jpeg');
-                              formData.append('name', stats.filename);
-                              formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                              formData.append('size', stats.size);
-                              apiPostImage(`activities/${item.id}/comments/${resPostText.data.id}/files`, formData, this.props.token);
-                            });
-                          })
-                          .catch(err => {
-                            console.log(err);
-                          });
-                      });
-                    });
-                  }
-                });
+        if (state.isConnected) {
+          await Object.keys(this.props.changes).forEach(async id => {
+            const changes = this.props.changes[id];
+            for (const change of changes) {
+              switch (change.type) {
+                case 'status':
+                  await this.props.updateWorkOrderStatus(id, change.payload, this.props.token);
+                  break;
+
+                case 'geo_locations':
+                  await this.props.updateWorkOrderGeoLocation(id, change.payload, this.props.token);
+                  break;
+
+                case 'comments':
+                  await this.props.updateWorkOrderComment(id, change.payload, this.props.token);
+                  break;
+
+                case 'question_answer_update':
+                  await this.props.updateWorkOrderQuestionAnswers(id, change.payload, this.props.token);
+                  break;
+
+                case 'manager_questions_save':
+                  await this.props.updateWorkOrderManagerQuestions(id, change.payload, this.props.token);
+                  break;
+
+                case 'failed_attempt_save':
+                  await this.props.saveWorkOrderFailedAttempt(id, change.payload, this.props.token);
               }
-            });
+            }
           });
-          await this.props.setChanges([]);
+
+          this.props.updateOfflineWorkOrderChanges([]);
         }
       });
     },

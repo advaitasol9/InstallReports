@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import WorkOrderDocsView from './WorkOrderDocsView';
 import { setActivityId } from '../../workOrder/WorkOrderState';
+import { files } from '../../offlineWorkorderState';
 import { apiGetJson } from '../../../core/api';
 
 export default compose(
@@ -13,7 +14,9 @@ export default compose(
       activityId: state.workOrder.activityId,
       // itemId: state.workOrder.itemId,
       connectionStatus: state.app.isConnected,
-      orderList: state.workOrder.orderList
+      orderList: state.workOrder.orderList,
+      offlineWorkOrders: state.offlineWorkOrder.workOrders,
+      offlineFiles: state.offlineWorkOrder.files
     }),
     dispatch => ({
       setActivityId: id => dispatch(setActivityId(id))
@@ -25,6 +28,7 @@ export default compose(
   withState('isLoading', 'setIsloading', true),
   withState('imageURL', 'setImageURL', ''),
   withState('imageModal', 'setImageModal', false),
+  withState('hasOfflineDocs', 'setHasOfflineDocs', false),
   lifecycle({
     componentDidMount() {
       if (this.props.connectionStatus) {
@@ -37,7 +41,26 @@ export default compose(
           this.props.setDocs(response.data);
         });
       } else {
-        this.props.setActivityData(this.props.orderList.filter(order => order.id === this.props.activityId)[0]);
+
+        const offlineWorkOrder = this.props.offlineWorkOrders[this.props.activityId];
+
+        let files = [];
+        if(this.props.offlineFiles){
+          Object.keys(this.props.offlineFiles).forEach((fileId)=>{
+            if(this.props.offlineFiles[fileId].activityId === this.props.activityId){
+              let fileObject = this.props.offlineFiles[fileId];
+              fileObject.s3_location = fileObject.local_path;
+              console.log(`Offline doc: ${fileObject.local_path}`);
+              files.push(fileObject);
+            }
+          });
+        }
+
+        this.props.setActivityData(offlineWorkOrder);
+
+        this.props.setHasOfflineDocs(files.length > 0 ?true:false);
+        this.props.setDocs(files);
+        
         this.props.setIsloading(false);
       }
     }

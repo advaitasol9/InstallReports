@@ -9,6 +9,8 @@ import { Header, ActivityInfoSection, ActivityTitle, ActivityStatus } from '../.
 import ImageView from 'react-native-image-view';
 import { PermissionsAndroid } from 'react-native';
 
+import docxType from '../../../../assets/images/docx.png';
+
 export default class WorkOrderDocsView extends Component {
   constructor(props) {
     super(props);
@@ -87,14 +89,13 @@ export default class WorkOrderDocsView extends Component {
                   flexWrap: 'wrap'
                 }}
               >
-                {!this.props.connectionStatus && <Text style={{ alignSelf: 'center' }}>There is no connection</Text>}
+                {!this.props.connectionStatus && !this.props.setHasOfflineDocs && <Text style={{ alignSelf: 'center' }}>There is no connection</Text>}
                 {this.props.connectionStatus && this.props.docs.length === 0 && (
                   <Text style={{ textAlign: 'left', paddingLeft: 25 }}>There are no documents for this work order</Text>
                 )}
-                {this.props.connectionStatus &&
+                {(this.props.connectionStatus || this.props.setHasOfflineDocs) &&
                   this.props.docs.length > 0 &&
                   this.props.docs.map((item, index) => {
-                    console.log(item.file_type);
                     if (
                       item.file_type === 'image/jpeg' ||
                       item.file_type === 'image/png' ||
@@ -144,7 +145,7 @@ export default class WorkOrderDocsView extends Component {
                               width: 100
                             }}
                             resizeMode="contain"
-                            source={require('../../../../assets/images/xlsx.png')}
+                            source={{uri: Image.resolveAssetSource(docxType).uri}}
                           />
                           <Text style={{ paddingTop: 8, textAlign: 'center' }}>{item.name}</Text>
                         </TouchableOpacity>

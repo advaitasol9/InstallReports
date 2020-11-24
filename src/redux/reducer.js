@@ -9,6 +9,7 @@ import detailPartial from '../modules/workActivity/workOrderDetails/DetailPartia
 import detailPreInstall from '../modules/workActivity/workOrderDetails/DetailPreInstall/DetailPreInstallState';
 import workOrderQuestion from '../modules/workActivity/workOrderQuestions/WorkOrderQuestionsState';
 import workOrderComment from '../modules/workActivity/workOrderComment/WorkOrderCommentState';
+import offlineWorkOrder from '../modules/offlineWorkorderState';
 
 export default combineReducers({
   // ## Generator Reducers
@@ -19,5 +20,6 @@ export default combineReducers({
   detailPartial,
   detailPreInstall,
   workOrderQuestion,
-  workOrderComment
+  workOrderComment,
+  offlineWorkOrder
 });

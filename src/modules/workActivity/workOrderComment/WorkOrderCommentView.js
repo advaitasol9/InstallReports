@@ -6,9 +6,9 @@ import RNFetchBlob from 'rn-fetch-blob';
 
 import { colors } from '../../../styles';
 import { Header, ActivityInfoSection, ActivityStatus, ActivityTitle, Button } from '../../../components';
-import setChangesInOffline from '../../../core/setChanges';
-import { apiGet, apiPostImage, apiPostComment, apiGetJson } from '../../../core/api';
+
 import moment from 'moment';
+import ImageView from 'react-native-image-view';
 
 const options = {
   quality: 1.0,
@@ -21,7 +21,9 @@ const options = {
 };
 
 export default function WorkOrderCommentView(props) {
-  const [isLocading, setisLocading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isImageViewVisible, setIsImageViewVisible] = useState(false);
+
   const renderPhoto = (photo, index) => {
     const photosCopy = props.photos.slice();
     return (
@@ -46,6 +48,29 @@ export default function WorkOrderCommentView(props) {
       <View style={styles.backgroundActivity}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
+    );
+  }
+
+  if (props.imageModal) {
+    const images = [
+      {
+        source: {
+          uri: props.imageURL
+        },
+        width: 806,
+        height: 720
+      }
+    ];
+    return (
+      <ImageView
+        images={images}
+        imageIndex={0}
+        isVisible={isImageViewVisible}
+        onClose={() => {
+          setIsImageViewVisible(true);
+          props.setImageModal(!props.imageModal);
+        }}
+      />
     );
   }
 
@@ -130,92 +155,51 @@ export default function WorkOrderCommentView(props) {
                 bgColor={props.photos.length === 0 && props.comment === '' ? '#b1cec1' : colors.green}
                 disabled={props.photos.length === 0 && props.comment === ''}
                 onPress={async () => {
-                  setisLocading(true);
-                  if (!props.connectionStatus) {
-                    setChangesInOffline(
-                      props.changes,
-                      props.setChanges,
-                      props.setNumOfChanges,
-                      props.comment,
-                      props.activityId,
-                      props.accountId,
-                      props.photos,
-                      null
-                    );
-                    await props.addPhoto([]);
-                    await props.setComment('');
-                  } else {
-                    const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=installer`;
-                    await apiPostComment(`spectrum/activities/${props.activityId}/comments`, data, props.token)
-                      .then(resPostText => {
-                        if (props.photos.length > 0) {
-                          props.photos.forEach(item => {
-                            apiGet('aws-s3-presigned-urls', props.token).then(res => {
-                              RNFetchBlob.fetch(
-                                'PUT',
-                                res.data.url,
-                                {
-                                  'security-token': props.token,
-                                  'Content-Type': 'image/jpeg'
-                                },
-                                RNFetchBlob.wrap(decodeURI(item.replace('file://', '')))
-                              )
-                                .then(() => {
-                                  RNFetchBlob.fs.stat(decodeURI(item.replace('file://', ''))).then(stats => {
-                                    const formData = new FormData();
-                                    formData.append('file_type', 'image/jpeg');
-                                    formData.append('name', stats.filename);
-                                    formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                                    formData.append('size', stats.size);
-                                    apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then(
-                                      postRes => {
-                                        setisLocading(false);
-                                      }
-                                    );
-                                  });
-                                })
-                                .catch(err => {
-                                  console.log(err);
-                                  setisLocading(false);
-                                });
-                            });
-                          });
-                        } else {
-                          setisLocading(false);
-                        }
-                      })
-                      .catch(err => {
-                        setisLocading(false);
-                      });
-                    await props.addPhoto([]);
-                    await props.setComment('');
-                  }
+                  await setIsLoading(true);
+                  await props.onSubmit();
+                  await setIsLoading(false);
                 }}
                 textColor={colors.white}
                 textStyle={{ fontSize: 20 }}
                 caption="Submit"
-                isLoading={isLocading}
+                isLoading={isLoading}
               />
             </View>
-            {!props.connectionStatus && <Text>Cant load comments. There is no connection</Text>}
-            {props.connectionStatus &&
-              props.data.map((item, i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: '100%',
-                    marginTop: 32,
-                    padding: 16,
-                    backgroundColor: 'white'
-                  }}
-                >
-                  {item.text !== '' && <Text>{item.text}</Text>}
-                  <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>{item.users[0].first_name + ' ' + item.users[0].last_name}</Text>
-                  <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>{moment(item.created_at).format('M/D/YY - hh:mmA')}</Text>
-                  <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                    {item.files.map((photo, j) => {
-                      if (photo.file_type === 'image/jpeg' || photo.file_type === 'image/png') {
-                        return (
+            {props.isCommentLoading &&
+              <View
+                style={{
+                  paddingVertical: 20
+                }}
+              >
+                <ActivityIndicator animating size="small" />
+              </View>
+            }
+
+            {props.data.map((item, i) => (
+              <View
+                key={i}
+                style={{
+                  width: '100%',
+                  marginTop: 32,
+                  padding: 16,
+                  backgroundColor: 'white'
+                }}
+              >
+                {item.text !== '' && <Text>{item.text}</Text>}
+                <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>{item.users[0].first_name + ' ' + item.users[0].last_name}</Text>
+                <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>{moment(item.created_at).format('M/D/YY - hh:mmA')}</Text>
+                <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                  {item.files.map((photo, j) => {
+                    if (photo.file_type === 'image/jpeg' || photo.file_type === 'image/png') {
+                      return (
+                        <TouchableOpacity
+                          key={j}
+                          onPress={() => {
+                            props.setImageURL(photo.s3_location);
+                            setIsImageViewVisible(true)
+                            props.setImageModal(!props.imageModal);
+                          }}
+                        >
                           <Image
                             key={j}
                             source={{ uri: photo.s3_location }}
@@ -226,34 +210,36 @@ export default function WorkOrderCommentView(props) {
                               resizeMode: 'cover'
                             }}
                           />
-                        );
-                      }
-                      if (photo.file_type === 'pdf' || photo.file_type === 'application/pdf') {
-                        return (
-                          <TouchableOpacity
-                            onPress={() => {
-                              // props.navigation.navigate('PdfDoc', { uri: photo.s3_location });
-                              props.navigation.navigate('PdfDoc', { uri: photo.s3_location, name: photo.name, type: photo.file_type });
+                        </TouchableOpacity>
+                      );
+                    }
+                    if (photo.file_type === 'pdf' || photo.file_type === 'application/pdf') {
+                      return (
+                        <TouchableOpacity
+                          key={j}
+                          onPress={() => {
+                            props.navigation.navigate('PdfDoc', { uri: photo.s3_location, name: photo.name, type: photo.file_type, route: "comment" });
+                          }}
+                        >
+                          <Image
+                            key={j}
+                            source={require('../../../../assets/images/pdf.png')}
+                            style={{
+                              width: 50,
+                              height: 50,
+                              marginRight: 16,
+                              resizeMode: 'cover'
                             }}
-                          >
-                            <Image
-                              source={require('../../../../assets/images/pdf.png')}
-                              style={{
-                                width: 50,
-                                height: 50,
-                                marginRight: 16,
-                                resizeMode: 'cover'
-                              }}
-                            />
-                            <Text>{photo.name}</Text>
-                          </TouchableOpacity>
-                        );
-                      }
-                      return null;
-                    })}
-                  </View>
+                          />
+                          <Text>{photo.name}</Text>
+                        </TouchableOpacity>
+                      );
+                    }
+                    return null;
+                  })}
                 </View>
-              ))}
+              </View>
+            ))}
           </View>
         </View>
       </ScrollView>
