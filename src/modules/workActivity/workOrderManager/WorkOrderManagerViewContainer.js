@@ -108,7 +108,7 @@ export default compose(
       let photoIds = [];
       const managerQuestions = JSON.parse(workOrder.manager_questions_answers);
 
-      const managerQuestionsPhotos = (managerQuestions ?? []).map(question => {
+      const managerQuestionsPhotos = managerQuestions.map(question => {
         let photos;
         if (question.type == 'photo') {
           photos = question.answers;
@@ -164,6 +164,10 @@ export default compose(
         if (question.required) {
           if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
             if (question.allow_photos && (question.photo == undefined || !question.photo.length)) {
+              props.setIsIncompleteOpen(true);
+              return;
+            }
+            if (question.answers == undefined) {
               props.setIsIncompleteOpen(true);
               return;
             }

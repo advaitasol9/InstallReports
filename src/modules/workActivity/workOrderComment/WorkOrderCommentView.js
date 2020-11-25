@@ -190,6 +190,7 @@ export default function WorkOrderCommentView(props) {
                 <Text style={{ flexDirection: 'row', marginTop: 8, color: 'blue' }}>{moment(item.created_at).format('M/D/YY - hh:mmA')}</Text>
                 <View style={{ flexDirection: 'row', marginTop: 8 }}>
                   {item.files.map((photo, j) => {
+                    //console.log(photo);
                     if (photo.file_type === 'image/jpeg' || photo.file_type === 'image/png') {
                       return (
                         <TouchableOpacity

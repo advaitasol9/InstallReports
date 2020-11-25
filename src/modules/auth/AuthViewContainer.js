@@ -36,7 +36,7 @@ export default compose(
       if(isLoggedOut){
         this.props.setCancleRendering = false;
         await this.props.logOut();
-        await AsyncStorage.removeItem('apipaths');
+        //await AsyncStorage.removeItem('apipaths');
       }
 
       if(this.props.authState.isLoggedIn){

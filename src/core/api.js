@@ -21,6 +21,7 @@ export const apiPostComment = (method, body, token) => {
 
   return fetch(url, options)
     .then(response => {
+      console.log(response);
       if (response && (response.status === 200 || response.status === 201)) {
         return response.json();
       }

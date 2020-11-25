@@ -212,7 +212,7 @@ export default compose(
               if (!props.connectionStatus && props.offlinePhotos[photo]) {
                 return {
                   file_id: photo,
-                  url: (props.offlinePhotos[photo]?.local_path).replace(' ', '%20').replace('undefined', '/storage/emulated/0/Pictures')
+                  url: ((props.offlinePhotos[photo]?.local_path).replace(" ", "%20")).replace("undefined", "/storage/emulated/0/Pictures")
                 };
               } else {
                 return {
@@ -248,7 +248,7 @@ export default compose(
               if (!props.connectionStatus && props.offlinePhotos[photo]) {
                 return {
                   file_id: photo,
-                  url: (props.offlinePhotos[photo]?.local_path).replace(' ', '%20').replace('undefined', '/storage/emulated/0/Pictures')
+                  url: ((props.offlinePhotos[photo]?.local_path).replace(" ", "%20")).replace("undefined", "/storage/emulated/0/Pictures")
                 };
               } else {
                 return {
@@ -295,35 +295,31 @@ export default compose(
         installer_questions_photos: installerAnswersPhotos
       });
 
+      if (installerQuestions?.length) {
+        for (let i = 0; i < installerQuestions.length; i++) {
+          const question = installerQuestions[i];
+          if (question.required) {
+            if (question.type == 'signature' && !props.signature.length && !question.answers) {
+              props.setIsSubmitBtnDisabled(true);
+            }
+            if (question.allow_photos && question.photo.length == 0) {
+              props.setIsSubmitBtnDisabled(true);
+            }
+            if (question.type == 'photo' && question.photo.length == 0) {
+              props.setIsSubmitBtnDisabled(true);
+            }
+            if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
+              props.setIsSubmitBtnDisabled(true);
+            }
+          }
+        }
+      }
+      
       props.setIsLoading(false);
     }
   }),
   lifecycle({
     async componentWillMount() {
-      var installerQuestions = [];
-
-      installerQuestions = JSON.parse(this.props.workOrderList.find(item => item.id == this.props.activityId).installer_questions_answers);
-
-      if (installerQuestions?.length) {
-        for (let i = 0; i < installerQuestions.length; i++) {
-          const question = installerQuestions[i];
-          if (question.required) {
-            if (question.type == 'signature' && !this.props.signature?.length && !question.answers) {
-              this.props.setIsSubmitBtnDisabled(true);
-            }
-            if (question.allow_photos && question.photo?.length == 0) {
-              this.props.setIsSubmitBtnDisabled(true);
-            }
-            if (question.type == 'photo' && question.photo?.length == 0) {
-              this.props.setIsSubmitBtnDisabled(true);
-            }
-            if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
-              this.props.setIsSubmitBtnDisabled(true);
-            }
-          }
-        }
-      }
-
       this._unsubscribe = this.props.navigation.addListener('didFocus', async e => {
         this.props.addPhoto([]);
         await this.props.initWOQuestions();
