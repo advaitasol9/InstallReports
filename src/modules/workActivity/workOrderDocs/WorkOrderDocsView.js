@@ -145,7 +145,7 @@ export default class WorkOrderDocsView extends Component {
                               width: 100
                             }}
                             resizeMode="contain"
-                            source={{uri: Image.resolveAssetSource(docxType).uri}}
+                            source={require('../../../../assets/images/xlsx.png')}
                           />
                           <Text style={{ paddingTop: 8, textAlign: 'center' }}>{item.name}</Text>
                         </TouchableOpacity>
