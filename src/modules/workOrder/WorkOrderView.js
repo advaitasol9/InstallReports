@@ -110,9 +110,33 @@ export default class WorkOrderScreen extends Component {
                     this.props.setLoaded(true);
                   }else{
                     var arrayObj = this.props.offlineWorkOrders;
-                    const result = [];
+                    let workOrders = [];
                     for (const key in arrayObj) {
-                      await result.push(this.props.offlineWorkOrders[key]);
+                      workOrders.push(this.props.offlineWorkOrders[key]);
+                    }
+            
+                    workOrders = workOrders.filter(workOrder => {
+                      if (workOrder.status == 'Complete' || workOrder.status == 'Failed') {
+                        return false;
+                      }
+            
+                      const changes = this.props.offlineChanges[workOrder.id];
+            
+                      if (!changes || !changes.length) {
+                        return true;
+                      }
+            
+                      const change = changes.find(item => item.type == 'status' && (item.payload == 'Complete' || item.payload == 'Failed'));
+            
+                      if (change) {
+                        return false;
+                      }
+                      return true;
+                    });
+            
+                    const result = [];
+                    for (const key in workOrders) {
+                      await result.push(workOrders[key]);
                     }
                     await this.props.setOrderList(result);
                     
