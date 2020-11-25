@@ -28,6 +28,8 @@ export default class AuthScreen extends React.Component {
     getEnv()
       .then(response => {
         const endpoints = response.data;
+        console.log('getEnv Response:');
+        console.log(response);
         if (state.apiPath == '') {
           setNewPath(endpoints[0].end_point_url, null);
         }

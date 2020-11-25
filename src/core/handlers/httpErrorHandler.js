@@ -1,5 +1,7 @@
 export default class HttpErrorHandler {
   static generateErrorMessage(error, specificErrors = {}) {
+    console.log('error msg:');
+    console.log(error);
     var errorMessage = {
       title: '',
       message: '',

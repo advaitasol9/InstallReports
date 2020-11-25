@@ -51,7 +51,6 @@ export function saveFilesOffline(payload): ActionType {
 }
 
 export function saveCommentsOffline(payload): ActionType {
-  console.log(payload);
   return {type: SAVE_COMMENTS_OFFLINE,payload};
 }
 
