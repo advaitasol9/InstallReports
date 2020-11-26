@@ -13,7 +13,7 @@ const ActivityInfoSection = props => (
       </TouchableOpacity>
       <Text style={styles.activityHeader}>Work Order #{props.activityData.id}</Text>
       <Text style={{ color: colors.primary, fontSize: 20, paddingTop: 8 }}>
-        Project: {props.activityData.items.length > 0 ? props.activityData.items[0].name : null}
+        Project: {props.activityData.items?.length > 0 ? props.activityData.items[0].name : null}
       </Text>
       <Text style={{ paddingTop: 8 }}>
         {props.activityData.location && `${props.activityData.location}`}

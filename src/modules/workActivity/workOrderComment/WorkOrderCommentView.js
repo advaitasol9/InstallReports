@@ -97,7 +97,7 @@ export default function WorkOrderCommentView(props) {
               style={[styles.inputStyle, { height: 160 }]}
               onChangeText={text => {
                 const regex = /(<([^>]+)>)/gi;
-                const result = text.replace(regex, '');
+                const result = text?.replace(regex, '');
                 props.setComment(result);
               }}
               value={props.comment}
@@ -165,7 +165,7 @@ export default function WorkOrderCommentView(props) {
                 isLoading={isLoading}
               />
             </View>
-            {props.isCommentLoading &&
+            {props.isCommentLoading && (
               <View
                 style={{
                   paddingVertical: 20
@@ -173,7 +173,7 @@ export default function WorkOrderCommentView(props) {
               >
                 <ActivityIndicator animating size="small" />
               </View>
-            }
+            )}
 
             {props.data.map((item, i) => (
               <View
@@ -197,7 +197,7 @@ export default function WorkOrderCommentView(props) {
                           key={j}
                           onPress={() => {
                             props.setImageURL(photo.s3_location);
-                            setIsImageViewVisible(true)
+                            setIsImageViewVisible(true);
                             props.setImageModal(!props.imageModal);
                           }}
                         >
@@ -219,7 +219,7 @@ export default function WorkOrderCommentView(props) {
                         <TouchableOpacity
                           key={j}
                           onPress={() => {
-                            props.navigation.navigate('PdfDoc', { uri: photo.s3_location, name: photo.name, type: photo.file_type, route: "comment" });
+                            props.navigation.navigate('PdfDoc', { uri: photo.s3_location, name: photo.name, type: photo.file_type, route: 'comment' });
                           }}
                         >
                           <Image
