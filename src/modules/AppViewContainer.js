@@ -39,9 +39,9 @@ export default compose(
     },
     componentDidMount() {
       this.unsubscribe = NetInfo.addEventListener(async state => {
-        this.props.setConnection(state.isConnected);
+        await this.props.setConnection(state.isConnected);
         if (state.isConnected) {
-          await Object.keys(this.props.changes).forEach(async id => {
+          for (const id of Object.keys(this.props.changes)) {
             const changes = this.props.changes[id];
             for (const change of changes) {
               switch (change.type) {
@@ -69,7 +69,7 @@ export default compose(
                   await this.props.saveWorkOrderFailedAttempt(id, change.payload, this.props.token);
               }
             }
-          });
+          }
 
           this.props.updateOfflineWorkOrderChanges([]);
         }
