@@ -194,7 +194,7 @@ export default compose(
       if (this.props.connectionStatus) {
         console.log('online');
 
-        apiGetJson(`activities/${this.props.activityId}?with=["items","accounts","files"]`, this.props.token).then(response => {
+        await apiGetJson(`activities/${this.props.activityId}?with=["items","accounts","files"]`, this.props.token).then(response => {
           this.props.setActivityData(response.data);
           this.props.setIsloading(false);
         });
