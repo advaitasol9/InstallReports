@@ -212,7 +212,7 @@ export default compose(
               if (!props.connectionStatus && props.offlinePhotos[photo]) {
                 return {
                   file_id: photo,
-                  url: ((props.offlinePhotos[photo]?.local_path).replace(" ", "%20")).replace("undefined", "/storage/emulated/0/Pictures")
+                  url: (props.offlinePhotos[photo]?.local_path).replace(' ', '%20').replace('undefined', '/storage/emulated/0/Pictures')
                 };
               } else {
                 return {
@@ -248,7 +248,7 @@ export default compose(
               if (!props.connectionStatus && props.offlinePhotos[photo]) {
                 return {
                   file_id: photo,
-                  url: ((props.offlinePhotos[photo]?.local_path).replace(" ", "%20")).replace("undefined", "/storage/emulated/0/Pictures")
+                  url: (props.offlinePhotos[photo]?.local_path).replace(' ', '%20').replace('undefined', '/storage/emulated/0/Pictures')
                 };
               } else {
                 return {
@@ -299,13 +299,13 @@ export default compose(
         for (let i = 0; i < installerQuestions.length; i++) {
           const question = installerQuestions[i];
           if (question.required) {
-            if (question.type == 'signature' && !props.signature.length && !question.answers) {
+            if (question.type == 'signature' && !props.signature?.length && !question.answers) {
               props.setIsSubmitBtnDisabled(true);
             }
-            if (question.allow_photos && question.photo.length == 0) {
+            if (question.allow_photos && question.photo?.length == 0) {
               props.setIsSubmitBtnDisabled(true);
             }
-            if (question.type == 'photo' && question.photo.length == 0) {
+            if (question.type == 'photo' && question.photo?.length == 0) {
               props.setIsSubmitBtnDisabled(true);
             }
             if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
@@ -314,7 +314,7 @@ export default compose(
           }
         }
       }
-      
+
       props.setIsLoading(false);
     }
   }),
