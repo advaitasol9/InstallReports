@@ -1,5 +1,6 @@
 import RNFetchBlob from 'rn-fetch-blob';
-import { apiChangeStatus, apiGet, apiPatch, apiPostComment, apiPostImage } from '../../core/api';
+import { apiChangeStatus, apiGet, apiGetJson, apiPatch, apiPostComment, apiPostImage } from '../../core/api';
+import { saveCommentsOffline } from '../../modules/offlineWorkorderState';
 
 export const WORKORDER_STATUS_CHANGED = 'workOrderPreInsatllAction/WORKORDER_STATUS_CHANGED';
 export const WORKORDER_GEO_LOCATION_CHANGED = 'workOrderPreInstallAction/WORKORDER_GEO_LOCATION_CHANGED';
@@ -57,12 +58,19 @@ export function updateWorkOrderComment(id, comment, token) {
         formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
         formData.append('size', stats.size);
 
-        return apiPostImage(`activities/${id}/comments/${resPostText.data.id}/files`, formData, token);
+        const { data } = await apiPostImage(`activities/${id}/comments/${resPostText.data.id}/files`, formData, token);
+
+        return { ...data, local_path: item };
       } catch (e) {
         return false;
       }
     });
-    await Promise.all(promises);
-    return dispatch(workOrderCommentChanged({ id, comment }));
+    const savedFiles = await Promise.all(promises);
+    const { data } = await apiGetJson(
+      `activities/${id}/comments?search={"fields":[{"operator":"equals","value":"${resPostText.data.id}","field":"id"}]}`,
+      token
+    );
+
+    dispatch(workOrderCommentChanged({ id, comment: { ...data[0], files: savedFiles, activityId: id } }));
   };
 }

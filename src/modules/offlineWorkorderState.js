@@ -1,5 +1,5 @@
 import { WORKORDER_FAILED_ATTEMPT_UPDATED } from '../redux/actions/workOrderFailedAttemptActions';
-import { WORKORDER_GEO_LOCATION_CHANGED, WORKORDER_STATUS_CHANGED } from '../redux/actions/workOrderPreInsallActions';
+import { WORKORDER_COMMENT_UPDATED, WORKORDER_GEO_LOCATION_CHANGED, WORKORDER_STATUS_CHANGED } from '../redux/actions/workOrderPreInsallActions';
 import { WORKORDER_QUESTION_ANSWERS_UPDATED } from '../redux/actions/workOrderQuestionsActions';
 
 type OfflineWorkOderStateType = {
@@ -51,7 +51,7 @@ export function saveFilesOffline(payload): ActionType {
 }
 
 export function saveCommentsOffline(payload): ActionType {
-  return {type: SAVE_COMMENTS_OFFLINE,payload};
+  return { type: SAVE_COMMENTS_OFFLINE, payload };
 }
 
 export default function offlineWorkorderStateReducer(state: OfflineWorkOderStateType = initialState, action: ActionType): OfflineWorkOderStateType {
@@ -119,10 +119,26 @@ export default function offlineWorkorderStateReducer(state: OfflineWorkOderState
       return state;
 
     case SAVE_FILES_OFFLINE:
-      return {...state, files: {...state.files, [action.payload.id]:action.payload}};
+      return { ...state, files: { ...state.files, [action.payload.id]: action.payload } };
 
     case SAVE_COMMENTS_OFFLINE:
-      return {...state, comments: {...state.comments, [action.payload.id]: action.payload}};
+      return { ...state, comments: { ...state.comments, [action.payload.id]: action.payload } };
+
+    case WORKORDER_COMMENT_UPDATED:
+      if (state.workOrders[action.payload.id]) {
+        return {
+          ...state,
+          workOrders: {
+            ...state.workOrders,
+            [action.payload.id]: {
+              ...state.workOrders[action.payload.id],
+              workOrderComments: [...state.workOrders[action.payload.id].workOrderComments, action.payload.comment]
+            }
+          },
+          comments: { ...state.comments, [action.payload.comment.id]: action.payload.comment }
+        };
+      }
+      return state;
 
     default:
       return state;

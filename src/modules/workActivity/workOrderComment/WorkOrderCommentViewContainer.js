@@ -31,7 +31,7 @@ export default compose(
       addPhoto: arr => dispatch(addCommentPhoto(arr)),
       setChanges: arr => dispatch(setChanges(arr)),
       saveOfflineChanges: (workOrderId, changes) => dispatch(addOfflineWorkorderChanges({ workOrderId, changes })),
-      saveCommentsOffline: comments => dispatch(saveCommentsOffline(comments)),
+      saveCommentsOffline: comments => dispatch(saveCommentsOffline(comments))
     })
   ),
   withState('numOfChanges', 'setNumOfChanges', 0),
@@ -47,7 +47,6 @@ export default compose(
   withHandlers({
     onSubmit: props => async () => {
       if (!props.connectionStatus) {
-
         Alert.alert('No Internet connection', "You're now working offline");
         const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${props.userRole}`;
         const changes = [{ type: 'comments', payload: { text: data, photos: props.photos } }];
@@ -70,25 +69,21 @@ export default compose(
         ]);
         await props.addPhoto([]);
         await props.setComment('');
-
       } else {
         const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${props.userRole}`;
         await apiPostComment(`spectrum/activities/${props.activityId}/comments`, data, props.token)
           .then(resPostText => {
-
-            let commentForOffline = {...resPostText.data,files:[]};
+            let commentForOffline = { ...resPostText.data, files: [] };
 
             if (props.photos.length > 0 || props.photos.length) {
               Promise.all(
-                
                 props.photos.map(item => {
-                let newFile = {
-                  app_id: 1,
-                  id:0,
-                  
-                };
+                  let newFile = {
+                    app_id: 1,
+                    id: 0
+                  };
 
-                 apiGet('aws-s3-presigned-urls', props.token).then(res => {
+                  apiGet('aws-s3-presigned-urls', props.token).then(res => {
                     RNFetchBlob.fetch(
                       'PUT',
                       res.data.url,
@@ -105,108 +100,82 @@ export default compose(
                           formData.append('name', stats.filename);
                           formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
                           formData.append('size', stats.size);
-                          apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then((postRes) => {
+                          apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then(postRes => {
                             console.log(postRes);
-                            const hasOfflineData = (props.offlineWorkOrder[props.activityId]!==undefined);
-                            
-                            if(hasOfflineData){
+                            const hasOfflineData = props.offlineWorkOrder[props.activityId] !== undefined;
+
+                            if (hasOfflineData) {
                               let fileObject = postRes.data;
                               const destination = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + fileObject.name;
-                              console.log('src:'+item);
-                              console.log('dst:'+destination);
-                              
+                              console.log('src:' + item);
+                              console.log('dst:' + destination);
+
                               const path = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + fileObject.name;
-                  RNFetchBlob.config({
-                    path: path
-                  })
-                  .fetch('GET',fileObject.s3_location)
-                  .then(()=>{
-                    console.log(`comment file saved: ${path}`);
-                    fileObject = {...fileObject,s3_location: `file://${path}`,local_path: `file://${path}`};
-                    commentForOffline.files.push(fileObject);
-                  });
-                              
-                              
+                              RNFetchBlob.config({
+                                path: path
+                              })
+                                .fetch('GET', fileObject.s3_location)
+                                .then(() => {
+                                  console.log(`comment file saved: ${path}`);
+                                  fileObject = { ...fileObject, s3_location: `file://${path}`, local_path: `file://${path}` };
+                                  commentForOffline.files.push(fileObject);
+                                });
                             }
-  
-    
-  
-  
-  
-                           });
+                          });
                         });
                       })
                       .catch(err => {
                         console.log(err);
                       });
                   });
-  
-                  
                 })
-              ).then(()=>{
-                console.log('comment for off:');
-                console.log(commentForOffline);
-                props.saveCommentsOffline({activityId:props.activityId, ...commentForOffline,users: [props.user]});
-                const hasOfflineData = (props.offlineWorkOrder[props.activityId]!==undefined);
-                if(hasOfflineData){
-
-
-                  // apiGetJson(
-                  //   `activities/${props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${props.userRole}","field":"channel"}]}`,
-                  //   props.token
-                  // ).then(response => {
-          
-                  //   console.log(response);
-  
-                  //   response.data.map(async comment => {
-  
-                  //     var commentFiles = [];
-                  //     if(comment.files != undefined && comment.files.length > 0)
-                  //     {
-            
-                  //       await Promise.all(comment.files.map(async file => {
-                  //             const path = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + file.name;
-                  //             await RNFetchBlob.config({
-                  //               path: path
-                  //             })
-                  //             .fetch('GET',file.s3_location)
-                  //             .then(()=>{
-                  //               console.log(`comment file saved: ${path}`);
-                  //             });
-                  //             commentFiles.push({...file,local_path: `file://${path}`});
-                  //       }));
-                              
-                  //     }
-                  //     comment = {...comment,files: commentFiles};
-                  //     props.saveCommentsOffline({activityId:props.activityId, ...comment});
-            
-                  //   });
-  
-  
-  
-                  //   //props.setData(response.data.reverse());
-                  //   console.log('new comment appended:');
-                  //   console.log(response);
-                  // });
-
-
-                }
-
-
-              }).catch((e)=>{
-                console.log(e);
-              });
+              )
+                .then(() => {
+                  console.log('comment for off:');
+                  console.log(commentForOffline);
+                  props.saveCommentsOffline({ activityId: props.activityId, ...commentForOffline, users: [props.user] });
+                  const hasOfflineData = props.offlineWorkOrder[props.activityId] !== undefined;
+                  if (hasOfflineData) {
+                    // apiGetJson(
+                    //   `activities/${props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${props.userRole}","field":"channel"}]}`,
+                    //   props.token
+                    // ).then(response => {
+                    //   console.log(response);
+                    //   response.data.map(async comment => {
+                    //     var commentFiles = [];
+                    //     if(comment.files != undefined && comment.files.length > 0)
+                    //     {
+                    //       await Promise.all(comment.files.map(async file => {
+                    //             const path = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + file.name;
+                    //             await RNFetchBlob.config({
+                    //               path: path
+                    //             })
+                    //             .fetch('GET',file.s3_location)
+                    //             .then(()=>{
+                    //               console.log(`comment file saved: ${path}`);
+                    //             });
+                    //             commentFiles.push({...file,local_path: `file://${path}`});
+                    //       }));
+                    //     }
+                    //     comment = {...comment,files: commentFiles};
+                    //     props.saveCommentsOffline({activityId:props.activityId, ...comment});
+                    //   });
+                    //   //props.setData(response.data.reverse());
+                    //   console.log('new comment appended:');
+                    //   console.log(response);
+                    // });
+                  }
+                })
+                .catch(e => {
+                  console.log(e);
+                });
               console.log('promise done');
-                  
-              
             } //if photos length
 
             //fetch again to display new comment
-                          
-
           })
-          .catch(err => { });
-          console.log('comment posted');
+          .catch(err => {});
+        console.log('comment posted');
         props.addPhoto([]);
         props.setComment('');
       }
@@ -223,7 +192,7 @@ export default compose(
         this.props.setComment(this.props.navigation.state.params.screenData.text);
       }
       if (this.props.connectionStatus) {
-        console.log("online");
+        console.log('online');
 
         apiGetJson(`activities/${this.props.activityId}?with=["items","accounts","files"]`, this.props.token).then(response => {
           this.props.setActivityData(response.data);
@@ -234,40 +203,40 @@ export default compose(
           `activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${this.props.userRole}","field":"channel"}]}`,
           this.props.token
         ).then(response => {
-
-          response.data
-            .map(msg => {
-              const regex = /(<([^>]+)>)/gi;
-              const result = msg.text.replace(regex, '');
-              const result1 = result.replace('&nbsp;', ' ');
-              msg.text = result1;
-            });
+          response.data.map(msg => {
+            const regex = /(<([^>]+)>)/gi;
+            const result = msg.text.replace(regex, '');
+            const result1 = result.replace('&nbsp;', ' ');
+            msg.text = result1;
+          });
           this.props.setData(response.data.reverse());
           this.props.setIsloading(false);
           this.props.setCommentIsloading(false);
         });
       } else {
-        this.props.setActivityData(this.props.orderList.filter(order => order.id === this.props.activityId)[0]);
+        await this.props.setActivityData(this.props.offlineWorkOrder[this.props.activityId]);
+
         currentComments = [];
         if (this.props.workOrder[this.props.activityId] != undefined) {
-          await (this.props.workOrder[this.props.activityId]).map(data => {
-            if (data.type == "comments") {
+          await this.props.workOrder[this.props.activityId].map(data => {
+            if (data.type == 'comments') {
               var filesArray = [];
-              data.payload.photos.forEach((element) => {
+              data.payload.photos.forEach(element => {
                 filesArray.push({
                   file_type: 'image/jpeg',
                   s3_location: element
                 });
               });
-              currentComments.push(
-                {
-                  files: filesArray,
-                  text: (((data.payload.text).split("&")[0]).replace("text=", "")).replace(/%20/g, " "),
-                  users: [this.props.user]
-                }
-              );
+              currentComments.push({
+                files: filesArray,
+                text: data.payload.text
+                  .split('&')[0]
+                  .replace('text=', '')
+                  .replace(/%20/g, ' '),
+                users: [this.props.user]
+              });
             }
-          })
+          });
         }
 
         if (this.props.offlineComments != undefined) {
@@ -284,21 +253,17 @@ export default compose(
               }
               offlineComments.push(data);
             }
-          })
+          });
         }
 
         console.log(currentComments);
 
-        this.props.setData([
-          ...currentComments.reverse() ?? [],
-          ...offlineComments.reverse() ?? []
-        ]);
+        this.props.setData([...(currentComments.reverse() ?? []), ...(offlineComments.reverse() ?? [])]);
         this.props.setIsloading(false);
         this.props.setCommentIsloading(false);
       }
     },
     componentDidMount() {
-      
       this._interval = setInterval(() => {
         if (this.props.activityId == null) {
           clearInterval(this._interval);
@@ -308,13 +273,12 @@ export default compose(
               `activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${this.props.userRole}","field":"channel"}]}`,
               this.props.token
             ).then(response => {
-              response.data
-                .map(msg => {
-                  const regex = /(<([^>]+)>)/gi;
-                  const result = msg.text.replace(regex, '');
-                  const result1 = result.replace('&nbsp;', ' ');
-                  msg.text = result1;
-                });
+              response.data.map(msg => {
+                const regex = /(<([^>]+)>)/gi;
+                const result = msg.text.replace(regex, '');
+                const result1 = result.replace('&nbsp;', ' ');
+                msg.text = result1;
+              });
               this.props.setData(response.data.reverse());
               this.props.setIsloading(false);
               this.props.setCommentIsloading(false);
@@ -322,26 +286,26 @@ export default compose(
           } else {
             currentComments = [];
             if (this.props.workOrder[this.props.activityId] != undefined) {
-              (this.props.workOrder[this.props.activityId]).map(data => {
-                if (data.type == "comments") {
+              this.props.workOrder[this.props.activityId].map(data => {
+                if (data.type == 'comments') {
                   var filesArray = [];
-                  data.payload.photos.forEach((element) => {
+                  data.payload.photos.forEach(element => {
                     filesArray.push({
                       file_type: 'image/jpeg',
                       s3_location: element
                     });
                   });
-                  currentComments.push(
-                    {
-                      files: filesArray,
-                      text: (((data.payload.text).split("&")[0]).replace("text=", "")).replace(/%20/g, " "),
-                      users: [this.props.user]
-                    }
-                  );
+                  currentComments.push({
+                    files: filesArray,
+                    text: data.payload.text
+                      .split('&')[0]
+                      .replace('text=', '')
+                      .replace(/%20/g, ' '),
+                    users: [this.props.user]
+                  });
                 }
-              })
+              });
             }
-
 
             if (this.props.offlineComments != undefined) {
               var offlineComments = [];
@@ -357,14 +321,10 @@ export default compose(
                   }
                   offlineComments.push(data);
                 }
-              })
+              });
             }
 
-            this.props.setData([
-              ...currentComments.reverse() ?? [],
-              ...offlineComments.reverse() ?? []
-            ]);
-            
+            this.props.setData([...(currentComments.reverse() ?? []), ...(offlineComments.reverse() ?? [])]);
           }
         }
       }, 10000);
