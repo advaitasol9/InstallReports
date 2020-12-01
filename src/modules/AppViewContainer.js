@@ -15,7 +15,8 @@ export default compose(
   connect(
     state => ({
       changes: state.offlineWorkOrder.workOrderChanges,
-      token: state.profile.security_token.token
+      token: state.profile.security_token.token,
+      connectionState: state.app.isConnected
     }),
     dispatch => ({
       setConnection: mode => dispatch(setConnection(mode)),
@@ -39,40 +40,47 @@ export default compose(
     },
     componentDidMount() {
       this.unsubscribe = NetInfo.addEventListener(async state => {
+        if (this.props.connectionState == state.isConnected) {
+          return;
+        }
+
         await this.props.setConnection(state.isConnected);
-        if (state.isConnected) {
-          for (const id of Object.keys(this.props.changes)) {
-            const changes = this.props.changes[id];
-            for (const change of changes) {
-              switch (change.type) {
-                case 'status':
-                  await this.props.updateWorkOrderStatus(id, change.payload, this.props.token);
-                  break;
 
-                case 'geo_locations':
-                  await this.props.updateWorkOrderGeoLocation(id, change.payload, this.props.token);
-                  break;
+        if (!state.isConnected) {
+          return;
+        }
 
-                case 'comments':
-                  await this.props.updateWorkOrderComment(id, change.payload, this.props.token);
-                  break;
+        for (const id of Object.keys(this.props.changes)) {
+          const changes = this.props.changes[id];
+          for (const change of changes) {
+            switch (change.type) {
+              case 'status':
+                await this.props.updateWorkOrderStatus(id, change.payload, this.props.token);
+                break;
 
-                case 'question_answer_update':
-                  await this.props.updateWorkOrderQuestionAnswers(id, change.payload, this.props.token);
-                  break;
+              case 'geo_locations':
+                await this.props.updateWorkOrderGeoLocation(id, change.payload, this.props.token);
+                break;
 
-                case 'manager_questions_save':
-                  await this.props.updateWorkOrderManagerQuestions(id, change.payload, this.props.token);
-                  break;
+              case 'comments':
+                await this.props.updateWorkOrderComment(id, change.payload, this.props.token);
+                break;
 
-                case 'failed_attempt_save':
-                  await this.props.saveWorkOrderFailedAttempt(id, change.payload, this.props.token);
-              }
+              case 'question_answer_update':
+                await this.props.updateWorkOrderQuestionAnswers(id, change.payload, this.props.token);
+                break;
+
+              case 'manager_questions_save':
+                await this.props.updateWorkOrderManagerQuestions(id, change.payload, this.props.token);
+                break;
+
+              case 'failed_attempt_save':
+                await this.props.saveWorkOrderFailedAttempt(id, change.payload, this.props.token);
             }
           }
-
-          this.props.updateOfflineWorkOrderChanges([]);
         }
+
+        this.props.updateOfflineWorkOrderChanges([]);
       });
     },
     componentWillUnmount() {
