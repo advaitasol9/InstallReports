@@ -1,25 +1,12 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
-import { NavigationEvents } from 'react-navigation';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { ActivityInfoSection, ActivityStatus, ActivityTitle, Button, Header, QuestionsList } from '../../../components';
 import NoOfflineWOMessage from '../../../components/NoOfflineWOMessage';
-import { apiGet, apiPatchAnswers } from '../../../core/api';
 import { colors } from '../../../styles';
 
 const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : '';
 
 export default class WorkOrderQuestionsView extends Component {
-  constructor(props) {
-    super(props);
-    this.uploadedImagesCount = 0;
-    deletePhotoIds = [];
-    isSignatureUploaded = false;
-    this.state = {
-      isLoading: false,
-      showButton: true
-    };
-  }
-
   updateAnswers = () => {
     const installerQuestions = this.props.activityData.installer_questions_answers;
     if (!installerQuestions?.length) {

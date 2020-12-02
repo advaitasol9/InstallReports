@@ -54,83 +54,78 @@ export default compose(
     },
     submitQuestionAnswers: props => async () => {
       props.setIsSubmitLoading(true);
-      if (!props.connectionStatus) {
-        const changes = [
-          {
-            type: 'question_answer_update',
-            payload: {
-              photos: props.photos,
-              answers: props.activityData.installer_questions_answers,
-              signature: props.signature[0],
-              deleted_photos: props.photosToDelete
-            }
-          }
-        ];
+      try {
+        const payload = {
+          photos: props.photos,
+          answers: props.activityData.installer_questions_answers,
+          signature: props.signature[0],
+          deleted_photos: props.photosToDelete
+        };
 
-        props.saveOfflineChanges(props.activityData.id, changes);
+        if (!props.connectionStatus) {
+          const changes = [{ type: 'question_answer_update', payload: payload }];
+          props.saveOfflineChanges(props.activityData.id, changes);
+        } else {
+          const { photos, answers } = await props.updateWorkOrderQuestionAnswers(props.activityData.id, payload, props.token);
+
+          const quetsionPhotos = answers.map(answer => {
+            const newPhotos = photos
+              .filter(photo => photo.order == answer.order)
+              .map(item => {
+                return { file_id: item.id, url: item.s3_location };
+              });
+            const answerPhotos = props.activityData.installer_questions_photos.find(photo => photo.question_order_id == answer.order);
+            return { ...answerPhotos, data: [...(answerPhotos?.data ?? []), ...newPhotos] };
+          });
+
+          props.setActivityData({ ...props.activityData, installer_questions_photos: quetsionPhotos, installer_questions_answers: answers });
+          props.clearPhotos();
+        }
+
         props.setIsSubmitLoading(false);
         props.setSignature([]);
         Alert.alert('Success', 'Your answer(s) have been received.', [{ text: 'Ok' }]);
-      } else {
-        try {
-          await props.updateWorkOrderQuestionAnswers(
-            props.activityData.id,
-            {
-              photos: props.photos,
-              answers: props.activityData.installer_questions_answers,
-              signature: props.signature[0],
-              deleted_photos: props.photosToDelete
-            },
-            props.token
-          );
-
-          props.setSignature([]);
-          props.setIsSubmitLoading(false);
-          Alert.alert('Success', 'Your answer(s) have been received.', [{ text: 'Ok' }]);
-        } catch (e) {
-          console.log(e);
-          props.setIsSubmitLoading(false);
-        }
+      } catch (e) {
+        console.log(e);
+        props.setIsSubmitLoading(false);
       }
     },
     updateQuestionAnswers: props => async () => {
       props.setIsUpdateLoading(true);
-      if (!props.connectionStatus) {
-        const changes = [
-          {
-            type: 'question_answer_update',
-            payload: {
-              photos: props.photos,
-              answers: props.activityData.installer_questions_answers,
-              signature: props.signature[0],
-              deleted_photos: props.photosToDelete
-            }
-          }
-        ];
-        props.saveOfflineChanges(props.activityData.id, changes);
+      try {
+        const payload = {
+          photos: props.photos,
+          answers: props.activityData.installer_questions_answers,
+          signature: props.signature[0],
+          deleted_photos: props.photosToDelete
+        };
+
+        if (!props.connectionStatus) {
+          const changes = [{ type: 'question_answer_update', payload: payload }];
+          props.saveOfflineChanges(props.activityData.id, changes);
+        } else {
+          const { photos, answers } = await props.updateWorkOrderQuestionAnswers(props.activityData.id, payload, props.token);
+
+          const quetsionPhotos = answers.map(answer => {
+            const newPhotos = photos
+              .filter(photo => photo.order == answer.order)
+              .map(item => {
+                return { file_id: item.id, url: item.s3_location };
+              });
+            const answerPhotos = props.activityData.installer_questions_photos.find(photo => photo.question_order_id == answer.order);
+            return { ...answerPhotos, data: [...(answerPhotos?.data ?? []), ...newPhotos] };
+          });
+
+          props.setActivityData({ ...props.activityData, installer_questions_photos: quetsionPhotos, installer_questions_answers: answers });
+          props.clearPhotos();
+        }
+
         props.setIsUpdateLoading(false);
         props.setSignature([]);
         Alert.alert('Success', 'Your answer(s) have been updated.', [{ text: 'Ok' }]);
-      } else {
-        try {
-          await props.updateWorkOrderQuestionAnswers(
-            props.activityData.id,
-            {
-              photos: props.photos,
-              answers: props.activityData.installer_questions_answers,
-              signature: props.signature[0],
-              deleted_photos: props.photosToDelete
-            },
-            props.token
-          );
-
-          props.setSignature([]);
-          props.setIsUpdateLoading(false);
-          Alert.alert('Success', 'Your answer(s) have been updated.', [{ text: 'Ok' }]);
-        } catch (e) {
-          console.log(e);
-          props.setIsUpdateLoading(false);
-        }
+      } catch (e) {
+        console.log(e);
+        props.setIsUpdateLoading(false);
       }
     },
     initWOQuestions: props => async () => {
