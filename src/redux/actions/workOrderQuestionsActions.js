@@ -42,9 +42,10 @@ export function updateWorkOrderQuestionAnswers(id, answerData, token) {
           }
         }
       });
+      return { ...fileRes.data, order: item.order };
     });
 
-    await Promise.all(promises);
+    const uploadedPhotos = await Promise.all(promises);
 
     const signatureQuestionIndex = answers.findIndex(item => item.type == 'signature');
     if (signature && signatureQuestionIndex !== -1) {
@@ -52,7 +53,9 @@ export function updateWorkOrderQuestionAnswers(id, answerData, token) {
       answers[signatureQuestionIndex].answers = fileRes.data.id;
     }
 
-    await apiPatchAnswers(`activities/${id}`, { installer_questions_answers: JSON.stringify(answers) }, token);
+    const temp = await apiPatchAnswers(`activities/${id}`, { installer_questions_answers: JSON.stringify(answers) }, token);
     dispatch(workOrderQuestionAnswerUpdated({ id, installer_questions_answers: answers }));
+
+    return { answers, photos: uploadedPhotos };
   };
 }

@@ -92,18 +92,7 @@ export default compose(
 
       var installerAnswers = [];
 
-      if (props.connectionStatus) {
-        installerAnswers = JSON.parse(workOrder.installer_questions_answers);
-      } else {
-        if (props.offlineChanges[props.activityId] != undefined) {
-          if ((props.offlineChanges[props.activityId].length != 0)) {
-            var wo = props.offlineChanges[props.activityId].pop();
-            installerAnswers = wo.payload.answers;
-          }
-        } else {
-          installerAnswers = JSON.parse(workOrder.installer_questions_answers);
-        }
-      }
+      installerAnswers = JSON.parse(workOrder.installer_questions_answers);
 
       let photoIds = [];
       const managerQuestions = JSON.parse(workOrder.manager_questions_answers) ?? [];
