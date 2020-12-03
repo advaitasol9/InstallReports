@@ -24,7 +24,7 @@ export default class WorkOrderQuestionsView extends Component {
         return;
       }
       const noNewPhotos = !this.props.photos.find(p => p.order == question.order);
-      const noExistingPhotos = !this.props.activityData.installer_questions_photos.find(p => p.order == question.order)?.data?.length;
+      const noExistingPhotos = !this.props.activityData.installer_questions_photos.find(p => p.question_order_id == question.order)?.data?.length;
       if (question.allow_photos && noNewPhotos && noExistingPhotos) {
         this.props.setIsSubmitBtnDisabled(true);
         return;
