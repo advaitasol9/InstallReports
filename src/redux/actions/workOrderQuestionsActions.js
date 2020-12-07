@@ -1,6 +1,5 @@
 import { apiPatchAnswers } from '../../core/api';
 import { uploadPhoto } from '../../core/fileHandle';
-import { clearPhotos } from '../../modules/workActivity/workOrderQuestions/WorkOrderQuestionsState';
 
 export const WORKORDER_QUESTION_ANSWERS_UPDATED = 'workOrderQuestionsAction/WORKORDER_QUESTION_ANSWER_UPDATED';
 
@@ -10,7 +9,7 @@ export function workOrderQuestionAnswerUpdated(payload) {
 
 export function updateWorkOrderQuestionAnswers(id, answerData, token) {
   return async dispatch => {
-    let { photos, answers, signature, deleted_photos } = answerData;
+    let { photos, answers, signature, deleted_photos } = JSON.parse(JSON.stringify(answerData));
 
     answers = answers.map(question => {
       if (question.type == 'photo') {

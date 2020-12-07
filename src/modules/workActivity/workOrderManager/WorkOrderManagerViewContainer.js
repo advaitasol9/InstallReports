@@ -142,37 +142,64 @@ export default compose(
 
       const offlineChanges = props.offlineChanges[props.activityId];
 
-      const installerChangeIndex = (offlineChanges ?? []).findIndex(change => change.type == 'question_answer_update');
+      const questionAnswerChanges = (offlineChanges ?? []).filter(change => change.type == 'question_answer_update');
 
-      if (installerChangeIndex !== -1) {
-        return;
-      }
+      if (questionAnswerChanges.length) {
+        const { answers, photos, signature, deleted_photos } = questionAnswerChanges[questionAnswerChanges.length - 1].payload;
 
-      for (let i = 0; i < installerAnswers.length; i++) {
-        const question = installerAnswers[i];
-        if (question.required) {
-          if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
-            if (question.allow_photos && (question.photo == undefined || !question.photo.length)) {
-              props.setIsIncompleteOpen(true);
-              return;
-            }
-            if (question.answers == undefined) {
-              props.setIsIncompleteOpen(true);
-              return;
-            }
-            if (question.answers == '') {
-              props.setIsIncompleteOpen(true);
-              return;
-            }
-          } else if (question.type == 'photo') {
-            if (question.answers == undefined || !question.answers.length) {
-              props.setIsIncompleteOpen(true);
-              return;
-            }
-          } else if (question.type == 'signature') {
-            if ((question.answers = undefined || question.answers == null)) {
-              props.setIsIncompleteOpen(true);
-              return;
+        for (const question of answers) {
+          if (!question.required) {
+            continue;
+          }
+
+          if (question.type == 'signature' && !signature.length && !question.answers) {
+            props.setIsIncompleteOpen(true);
+            return;
+          }
+          const noNewPhotos = !photos.find(p => p.order == question.order);
+          const noExistingPhotos = !question.photo || !question.photo.find(p => !deleted_photos.includes(p));
+          if (question.allow_photos && noNewPhotos && noExistingPhotos) {
+            props.setIsIncompleteOpen(true);
+            return;
+          }
+
+          if (question.type == 'photo' && noNewPhotos && !question.answers.find(p => !deleted_photos.includes(p))) {
+            props.setIsIncompleteOpen(true);
+            return;
+          }
+
+          if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
+            props.setIsIncompleteOpen(true);
+            return;
+          }
+        }
+      } else {
+        for (let i = 0; i < installerAnswers.length; i++) {
+          const question = installerAnswers[i];
+          if (question.required) {
+            if (['checklist', 'freeform', 'dropdown'].includes(question.type)) {
+              if (question.allow_photos && (question.photo == undefined || !question.photo.length)) {
+                props.setIsIncompleteOpen(true);
+                return;
+              }
+              if (question.answers == undefined) {
+                props.setIsIncompleteOpen(true);
+                return;
+              }
+              if (question.answers == '') {
+                props.setIsIncompleteOpen(true);
+                return;
+              }
+            } else if (question.type == 'photo') {
+              if (question.answers == undefined || !question.answers.length) {
+                props.setIsIncompleteOpen(true);
+                return;
+              }
+            } else if (question.type == 'signature') {
+              if ((question.answers = undefined || question.answers == null)) {
+                props.setIsIncompleteOpen(true);
+                return;
+              }
             }
           }
         }
