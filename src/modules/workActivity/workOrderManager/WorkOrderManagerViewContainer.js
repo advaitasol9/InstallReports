@@ -157,7 +157,7 @@ export default compose(
             return;
           }
           const noNewPhotos = !photos.find(p => p.order == question.order);
-          const noExistingPhotos = !question.photo.find(p => !deleted_photos.includes(p));
+          const noExistingPhotos = !question.photo || !question.photo.find(p => !deleted_photos.includes(p));
           if (question.allow_photos && noNewPhotos && noExistingPhotos) {
             props.setIsIncompleteOpen(true);
             return;
