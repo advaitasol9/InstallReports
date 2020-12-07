@@ -7,43 +7,6 @@ import { colors } from '../../../styles';
 const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : '';
 
 export default class WorkOrderQuestionsView extends Component {
-  updateAnswers = () => {
-    const installerQuestions = this.props.activityData.installer_questions_answers;
-    if (!installerQuestions?.length) {
-      return;
-    }
-
-    for (let i = 0; i < installerQuestions.length; i++) {
-      const question = installerQuestions[i];
-      if (!question.required) {
-        continue;
-      }
-
-      if (question.type == 'signature' && !this.props.signature.length && !question.answers) {
-        this.props.setIsSubmitBtnDisabled(true);
-        return;
-      }
-      const noNewPhotos = !this.props.photos.find(p => p.order == question.order);
-      const noExistingPhotos = !this.props.activityData.installer_questions_photos.find(p => p.question_order_id == question.order)?.data?.length;
-      if (question.allow_photos && noNewPhotos && noExistingPhotos) {
-        this.props.setIsSubmitBtnDisabled(true);
-        return;
-      }
-
-      if (question.type == 'photo' && noNewPhotos && noExistingPhotos) {
-        this.props.setIsSubmitBtnDisabled(true);
-        return;
-      }
-
-      if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
-        this.props.setIsSubmitBtnDisabled(true);
-        return;
-      }
-    }
-
-    this.props.setIsSubmitBtnDisabled(false);
-  };
-
   render() {
     if (this.props.isLoading) {
       return (
@@ -76,7 +39,7 @@ export default class WorkOrderQuestionsView extends Component {
                 screen="Questions"
                 setUpdate={this.props.setUpdate}
                 update={this.props.update}
-                updateAnswers={this.updateAnswers}
+                updateAnswers={this.props.validateAnswers}
                 deleteInstallerPhotos={this.props.deletePhotos}
                 setSignature={this.props.setSignature}
               />

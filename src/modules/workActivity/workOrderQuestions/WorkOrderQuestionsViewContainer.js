@@ -40,6 +40,44 @@ export default compose(
   withState('isSubmitLoading', 'setIsSubmitLoading', false),
   withState('isSubmitBtnDisabled', 'setIsSubmitBtnDisabled', false),
   withHandlers({
+    validateAnswers: props => () => {
+      const installerQuestions = props.activityData.installer_questions_answers;
+      if (!installerQuestions?.length) {
+        return;
+      }
+
+      for (let i = 0; i < installerQuestions.length; i++) {
+        const question = installerQuestions[i];
+        if (!question.required) {
+          continue;
+        }
+
+        if (question.type == 'signature' && !props.signature.length && !question.answers) {
+          props.setIsSubmitBtnDisabled(true);
+          return;
+        }
+        const noNewPhotos = !props.photos.find(p => p.order == question.order);
+        const noExistingPhotos = !props.activityData.installer_questions_photos.find(p => p.question_order_id == question.order)?.data?.length;
+        if (question.allow_photos && noNewPhotos && noExistingPhotos) {
+          props.setIsSubmitBtnDisabled(true);
+          return;
+        }
+
+        if (question.type == 'photo' && noNewPhotos && noExistingPhotos) {
+          props.setIsSubmitBtnDisabled(true);
+          return;
+        }
+
+        if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
+          props.setIsSubmitBtnDisabled(true);
+          return;
+        }
+      }
+
+      props.setIsSubmitBtnDisabled(false);
+    }
+  }),
+  withHandlers({
     deletePhotos: props => photo => {
       const photos = props.activityData.installer_questions_photos.map(item => {
         const index = item.data.findIndex(obj => obj.file_id == photo.file_id);
@@ -155,17 +193,15 @@ export default compose(
 
       const workOrderChanges = props.offlineChanges[props.activityId] ?? [];
 
-      workOrderChanges.forEach(change => {
-        if (change.type == 'status' && change.payload == 'In_Progress') {
-          preInstallCompleted = true;
-          return;
-        }
+      const stateChanges = workOrderChanges.filter(item => item.type == 'status');
+      const answerChanges = workOrderChanges.filter(item => item.type == 'question_answer_update');
 
-        if (change.type != 'question_answer_update') {
-          return;
-        }
+      if (stateChanges[stateChanges.length - 1]?.payload == 'In_Progress') {
+        preInstallCompleted = true;
+      }
 
-        let { photos, answers, signature, deleted_photos } = change.payload;
+      if (answerChanges.length) {
+        let { photos, answers, signature, deleted_photos } = answerChanges[answerChanges.length - 1].payload;
 
         answers = answers.map(question => {
           if (question.type == 'photo') {
@@ -196,7 +232,7 @@ export default compose(
 
         props.addPhoto(unsavedPhotos);
         installerQuestions = answers;
-      });
+      }
 
       installerQuestions.forEach(question => {
         if (question.type == 'photo') {
@@ -284,32 +320,13 @@ export default compose(
         );
       }
 
-      props.setActivityData({
+      await props.setActivityData({
         ...workOrder,
         installer_questions_answers: installerQuestions,
         installer_questions_photos: installerAnswersPhotos
       });
 
-      if (installerQuestions?.length) {
-        for (let i = 0; i < installerQuestions.length; i++) {
-          const question = installerQuestions[i];
-          if (question.required) {
-            if (question.type == 'signature' && !props.signature?.length && !question.answers) {
-              props.setIsSubmitBtnDisabled(true);
-            }
-            if (question.allow_photos && question.photo?.length == 0) {
-              props.setIsSubmitBtnDisabled(true);
-            }
-            if (question.type == 'photo' && question.photo?.length == 0) {
-              props.setIsSubmitBtnDisabled(true);
-            }
-            if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
-              props.setIsSubmitBtnDisabled(true);
-            }
-          }
-        }
-      }
-
+      props.validateAnswers();
       props.setIsLoading(false);
     }
   }),
