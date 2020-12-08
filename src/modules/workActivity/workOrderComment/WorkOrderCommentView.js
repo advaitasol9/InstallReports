@@ -1,14 +1,11 @@
+import moment from 'moment';
 import React, { useState } from 'react';
-import { StyleSheet, View, StatusBar, Text, TextInput, ScrollView, Alert, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Alert, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
-import RNFetchBlob from 'rn-fetch-blob';
-
+import { ActivityInfoSection, ActivityStatus, ActivityTitle, Button, Header } from '../../../components';
+import CommentImageView from '../../../components/CommentImageView';
 import { colors } from '../../../styles';
-import { Header, ActivityInfoSection, ActivityStatus, ActivityTitle, Button } from '../../../components';
-
-import moment from 'moment';
-import ImageView from 'react-native-image-view';
 
 const options = {
   quality: 1.0,
@@ -52,25 +49,14 @@ export default function WorkOrderCommentView(props) {
   }
 
   if (props.imageModal) {
-    const images = [
-      {
-        source: {
-          uri: props.imageURL
-        },
-        width: 806,
-        height: 720
-      }
-    ];
     return (
-      <ImageView
-        images={images}
-        imageIndex={0}
-        isVisible={isImageViewVisible}
-        onClose={() => {
+      <CommentImageView
+        imageURL={props.imageURL}
+        callback={() => {
           setIsImageViewVisible(true);
           props.setImageModal(!props.imageModal);
         }}
-      />
+      ></CommentImageView>
     );
   }
 
