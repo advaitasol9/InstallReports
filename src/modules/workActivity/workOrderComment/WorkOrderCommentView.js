@@ -6,6 +6,9 @@ import IO from 'react-native-vector-icons/Ionicons';
 import { ActivityInfoSection, ActivityStatus, ActivityTitle, Button, Header } from '../../../components';
 import CommentImageView from '../../../components/CommentImageView';
 import { colors } from '../../../styles';
+import CameraRoll from '@react-native-community/cameraroll';
+import { Platform } from 'react-native';
+import { PermissionsAndroid } from 'react-native';
 
 const options = {
   quality: 1.0,
@@ -117,6 +120,27 @@ export default function WorkOrderCommentView(props) {
                             if (!response.didCancel) {
                               photos.push(response.uri);
                               props.addPhoto(photos);
+                                
+                                //save to cameraRoll
+                                let permission = false;
+                                if (Platform.OS == 'android') {
+                                  permission = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+                                }
+
+                                 if (Platform.OS !== 'android' || permission) {
+                                    try{
+                                        
+                                        CameraRoll.save(response.uri, { album: 'Install Reports' }).then(()=>{
+                                            console.log('photo saved to album');
+                                        }).catch((e)=>{
+                                            console.log(e);
+                                        });
+                                    }
+                                    catch(e){
+                                        console.log(e);
+                                    }
+                                 }
+                                
                               props.setNumOfChanges(props.numOfChanges);
                             }
                           });
