@@ -107,7 +107,7 @@ export function Camera(props) {
                 permission = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
               }
 
-              if (Platform.OS !== 'android' || permission) {
+               if (Platform.OS !== 'android' || permission) {
                   try{
                       
                       CameraRoll.save(props.photoUri, { album: 'Install Reports' }).then(()=>{
@@ -119,7 +119,7 @@ export function Camera(props) {
                   catch(e){
                       console.log(e);
                   }
-              }
+               }
 
               const { photos } = props;
               if (props.backRoute === 'Manager' || props.backRoute === 'Questions') {
