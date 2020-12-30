@@ -9,6 +9,9 @@ import { compose, lifecycle } from 'recompose';
 import { colors } from '../styles';
 import Button from './Button';
 import CheckBox from './CheckBox';
+import CameraRoll from '@react-native-community/cameraroll';
+import { Platform } from 'react-native';
+import { PermissionsAndroid } from 'react-native';
 
 const options = {
   quality: 1.0,
@@ -107,6 +110,29 @@ const QuestionsList = props => {
                       });
                       props.setUpdate(!props.update);
                       props.addPhoto(photos);
+
+
+                      //save to cameraRoll
+                      let permission = false;
+                      if (Platform.OS == 'android') {
+                        permission = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+                      }
+
+                       if (Platform.OS !== 'android' || permission) {
+                          try{
+                              
+                              CameraRoll.save(response.uri, { album: 'Install Reports' }).then(()=>{
+                                  console.log('photo saved to album');
+                              }).catch((e)=>{
+                                  console.log(e);
+                              });
+                          }
+                          catch(e){
+                              console.log(e);
+                          }
+                       }
+
+
                       props.updateAnswers();
                     }
                   });
