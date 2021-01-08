@@ -38,7 +38,7 @@ export default compose(
   withHandlers({
     onSubmit: props => async () => {
       props.setIsLoading(true);
-      const data = encodeURI(`text=PRE INSTALL NOTES - ${props.comment}&user_ids=[${props.accountId}]&channel=${props.userRole}`);
+      const data = encodeURI(`text=PRE INSTALL NOTES - ${props.comment}&user_ids=[${props.accountId}]&channel=${(props.userRole == "installer" || props.userRole == "installer-sub") ? "installer":props.userRole}`);
 
       if (!props.connectionStatus) {
         const changes = [
