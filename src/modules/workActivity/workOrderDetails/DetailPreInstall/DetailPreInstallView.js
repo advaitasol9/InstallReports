@@ -235,7 +235,7 @@ export default class DetailPartialView extends Component {
             res.data.url,
             {
               'security-token': this.props.token,
-              'Content-Type': 'application/octet-stream'
+              'Content-Type': 'image/jpeg'
             },
             RNFetchBlob.wrap(item.replace('file://', ''))
           );
