@@ -66,18 +66,13 @@ export default compose(
   withState('checked', 'setChecked', false),
   lifecycle({
     componentDidMount() {
-      const arr = this.props.filter;
-      arr.forEach(item => {
-        var setNewValue = this.props.title.replace(' ', '_');
-        const value = setNewValue.toLowerCase();
-        if (this.props.forQuestionList) {
-          if (item === value) {
-            this.props.setChecked(true);
-          }
-        } else if (item.id === this.props.id) {
+      const arr=[];
+      arr.push(this.props);
+      arr.forEach((item) => {
+        if(this.props.filter==item.id){
           this.props.setChecked(true);
         }
       });
-    }
-  })
+    },
+  }),
 )(CheckBox);
