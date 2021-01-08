@@ -48,7 +48,7 @@ export default compose(
     onSubmit: props => async () => {
       if (!props.connectionStatus) {
         Alert.alert('No Internet connection', "You're now working offline");
-        const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${props.userRole}`;
+        const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${(props.userRole == "installer" || props.userRole == "installer-sub") ? "installer":props.userRole}`;
         const changes = [{ type: 'comments', payload: { text: data, photos: props.photos } }];
         await props.saveOfflineChanges(props.activityId, changes);
 
@@ -70,7 +70,7 @@ export default compose(
         await props.addPhoto([]);
         await props.setComment('');
       } else {
-        const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${props.userRole}`;
+        const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${(props.userRole == "installer" || props.userRole == "installer-sub") ? "installer":props.userRole}`;
         await apiPostComment(`spectrum/activities/${props.activityId}/comments`, data, props.token)
           .then(resPostText => {
             let commentForOffline = { ...resPostText.data, files: [] };
@@ -175,7 +175,6 @@ export default compose(
             //fetch again to display new comment
           })
           .catch(err => {});
-        console.log('comment posted');
         props.addPhoto([]);
         props.setComment('');
       }
@@ -200,7 +199,7 @@ export default compose(
         });
 
         await apiGetJson(
-          `activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${this.props.userRole}","field":"channel"}]}`,
+          `activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${(this.props.userRole == "installer" || this.props.userRole == "installer-sub") ? "installer":this.props.userRole}","field":"channel"}]}`,
           this.props.token
         ).then(response => {
           response.data.map(msg => {
@@ -270,7 +269,7 @@ export default compose(
         } else {
           if (this.props.connectionStatus) {
             apiGetJson(
-              `activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${this.props.userRole}","field":"channel"}]}`,
+              `activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${(this.props.userRole == "installer" || this.props.userRole == "installer-sub") ? "installer":this.props.userRole}","field":"channel"}]}`,
               this.props.token
             ).then(response => {
               response.data.map(msg => {
