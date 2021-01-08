@@ -47,7 +47,7 @@ export function updateWorkOrderComment(id, comment, token) {
           res.data.url,
           {
             'security-token': token,
-            'Content-Type': 'application/octet-stream'
+            'Content-Type': 'image/jpeg'
           },
           RNFetchBlob.wrap(decodeURI(item.replace('file://', '')))
         );
