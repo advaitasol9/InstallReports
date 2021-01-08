@@ -131,7 +131,7 @@ export default compose(
         await apiGetJson(`activities/${this.props.activityId}?with=["items","accounts","files"]`, this.props.token).then(async response => {
           responseData = response.data;
         });
-        await apiGetJson(`activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${this.props.userRole}","field":"channel"}]}`,
+        await apiGetJson(`activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${(this.props.userRole == "installer" || this.props.userRole == "installer-sub") ? "installer":this.props.userRole}","field":"channel"}]}`,
           this.props.token
         )
         
