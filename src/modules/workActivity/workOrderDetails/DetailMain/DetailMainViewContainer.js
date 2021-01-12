@@ -128,8 +128,9 @@ export default compose(
     async componentDidMount() {
       if (this.props.connectionStatus) {
         var responseData = {};
-        await apiGetJson(`activities/${this.props.activityId}?with=["items","accounts","files"]`, this.props.token).then(async response => {
-          responseData = response.data;
+        const search=`&search={"fields":[{"operator":"equals","value":${this.props.activityId},"field":"id"}]}`;
+        await apiGetJson(`spectrum/activities?with=["items","accounts","files"]`+ search, this.props.token).then(async response => {
+          responseData = response.data[0];
         });
         await apiGetJson(`activities/${this.props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${(this.props.userRole == "installer" || this.props.userRole == "installer-sub") ? "installer":this.props.userRole}","field":"channel"}]}`,
           this.props.token

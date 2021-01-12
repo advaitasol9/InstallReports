@@ -208,7 +208,22 @@ export default compose(
 
     onSubmit: props => async () => {
       props.setSubmitButtonLoading(true);
-
+      var statusValue = 'Complete';
+      if (props.connectionStatus) {
+        data = props.orderList.filter(item => item.id == props.activityId);
+        if (data[0] != undefined && data[0].items[0]) {
+          if (data[0].items[0].is_immediate_client_review == 1) {
+            statusValue = 'Client_Review';
+          }
+        }
+      } else {
+        var WO=props.offlineWorkOrders[props.activityId];
+        if(WO.items[0] != undefined){
+          if (WO.items[0].is_immediate_client_review == 1) {
+            statusValue = 'Client_Review';
+          }
+        }
+      }
       try {
         if (props.connectionStatus) {
           await props.updateMangerAnswers(
@@ -217,7 +232,7 @@ export default compose(
             props.token
           );
 
-          await props.updateWorkOrderStatus(props.activityId, 'Complete', props.token);
+          await props.updateWorkOrderStatus(props.activityId, statusValue, props.token);
 
           await props.updateWorkOrderGeoLocation(props.activityId, { complete: props.geoLocation }, props.token);
         } else {
@@ -226,7 +241,7 @@ export default compose(
               type: 'manager_questions_save',
               payload: { answers: props.activityData.manager_questions_answers, photos: props.photos, signature: props.signature[0] }
             },
-            { type: 'status', payload: 'Complete' },
+            { type: 'status', payload: statusValue },
             { type: 'geo_locations', payload: { complete: props.geoLocation } }
           ];
 
