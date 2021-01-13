@@ -45,7 +45,7 @@ export default class OrderListTile extends Component {
           <View style={styles.infoBottomSection}>
             <View style={{ flexDirection: 'row' }}>
               <Text style={[styles.infoBottomText, { marginRight: 20 }]}>
-                {this.props.item.store_name} #{this.props.item.id}
+                {this.props.item.store_name} #{this.props.item.store_id}
               </Text>
             </View>
             <View style={{ flexDirection: 'row' }}>
