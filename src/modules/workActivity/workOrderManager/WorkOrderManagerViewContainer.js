@@ -84,8 +84,9 @@ export default compose(
       let workOrder;
 
       if (props.connectionStatus) {
-        const response = await apiGetJson(`activities/${props.activityId}?with=["items"]`, props.token);
-        workOrder = response.data;
+        const search=`&search={"fields":[{"operator":"equals","value":${props.activityId},"field":"id"}]}`;
+        const response =  await apiGetJson(`spectrum/activities?with=["items"]`+ search, props.token);
+        workOrder = response.data[0];
       } else {
         workOrder = props.offlineWorkOrders[props.activityId];
       }
@@ -210,15 +211,14 @@ export default compose(
       props.setSubmitButtonLoading(true);
       var statusValue = 'Complete';
       if (props.connectionStatus) {
-        data = props.orderList.filter(item => item.id == props.activityId);
-        if (data[0] != undefined && data[0].items[0]) {
-          if (data[0].items[0].is_immediate_client_review == 1) {
+        if(props.activityData.items.length>0){
+          if(props.activityData.items[0].is_immediate_client_review==1){
             statusValue = 'Client_Review';
           }
         }
       } else {
         var WO=props.offlineWorkOrders[props.activityId];
-        if(WO.items[0] != undefined){
+        if(WO.items.length>0){
           if (WO.items[0].is_immediate_client_review == 1) {
             statusValue = 'Client_Review';
           }
