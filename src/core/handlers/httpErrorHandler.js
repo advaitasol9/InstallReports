@@ -19,10 +19,10 @@ export default class HttpErrorHandler {
       429: { title: 'Too Many Requests', message: 'Too many requests to server.' }
     };
 
-    if (specificErrors[error[0].status]) {
+    if (specificErrors[error[0]?.status]) {
       errorMessage.title = specificErrors[error[0].status].title;
       errorMessage.message = specificErrors[error[0].status].message;
-    } else if (customMessages[error[0].status]) {
+    } else if (customMessages[error[0]?.status]) {
       errorMessage.title = customMessages[error[0].status].title;
       errorMessage.message = customMessages[error[0].status].message;
     } else {
@@ -31,8 +31,8 @@ export default class HttpErrorHandler {
     }
 
     errorMessage.curl = error[1];
-    errorMessage.statusText = error[0].statusText;
-    errorMessage.status = error[0].status;
+    errorMessage.statusText = error[0]?.statusText;
+    errorMessage.status = error[0]?.status;
     errorMessage.action = error[2];
 
     return errorMessage;
