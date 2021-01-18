@@ -1,5 +1,6 @@
 import RNFetchBlob from 'rn-fetch-blob';
 import { apiChangeStatus, apiGet, apiGetJson, apiPatch, apiPostComment, apiPostImage } from '../../core/api';
+import { uploadCommentFile } from '../../core/fileHandle';
 import { saveCommentsOffline } from '../../modules/offlineWorkorderState';
 
 export const WORKORDER_STATUS_CHANGED = 'workOrderPreInsatllAction/WORKORDER_STATUS_CHANGED';
@@ -41,25 +42,7 @@ export function updateWorkOrderComment(id, comment, token) {
     const resPostText = await apiPostComment(`spectrum/activities/${id}/comments`, comment.text, token);
     const promises = comment.photos.map(async item => {
       try {
-        const res = await apiGet('aws-s3-presigned-urls', token);
-        await RNFetchBlob.fetch(
-          'PUT',
-          res.data.url,
-          {
-            'security-token': token,
-            'Content-Type': 'image/jpeg'
-          },
-          RNFetchBlob.wrap(decodeURI(item.replace('file://', '')))
-        );
-        const stats = await RNFetchBlob.fs.stat(decodeURI(item.replace('file://', '')));
-        const formData = new FormData();
-        formData.append('file_type', 'image/jpeg');
-        formData.append('name', stats.filename);
-        formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-        formData.append('size', stats.size);
-
-        const { data } = await apiPostImage(`activities/${id}/comments/${resPostText.data.id}/files`, formData, token);
-
+        const { data } = await uploadCommentFile(item, resPostText.data.id, id, token);
         return { ...data, local_path: item };
       } catch (e) {
         return false;
