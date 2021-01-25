@@ -9,6 +9,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 import setChangesInOffline from '../../../core/setChanges';
 import { Alert } from 'react-native';
 import { split } from 'lodash';
+import { uploadCommentFile } from '../../../core/fileHandle';
 export default compose(
   connect(
     state => ({
@@ -70,111 +71,43 @@ export default compose(
         await props.addPhoto([]);
         await props.setComment('');
       } else {
-        const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${(props.userRole == "installer" || props.userRole == "installer-sub") ? "installer":props.userRole}`;
-        await apiPostComment(`spectrum/activities/${props.activityId}/comments`, data, props.token)
-          .then(resPostText => {
-            let commentForOffline = { ...resPostText.data, files: [] };
+        const data = `text=${props.comment}&user_ids=%5B${props.accountId}%5D&channel=${
+          props.userRole == 'installer' || props.userRole == 'installer-sub' ? 'installer' : props.userRole
+        }`;
+        const resPostText = await apiPostComment(`spectrum/activities/${props.activityId}/comments`, data, props.token);
 
-            if (props.photos.length > 0 || props.photos.length) {
-              Promise.all(
-                props.photos.map(item => {
-                  let newFile = {
-                    app_id: 1,
-                    id: 0
-                  };
+        var photos=[]
+        if (props.photos.length > 0 || props.photos.length) {
+          photos= props.photos.map;
+        }
+        const promises = props.photos.map(async item => {
+   
+          try {
+            const { data } = await uploadCommentFile(item, resPostText.data.id, props.activityId, props.token); //
+            const hasOfflineData = props.offlineWorkOrder[props.activityId] !== undefined;
 
-                  apiGet('aws-s3-presigned-urls', props.token).then(res => {
-                    RNFetchBlob.fetch(
-                      'PUT',
-                      res.data.url,
-                      {
-                        'security-token': props.token,
-                        'Content-Type': 'image/jpeg'
-                      },
-                      RNFetchBlob.wrap(decodeURI(item.replace('file://', '')))
-                    )
-                      .then(() => {
-                        RNFetchBlob.fs.stat(decodeURI(item.replace('file://', ''))).then(stats => {
-                          const formData = new FormData();
-                          formData.append('file_type', 'image/jpeg');
-                          formData.append('name', stats.filename);
-                          formData.append('s3_location', res.data.file_name.replace('uploads/', ''));
-                          formData.append('size', stats.size);
-                          apiPostImage(`activities/${props.activityId}/comments/${resPostText.data.id}/files`, formData, props.token).then(postRes => {
-                            console.log(postRes);
-                            const hasOfflineData = props.offlineWorkOrder[props.activityId] !== undefined;
+            if (hasOfflineData) {
+              let fileObject = data;
+              const destination = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + fileObject.name;
+              console.log('src:' + item);
+              console.log('dst:' + destination);
 
-                            if (hasOfflineData) {
-                              let fileObject = postRes.data;
-                              const destination = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + fileObject.name;
-                              console.log('src:' + item);
-                              console.log('dst:' + destination);
-
-                              const path = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + fileObject.name;
-                              RNFetchBlob.config({
-                                path: path
-                              })
-                                .fetch('GET', fileObject.s3_location)
-                                .then(() => {
-                                  console.log(`comment file saved: ${path}`);
-                                  fileObject = { ...fileObject, s3_location: `file://${path}`, local_path: `file://${path}` };
-                                  commentForOffline.files.push(fileObject);
-                                });
-                            }
-                          });
-                        });
-                      })
-                      .catch(err => {
-                        console.log(err);
-                      });
-                  });
-                })
-              )
+              const path = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + fileObject.name;
+              RNFetchBlob.config({
+                path: path
+              })
+                .fetch('GET', fileObject.s3_location)
                 .then(() => {
-                  console.log('comment for off:');
-                  console.log(commentForOffline);
-                  props.saveCommentsOffline({ activityId: props.activityId, ...commentForOffline, users: [props.user] });
-                  const hasOfflineData = props.offlineWorkOrder[props.activityId] !== undefined;
-                  if (hasOfflineData) {
-                    // apiGetJson(
-                    //   `activities/${props.activityId}/comments?search={"fields":[{"operator":"equals","value":"${props.userRole}","field":"channel"}]}`,
-                    //   props.token
-                    // ).then(response => {
-                    //   console.log(response);
-                    //   response.data.map(async comment => {
-                    //     var commentFiles = [];
-                    //     if(comment.files != undefined && comment.files.length > 0)
-                    //     {
-                    //       await Promise.all(comment.files.map(async file => {
-                    //             const path = RNFetchBlob.fs.dirs.DocumentDir + '/Install Reports/comments_files/' + file.name;
-                    //             await RNFetchBlob.config({
-                    //               path: path
-                    //             })
-                    //             .fetch('GET',file.s3_location)
-                    //             .then(()=>{
-                    //               console.log(`comment file saved: ${path}`);
-                    //             });
-                    //             commentFiles.push({...file,local_path: `file://${path}`});
-                    //       }));
-                    //     }
-                    //     comment = {...comment,files: commentFiles};
-                    //     props.saveCommentsOffline({activityId:props.activityId, ...comment});
-                    //   });
-                    //   //props.setData(response.data.reverse());
-                    //   console.log('new comment appended:');
-                    //   console.log(response);
-                    // });
-                  }
-                })
-                .catch(e => {
-                  console.log(e);
+                  console.log(`comment file saved: ${path}`);
+                  fileObject = { ...fileObject, s3_location: `file://${path}`, local_path: `file://${path}` };
+                  commentForOffline.files.push(fileObject);
                 });
-              console.log('promise done');
-            } //if photos length
-
-            //fetch again to display new comment
-          })
-          .catch(err => {});
+            }
+          } catch (e) {
+            return false;
+          }
+        });
+        await Promise.all(promises);
         props.addPhoto([]);
         props.setComment('');
       }

@@ -32,7 +32,7 @@ export default class HttpErrorHandler {
 
     errorMessage.curl = error[1];
     errorMessage.statusText = error[0]?.statusText;
-    errorMessage.status = error[0]?.status;
+    errorMessage.status = error[0].status;
     errorMessage.action = error[2];
 
     return errorMessage;
