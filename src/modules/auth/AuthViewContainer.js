@@ -7,12 +7,13 @@ import { logout } from '../../core/api';
 import AuthView from './AuthView';
 import AsyncStorage from '@react-native-community/async-storage';
 import { setNewPath, state } from '../../core/mainEnv';
+import { setOrderList, setSearchResultList } from '../workOrder/WorkOrderState';
 
 export default compose(
   withState('password', 'setPassword', ''),
   withState('email', 'setEmail', ''),
   withState('apiPath', 'setApiPath', ''),
-  withState('cancleRendering','setCancleRendering',true),
+  withState('cancleRendering', 'setCancleRendering', true),
   connect(
     state => ({
       authState: state.app,
@@ -23,31 +24,35 @@ export default compose(
     dispatch => ({
       logIn: (selectedEndpoint) => dispatch(logIn(selectedEndpoint)),
       logOut: () => dispatch(logOut()),
-      setUserInfo: data => dispatch(setUserInfo(data))
+      setUserInfo: data => dispatch(setUserInfo(data)),
+      setSearchResultList: arr => dispatch(setSearchResultList(arr)),
+      setOrderList: arr => dispatch(setOrderList(arr)),
     })
   ),
   lifecycle({
     async componentWillMount() {
-        
-      
+
+
       const authData = JSON.parse(await AsyncStorage.getItem('savedAuthResponse'));
       const isLoggedOut = (await this.props.navigation.getParam('logOut', false));
-      
-      if(isLoggedOut){
+
+      if (isLoggedOut) {
         this.props.setCancleRendering = false;
+        this.props.setSearchResultList([]);
+        this.props.setOrderList([]);
         await this.props.logOut();
         //await AsyncStorage.removeItem('apipaths');
       }
 
-      if(this.props.authState.isLoggedIn){
-        await setNewPath(null,{key:this.props.selectedEndpoint.apiPath,value:this.props.selectedEndpoint.name});
+      if (this.props.authState.isLoggedIn) {
+        await setNewPath(null, { key: this.props.selectedEndpoint.apiPath, value: this.props.selectedEndpoint.name });
         await this.props.setUserInfo(authData);
         await this.props.navigation.navigate({ routeName: 'Home' });
       }
-      else{
+      else {
         this.props.setCancleRendering = false;
       }
-            
+
     },
 
   })

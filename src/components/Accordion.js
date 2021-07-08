@@ -121,17 +121,7 @@ export default compose(
                 await this.props.setData(filterItems);
               }
             }
-          } else if (this.props.title === 'Client') {
-            if (item[Object.keys(item)[0]] !== null) {
-              if (orderList.filter(order => order.accounts[0].name === item[Object.keys(item)[0]]).length > 0) {
-                await filterItems.push({
-                  columns: item,
-                  id: index
-                });
-                await this.props.setData(filterItems);
-              }
-            }
-          }
+          } 
         });
       } else {
         if (this.props.title == 'Location') {
@@ -171,18 +161,6 @@ export default compose(
             }
           });
           this.props.setData(projects);
-        }
-
-        if (this.props.title == 'Client') {
-          const clients = [];
-          Object.keys(this.props.offlineWorkOrders).forEach((key, index) => {
-            const client = this.props.offlineWorkOrders[key]?.accounts[0]?.name;
-            const clientIndex = clients.findIndex(data => data.columns?.accounts == client);
-            if (clientIndex == -1) {
-              clients.push({ columns: { client }, id: index });
-            }
-          });
-          this.props.setData(clients);
         }
       }
     }

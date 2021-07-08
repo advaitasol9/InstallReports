@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { compose, lifecycle, shallowEqual, withHandlers, withState } from 'recompose';
 import { apiGetActivities } from '../../core/api';
-import { setActivityId, setOrderList, setWorkOrdersFullCount } from './WorkOrderState';
+import { setActivityId, setOrderList, setWorkOrdersFullCount, setFilterData, setallWoList } from './WorkOrderState';
 import WorkOrderScreen from './WorkOrderView';
 
 export default compose(
@@ -17,6 +17,7 @@ export default compose(
     }),
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
+      setFilterData: arr => dispatch(setFilterData(arr)),
       setActivityId: id => dispatch(setActivityId(id)),
       setWorkOrdersFullCount: id => dispatch(setWorkOrdersFullCount(id))
     })
@@ -25,14 +26,14 @@ export default compose(
   withState('isLoaded', 'setLoaded', false),
   withHandlers({
     refreshList: props => async () => {
-      props.setOrderList([]);
+
       props.setLoaded(false);
       let list;
       let count;
 
       if (props.connectionStatus) {
         const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
-        const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=1&count=10' + statuses, props.token);
+        const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]' + statuses, props.token);
         list = data.data.data;
         count = data.appContentFullCount;
       } else {
@@ -60,7 +61,10 @@ export default compose(
         return true;
       });
 
-      props.setOrderList(workOrders);
+      props.setOrderList([]);
+      props.setFilterData([]);
+      props.setOrderList(workOrders.slice(0, 10));
+      props.setFilterData(workOrders);
       props.setWorkOrdersFullCount(count);
       props.setLoaded(true);
     }
