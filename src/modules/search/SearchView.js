@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
-import { FlatList, Image, Platform, StatusBar, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Platform, StatusBar, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { OrderListTile, SearchSideFilter } from '../../components';
 import { Text } from '../../components/StyledText';
+import { apiGetActivities } from '../../core/api';
 import { colors } from '../../styles';
 
 export default class WorkOrderScreen extends Component {
   constructor(props) {
     super(props);
-    this.page = 2;
+    this.page = 1;
     this.searchText = '';
+    this.state = {
+      isDataLoading: false
+    };
   }
 
   render() {
@@ -18,7 +22,7 @@ export default class WorkOrderScreen extends Component {
         <View style={styles.headerTop}>
           <View style={styles.headerInputContainer}>
             <TextInput
-              placeholder="Enter activity name"
+              placeholder="Search"
               defaultValue={this.props.searchText}
               onChangeText={text => this.props.setSearchText(text)}
               style={{
@@ -35,7 +39,9 @@ export default class WorkOrderScreen extends Component {
               style={{ height: 29, textAlignVertical: 'center' }}
               backgroundColor="#3b5998"
               iconStyle={{ marginLeft: 5 }}
-              onPress={() => this.props.search()}
+              onPress={() => {
+                this.props.search("type")
+              }}
             />
           </View>
         </View>
@@ -54,29 +60,73 @@ export default class WorkOrderScreen extends Component {
 
     const renderTile = (item, index) => <OrderListTile index={index} item={item} setActivityId={this.props.setActivityId} navigation={this.props.navigation} />;
 
+    const loadMoreWorkOrders = async () => {
+      if (this.props.searchResult.length < this.props.workOrdersFullCount && !this.state.isDataLoading) {
+        this.setState({
+          isDataLoading: true
+        });
+
+        const statuses = '&search={"fields":[{"operator": "is_in","value": ["assigned","in_progress"],"field": "status"}]}&sort_by=id&sort_order=asc';
+        const data = await apiGetActivities('spectrum/activities?with=["items","accounts"]&page=' + (this.page + 1) + '&count=50' + statuses, this.props.token);
+        const result = this.props.searchResult;
+
+        if (data.data.data.length > 0) {
+          await data.data.data.forEach(activity => {
+            result.push(activity);
+          });
+          this.page += 1;
+          this.props.setOrderList(result);
+          this.setState({
+            isDataLoading: false
+          });
+        }
+      }
+    };
+
+    const renderFooter = () => {
+      if (!this.state.isDataLoading) return null;
+
+      return (
+        <View
+          style={{
+            paddingVertical: 20
+          }}
+        >
+          <ActivityIndicator animating size="small" />
+        </View>
+      );
+    };
+
     return (
       <React.Fragment>
         <View style={styles.container}>
           <StatusBar backgroundColor={colors.lightGray} barStyle="dark-content" />
           {SearhHeader()}
-          {this.props.orderList === [] && this.props.connectionStatus ? (
+          {this.props.searchResult === [] && this.props.connectionStatus ? (
             <View style={styles.containerIndicator}>
               <Text>There is no connection</Text>
             </View>
           ) : (
-            <View style={{ flex: 1, width: '100%' }}>
-              {this.props.isLoaded === true ? (
-                <FlatList
-                  ListHeaderComponent={null}
-                  scrollEventThrottle={16}
-                  refreshing={false}
-                  data={this.props.searchResult}
-                  keyExtractor={(item, index) => {
-                    return index.toString();
-                  }}
-                  renderItem={({ item, index }) => renderTile(item, index)}
-                />
-              ) : (
+              <View style={{ flex: 1, width: '100%' }}>
+                {this.props.isLoaded === true ? (
+                  <FlatList
+                    ListHeaderComponent={null}
+                    scrollEventThrottle={16}
+                    refreshing={false}
+                    onRefresh={async () => {
+                      this.page = 1;
+                      this.props.search();
+                    }}
+                    data={this.props.searchResult}
+                    keyExtractor={(item, index) => {
+                      return index.toString();
+                    }}
+                    renderItem={({ item, index }) => renderTile(item, index)}
+                    onEndReached={loadMoreWorkOrders}
+                    onEndReachedThreshold={0.1}
+                    ListFooterComponent={renderFooter}
+                  />
+                ) : (
                 <Image style={{ height: '100%', width: '100%' }} source={require('../../../assets/images/loading.gif')} />
               )}
             </View>

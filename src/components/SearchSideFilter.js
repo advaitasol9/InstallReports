@@ -6,7 +6,7 @@ import { apiGetActivities } from '../core/api';
 import { colors, height, width } from '../styles';
 
 export default props => (
-  <Modal animationType="fade" transparent visible={props.filtersOpen}>
+  <Modal  transparent visible={props.filtersOpen}>
     <View style={[styles.sideFilterContainer, { width, height, backgroundColor: 'rgba(0,0,0,0.75)' }]}>
       <View
         style={{
@@ -31,7 +31,7 @@ export default props => (
             setFilters={props.setCitiesFilter}
             filter={props.citiesFilter}
             column="city&#34;, &#34;state"
-            orderList={props.orderList}
+            orderList={props.filterData}
             entity="activities"
           />
           <Accordion
@@ -39,18 +39,16 @@ export default props => (
             setFilters={props.setDatesFilter}
             filter={props.datesFilter}
             column="date_2"
-            orderList={props.orderList}
+            orderList={props.filterData}
             entity="activities"
           />
-          <Accordion title="Project" setFilters={props.setItemsFilter} filter={props.itemsFilter} column="name" entity="items" orderList={props.orderList} />
           <Accordion
-            title="Client"
-            setFilters={props.setClientsFilter}
-            filter={props.clientsFilter}
+            title="Project"
+            setFilters={props.setItemsFilter}
+            filter={props.itemsFilter}
             column="name"
-            orderList={props.orderList}
-            entity="accounts"
-          />
+            entity="items"
+            orderList={props.filterData} />
         </ScrollView>
       </View>
     </View>

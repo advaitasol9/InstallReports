@@ -69,7 +69,7 @@ export default compose(
       const arr=[];
       arr.push(this.props);
       arr.forEach((item) => {
-        if(this.props.filter==item.id){
+        if(this.props.filter===item.id){
           this.props.setChecked(true);
         }
       });

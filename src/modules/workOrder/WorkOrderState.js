@@ -1,6 +1,8 @@
 const initialState = {
   changesInOffline: [],
   orderList: [],
+  searchResultList: [],
+  filterData: [],
   activityId: null,
   itemId: null,
   workOrdersFullCount: null
@@ -8,6 +10,8 @@ const initialState = {
 
 export const SET_CHANGES = 'SET_CHANGES';
 export const SET_ORDER_LIST = 'ORDER_LIST';
+export const SET_SEARCH_RESULT_LIST = 'SEARCH_RESULT_LIST';
+export const SET_FILTER_DATA = 'FILTER_DATA';
 export const SET_ACTIVITY_ID = 'SET_ACTIVITY_ID';
 export const SET_ITEM_ID = 'SET_ITEM_ID';
 export const SET_WORK_ORDERS_FULL_COUNT = 'SET_WORK_ORDERS_FULL_COUNT';
@@ -22,6 +26,20 @@ export function setChanges(payload) {
 export function setOrderList(payload) {
   return {
     type: SET_ORDER_LIST,
+    payload
+  };
+}
+
+export function setSearchResultList(payload) {
+  return {
+    type: SET_SEARCH_RESULT_LIST,
+    payload
+  };
+}
+
+export function setFilterData(payload) {
+  return {
+    type: SET_FILTER_DATA,
     payload
   };
 }
@@ -58,6 +76,16 @@ export default function AppStateReducer(state = initialState, action) {
       return {
         ...state,
         orderList: action.payload
+      };
+    case SET_SEARCH_RESULT_LIST:
+      return {
+        ...state,
+        searchResultList: action.payload
+      };
+    case SET_FILTER_DATA:
+      return {
+        ...state,
+        filterData: action.payload
       };
     case SET_ACTIVITY_ID:
       return {
