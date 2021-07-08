@@ -223,7 +223,6 @@ export default class AuthScreen extends React.Component {
                       style={{ color: 'rgba(255, 255, 255, 0.0)' }}
                       dropdownOffset={{ top: 10, left: 0 }}
                       shadeOpacity={0.12}
-                      value="Production"
                       onChangeText={text => {
                         const selectedItem = this.state.env.filter(answer => answer.value == text)[0];
                         setNewPath(null, selectedItem);
