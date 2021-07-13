@@ -26,9 +26,7 @@ export const screenHeight = height;
 export const screenWidth = width;
 
 const options = {
-  quality: 1.0,
-  maxWidth: 500,
-  maxHeight: 500,
+  quality: 0.5,
   storageOptions: {
     skipBackup: true
   }
