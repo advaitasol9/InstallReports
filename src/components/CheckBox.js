@@ -66,10 +66,11 @@ export default compose(
   withState('checked', 'setChecked', false),
   lifecycle({
     componentDidMount() {
-      const arr=[];
+      const arr = [];
       arr.push(this.props);
       arr.forEach((item) => {
-        if(this.props.filter===item.id){
+        const itemArray = this.props.filter;
+        if (itemArray.includes(String(item.id))) {
           this.props.setChecked(true);
         }
       });

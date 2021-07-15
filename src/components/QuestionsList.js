@@ -227,7 +227,7 @@ const QuestionsList = props => {
         <Dropdown
           label="Сhoose option"
           data={data}
-          value={item.answers == undefined ? '' : item.answers}
+          value={item.answers == undefined ? '' : item.values[item.answers]}
           onChangeText={text => {
             const selectedItem = data.filter(answer => answer.value == text)[0];
             item.answers = selectedItem.key;
