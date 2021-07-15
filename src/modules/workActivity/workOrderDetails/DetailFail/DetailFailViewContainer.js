@@ -86,7 +86,7 @@ export default compose(
     saveFailedDetails: props => async () => {
       props.setIsSubmitLoading(true);
       try {
-        const data = `text=${props.comment}&user_id=%5B${props.accountId}%5D&channel=${(props.userRole == "installer" || props.userRole == "installer-sub") ? "installer":props.userRole}`;
+        const data = `text=FAILED ATTEMPT NOTES - ${props.comment}&user_id=%5B${props.accountId}%5D&channel=${(props.userRole == "installer" || props.userRole == "installer-sub") ? "installer":props.userRole}`;
         if (!props.connectionStatus) {
           const changes = [
             {
