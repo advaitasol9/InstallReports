@@ -154,6 +154,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-signature-capture')
     implementation project(':react-native-fs')
     implementation project(':@react-native-community_async-storage')
     implementation 'com.facebook.fresco:fresco:1.10.0'
@@ -163,7 +164,6 @@ dependencies {
     implementation project(':@react-native-community_geolocation')
     def paging_version = "2.1.0-beta01"
     implementation project(':react-native-image-picker')
-    implementation project(':@terrylinla_react-native-sketch-canvas')
     implementation project(':react-native-pdf')
     implementation project(':rn-fetch-blob')
     implementation project(':@react-native-community_netinfo')

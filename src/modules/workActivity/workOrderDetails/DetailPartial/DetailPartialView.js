@@ -3,7 +3,6 @@ import React, { useRef, useEffect, Component } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Dimensions, Image, Alert, StatusBar } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import IO from 'react-native-vector-icons/Ionicons';
-import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
 
 import { colors } from '../../../../styles';
 import { Button, PartialModal, Header } from '../../../../components';
@@ -178,7 +177,7 @@ export default class DetailPartialView extends Component {
             <Required />
             <View style={styles.photoSection}>{this.props.photos.map((photo, index) => renderPhoto(photo, index))}</View>
             <Text style={{ fontSize: 16, marginTop: 16 }}>Manager on Duty Signature:</Text>
-            <RNSketchCanvas
+            {/* <RNSketchCanvas
               ref={ref => (this.canvas = ref)}
               containerStyle={[
                 {
@@ -210,7 +209,7 @@ export default class DetailPartialView extends Component {
               onStrokeEnd={path => {
                 this.canvas.save();
               }}
-            />
+            /> */}
             <Required />
             <TextInput placeholder="Enter name..." style={styles.inputStyle} onChangeText={text => this.props.setName(text)} value={this.props.name} />
             <Required />
