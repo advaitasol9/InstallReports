@@ -4,13 +4,13 @@ import android.app.Application;
 
 import com.reactnativecommunity.cameraroll.CameraRollPackage;
 import com.facebook.react.ReactApplication;
+import com.rssignaturecapture.RSSignatureCapturePackage;
 import com.rnfs.RNFSPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.github.reactnativecommunity.location.RNLocationPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.imagepicker.ImagePickerPackage;
-import com.terrylinla.rnsketchcanvas.SketchCanvasPackage;
 import org.wonday.pdf.RCTPdfView;
 import com.RNFetchBlob.RNFetchBlobPackage;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
@@ -38,13 +38,13 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RSSignatureCapturePackage(),
             new RNFSPackage(),
             new AsyncStoragePackage(),
             new RNCameraPackage(),
             new RNLocationPackage(),
             new GeolocationPackage(),
             new ImagePickerPackage(),
-            new SketchCanvasPackage(),
             new RCTPdfView(),
             new RNFetchBlobPackage(),
             new NetInfoPackage(),

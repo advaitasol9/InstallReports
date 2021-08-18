@@ -1,5 +1,5 @@
-import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
-import React from 'react';
+
+import React, { createRef } from 'react';
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import { Dropdown } from 'react-native-material-dropdown';
@@ -12,7 +12,9 @@ import CheckBox from './CheckBox';
 import CameraRoll from '@react-native-community/cameraroll';
 import { Platform } from 'react-native';
 import { PermissionsAndroid } from 'react-native';
-
+import SignatureCapture from 'react-native-signature-capture';
+import { TouchableHighlight } from 'react-native-gesture-handler';
+const sign = createRef();
 const options = {
   quality: 0.5,
   storageOptions: {
@@ -242,13 +244,11 @@ const QuestionsList = props => {
       </View>
     );
   };
-
-  const onSave = async (success, path) => {
-    if (!success) return;
-    let imageUri;
-
-    try {
-      if (path == null) {
+  
+  _onSaveEvent= async (result) => {
+      console.log(result);
+     try {
+      if (result.pathName == null) {
         const images = await CameraRoll.getPhotos({ first: 1 });
         if (images.length > 0) {
           imageUri = [0].image.uri;
@@ -257,15 +257,23 @@ const QuestionsList = props => {
           return;
         }
       } else {
-        imageUri = path;
+        imageUri = result.pathName;
       }
     } catch (e) {
       console.log(e.message);
     }
-
-    props.setSignature([imageUri]);
-    props.updateAnswers();
-  };
+    setTimeout(() => {
+      props.setSignature([imageUri]);
+      props.updateAnswers();
+    }, 1000);
+  }
+  
+  _onDragEvent= async () => {
+    setTimeout(() => {
+      props.setSignature([]);
+      props.updateAnswers();
+    }, 1000);
+  }
 
   const renderSignature = (item, images) => {
     const signature = [];
@@ -274,7 +282,21 @@ const QuestionsList = props => {
         <Text style={{ marginTop: 12, paddingBottom: 12 }}>
           {item.order}. {item.text}
         </Text>
-        <RNSketchCanvas
+
+        <SignatureCapture
+          style={[{flex:1},styles.signature]}
+          ref={sign}
+          onSaveEvent={this._onSaveEvent}
+          onDragEvent={this._onDragEvent}
+          saveImageFileInExtStorage={true}
+          showNativeButtons={true}
+          showTitleLabel={false}
+          strokeColor="#000000"
+          minStrokeWidth={4}
+          maxStrokeWidth={4}
+          viewMode={"portrait"}/>
+        {
+        /* <RNSketchCanvas
           ref={ref => (this.canvas = ref)}
           containerStyle={[
             {
@@ -315,7 +337,7 @@ const QuestionsList = props => {
               props.updateAnswers();
             }, 500);
           }}
-        />
+        /> */}
         {item.allow_photos && renderAddPhotoButton(item.order)}
         {item.allow_photos && <View style={styles.photoSection}>{props.photos.map((photo, index) => renderPhoto(photo, index, item.order))}</View>}
         {/* {(
@@ -392,6 +414,17 @@ export default compose(
 )(QuestionsList);
 
 const styles = StyleSheet.create({
+  signature: {
+    height:200,
+      flex: 1,
+      borderColor: '#000033',
+      borderWidth: 1,
+  },
+  buttonStyle: {
+      flex: 1, justifyContent: "center", alignItems: "center", height: 50,
+      backgroundColor: "#eeeeee",
+      margin: 10
+  },
   inputStyle: {
     backgroundColor: colors.white,
     color: colors.black,
