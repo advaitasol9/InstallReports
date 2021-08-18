@@ -10,6 +10,7 @@ import ImageView from 'react-native-image-view';
 import { PermissionsAndroid } from 'react-native';
 
 import docxType from '../../../../assets/images/docx.png';
+import CommentImageView from '../../../components/CommentImageView';
 
 export default class WorkOrderDocsView extends Component {
   constructor(props) {
@@ -45,27 +46,16 @@ export default class WorkOrderDocsView extends Component {
         </View>
       );
     }
-
+  
     if (this.props.imageModal) {
-      const images = [
-        {
-          source: {
-            uri: this.props.imageURL
-          },
-          width: 806,
-          height: 720
-        }
-      ];
       return (
-        <ImageView
-          images={images}
-          imageIndex={0}
-          isVisible={this.state.isImageViewVisible}
-          onClose={() => {
-            this.setState({ isImageViewVisible: false });
-            this.props.setImageModal(!this.props.imageModal);
-          }}
-        />
+        <CommentImageView
+        imageURL={this.props.imageURL}
+        callback={() => {
+          this.setState({ isImageViewVisible: false });
+          this.props.setImageModal(!this.props.imageModal);
+        }}
+      ></CommentImageView>
       );
     }
     return (
