@@ -1,5 +1,4 @@
-// @flow
-import RNSketchCanvas from '@terrylinla/react-native-sketch-canvas';
+
 import React, { Component } from 'react';
 import { Dimensions, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import IO from 'react-native-vector-icons/Ionicons';
@@ -94,7 +93,7 @@ export default class DetailFailedView extends Component {
             <Required />
             <View style={styles.photoSection}>{this.props.photos.map((photo, index) => renderPhoto(photo, index))}</View>
             <Text style={{ fontSize: 16, marginTop: 16 }}>Manager on Duty Signature:</Text>
-            <RNSketchCanvas
+            {/* <RNSketchCanvas
               ref={ref => (this.canvas = ref)}
               containerStyle={[
                 {
@@ -126,7 +125,7 @@ export default class DetailFailedView extends Component {
               onStrokeEnd={path => {
                 this.canvas.save();
               }}
-            />
+            /> */}
             <TextInput placeholder="Enter name..." style={styles.inputStyle} onChangeText={text => this.props.setName(text)} value={this.props.name} />
             <View style={styles.buttonRow}>
               <Button
