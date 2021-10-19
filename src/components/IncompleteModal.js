@@ -30,6 +30,7 @@ const ManagerModal = props => (
             onPress={() => {
               props.setModalVisible(false);
               props.navigation.navigate('Questions');
+              props.close();
             }}
             textColor={colors.white}
             caption="OK"

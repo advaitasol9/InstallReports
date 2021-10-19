@@ -2,7 +2,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
-import IO from 'react-native-vector-icons/Ionicons';
+import IO from 'react-native-vector-icons/FontAwesome';
 import { ActivityInfoSection, ActivityStatus, ActivityTitle, Button, Header } from '../../../components';
 import CommentImageView from '../../../components/CommentImageView';
 import { colors } from '../../../styles';
@@ -33,8 +33,8 @@ export default function WorkOrderCommentView(props) {
             props.addPhoto(photosCopy);
           }}
         >
-          <View style={styles.whiteBackground} />
-          <IO style={styles.delIcon} name="md-close-circle" />
+          {/* <View style={styles.whiteBackground} /> */}
+          <IO name="times-circle" color={colors.red} size={40} />
         </TouchableOpacity>
         <Image source={{ uri: photo }} style={styles.photoBlock} />
       </View>
@@ -118,27 +118,27 @@ export default function WorkOrderCommentView(props) {
                             if (!response.didCancel) {
                               photos.push(response.uri);
                               props.addPhoto(photos);
-                                
-                                //save to cameraRoll
-                                let permission = false;
-                                if (Platform.OS == 'android') {
-                                  permission = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
-                                }
 
-                                 if (Platform.OS !== 'android' || permission) {
-                                    try{
-                                        
-                                        CameraRoll.save(response.uri, { album: 'Install Reports' }).then(()=>{
-                                            console.log('photo saved to album');
-                                        }).catch((e)=>{
-                                            console.log(e);
-                                        });
-                                    }
-                                    catch(e){
-                                        console.log(e);
-                                    }
-                                 }
-                                
+                              //save to cameraRoll
+                              let permission = false;
+                              if (Platform.OS == 'android') {
+                                permission = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+                              }
+
+                              if (Platform.OS !== 'android' || permission) {
+                                try {
+                                  CameraRoll.save(response.uri, { album: 'Install Reports' })
+                                    .then(() => {
+                                      console.log('photo saved to album');
+                                    })
+                                    .catch(e => {
+                                      console.log(e);
+                                    });
+                                } catch (e) {
+                                  console.log(e);
+                                }
+                              }
+
                               props.setNumOfChanges(props.numOfChanges);
                             }
                           });

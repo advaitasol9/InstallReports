@@ -26,7 +26,6 @@ export default compose(
   withState('isLoaded', 'setLoaded', false),
   withHandlers({
     refreshList: props => async () => {
-
       props.setLoaded(false);
       let list;
       let count;

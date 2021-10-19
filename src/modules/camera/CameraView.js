@@ -107,19 +107,19 @@ export function Camera(props) {
                 permission = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
               }
 
-               if (Platform.OS !== 'android' || permission) {
-                  try{
-                      
-                      CameraRoll.save(props.photoUri, { album: 'Install Reports' }).then(()=>{
-                          console.log('success');
-                      }).catch((e)=>{
-                          console.log(e);
-                      });
-                  }
-                  catch(e){
+              if (Platform.OS !== 'android' || permission) {
+                try {
+                  CameraRoll.save(props.photoUri, { album: 'Install Reports' })
+                    .then(() => {
+                      console.log('success');
+                    })
+                    .catch(e => {
                       console.log(e);
-                  }
-               }
+                    });
+                } catch (e) {
+                  console.log(e);
+                }
+              }
 
               const { photos } = props;
               if (props.backRoute === 'Manager' || props.backRoute === 'Questions') {
@@ -130,11 +130,17 @@ export function Camera(props) {
               } else {
                 photos.push(props.photoUri);
               }
-        console.log('closing this');
-        await props.navigation.state.params.addPhoto(photos);
-            props.setPhotoModal(false);
-        props.navigation.navigate(props.backRoute, { screenData: props.navigation.state.params.screenData });
-              
+              console.log('closing this');
+              await props.navigation.state.params.addPhoto(photos);
+
+              if (props.backRoute === 'Manager' || props.backRoute === 'Questions') {
+                const { update, setUpdate, updateAnswers } = props.navigation.state.params;
+                setUpdate(!update);
+                updateAnswers();
+              }
+
+              props.setPhotoModal(false);
+              props.navigation.navigate(props.backRoute, { screenData: props.navigation.state.params.screenData });
             }}
           >
             <Text

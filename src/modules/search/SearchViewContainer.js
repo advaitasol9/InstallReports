@@ -37,9 +37,17 @@ const getFilterChanges = async (props, type) => {
 
   if (type) {
     if (props.searchText) {
-      searchParams.fields = [{ operator: 'is_in', value: ['assigned', 'in_progress'], field: 'status' }],
-        searchParams.keyword = props.searchText;
-      searchParams.search_keyword_in = ['items.name', 'accounts.name', 'activities.id', 'activities.address_1', 'activities.city', 'activities.state', 'activities.date_2', 'store'];
+      (searchParams.fields = [{ operator: 'is_in', value: ['assigned', 'in_progress'], field: 'status' }]), (searchParams.keyword = props.searchText);
+      searchParams.search_keyword_in = [
+        'items.name',
+        'accounts.name',
+        'activities.id',
+        'activities.address_1',
+        'activities.city',
+        'activities.state',
+        'activities.date_2',
+        'store'
+      ];
     }
   } else {
     if (props.datesFilter.length > 0) {
@@ -53,7 +61,7 @@ const getFilterChanges = async (props, type) => {
     }
   }
   return searchParams;
-}
+};
 
 export default compose(
   connect(
@@ -65,7 +73,7 @@ export default compose(
       workOrdersFullCount: state.workOrder.workOrdersFullCount,
       offlineChanges: state.offlineWorkOrder.workOrderChanges,
       searchResultData: state.workOrder.searchResultList,
-      filterData: state.workOrder.filterData,
+      filterData: state.workOrder.filterData
     }),
     dispatch => ({
       setOrderList: arr => dispatch(setOrderList(arr)),
@@ -82,19 +90,24 @@ export default compose(
   withState('clientsFilter', 'setClientsFilter', []),
   withState('isLoaded', 'setIsLoaded', true),
   withHandlers({
-    search: props => async (type) => {
+    search: props => async type => {
       props.setIsLoaded(false);
       let count;
       if (props.connectionStatus) {
         searchParams = await getFilterChanges(props, type);
         var res;
         if (searchParams.fields.length > 1 || props.datesFilter.length > 0 || props.searchText) {
-          res = await apiGetActivities('spectrum/activities?with=["items","accounts"]&sort_by=id&page=1&count=50&sort_order=asc&search=' + JSON.stringify(searchParams), props.token)
+          res = await apiGetActivities(
+            'spectrum/activities?with=["items","accounts"]&sort_by=id&page=1&count=50&sort_order=asc&search=' + JSON.stringify(searchParams),
+            props.token
+          );
         }
 
         if (res != undefined) {
           if (res.data.data.length > 50) {
-            Alert.alert(res.data.data.length + ' results found.', 'Only the first 50 results have been displayed. Please refine your search.', [{ text: 'Ok' }]);
+            Alert.alert(res.data.data.length + ' results found.', 'Only the first 50 results have been displayed. Please refine your search.', [
+              { text: 'Ok' }
+            ]);
           }
           count = res.appContentFullCount;
           let searchResults = [];
@@ -105,7 +118,7 @@ export default compose(
             }
           });
           props.setSearchResult(searchResults);
-          props.setSearchResultList(searchResults)
+          props.setSearchResultList(searchResults);
           props.setIsLoaded(true);
           props.setItemsFilter([]);
           props.setCitiesFilter([]);
@@ -211,7 +224,7 @@ export default compose(
       await props.setSearchText('');
       props.setFiltersOpen(false);
       props.setSearchResultList([]);
-      props.setSearchResult([])
+      props.setSearchResult([]);
     },
     clearCheckItemInFilter: props => async () => {
       await props.setItemsFilter([]);
@@ -233,10 +246,11 @@ export default compose(
       // });
       if (this.props.searchResultData && this.props.searchResultData.length > 0) {
         this.props.setSearchResult(this.props.searchResultData);
-        this.props.setSearchResultList(this.props.searchResultData)
+        this.props.setSearchResultList(this.props.searchResultData);
         this.props.setIsLoaded(true);
       }
     },
+
     componentWillUnmount() {
       // this._unsubscribe.remove();
       this.props.setSearchText('');

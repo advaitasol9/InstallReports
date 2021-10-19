@@ -9,19 +9,20 @@ import { auth, getEnv } from '../../core/api';
 import { setNewPath, state } from '../../core/mainEnv';
 import { colors, fonts } from '../../styles';
 export default class AuthScreen extends React.Component {
-    
-  state = {...state,anim: new Animated.Value(0),
+  state = {
+    ...state,
+    anim: new Animated.Value(0),
     // Current visible form
     isKeyboardVisible: false,
     dropdownVisible: false,
-    env: []};
+    env: []
+  };
   constructor() {
     super();
     let versionString = version;
     versionString = versionString.match(/^\d+\.\d+/g);
     const formattedVersion = versionString.length > 0 ? versionString[0] : '0.0';
     this.state = { ...this.state, version: formattedVersion };
-    
   }
 
   componentWillMount() {
@@ -39,7 +40,7 @@ export default class AuthScreen extends React.Component {
           Object.keys(endpoints).forEach(key => {
             data.push({ key: endpoints[key].end_point_url, value: endpoints[key].name });
           });
-          
+
           this.setState({ env: data });
         } else {
           if (state.apiPath == '') {
@@ -47,7 +48,9 @@ export default class AuthScreen extends React.Component {
           }
         }
       })
-      .catch(err => {console.log(err)});
+      .catch(err => {
+        console.log(err);
+      });
 
     this.keyboardDidShowListener = Keyboard.addListener(
       Platform.select({ android: 'keyboardDidShow', ios: 'keyboardWillShow' }),
@@ -66,7 +69,6 @@ export default class AuthScreen extends React.Component {
   componentWillUnmount() {
     this.keyboardDidShowListener.remove();
     this.keyboardDidHideListener.remove();
-    
   }
 
   setFormData(password, email) {
@@ -104,12 +106,12 @@ export default class AuthScreen extends React.Component {
   };
 
   storeSelectedAPI = async selectedAPI => {
-    await AsyncStorage.setItem('selectedEndpoint',JSON.stringify(selectedAPI));
-  }
+    await AsyncStorage.setItem('selectedEndpoint', JSON.stringify(selectedAPI));
+  };
 
   storeAuthResponse = async response => {
-    await AsyncStorage.setItem('savedAuthResponse',JSON.stringify(response));
-  }
+    await AsyncStorage.setItem('savedAuthResponse', JSON.stringify(response));
+  };
 
   fadeIn(delay, from = 0) {
     const { anim } = this.state;
@@ -142,8 +144,7 @@ export default class AuthScreen extends React.Component {
   }
 
   render() {
-
-    if(!this.props.authState.isLoggedIn){
+    if (!this.props.authState.isLoggedIn) {
       return (
         <View style={styles.backgroundImage}>
           <View style={styles.container}>
@@ -165,7 +166,7 @@ export default class AuthScreen extends React.Component {
                 source={require('../../../assets/images/logo-white.png')}
               />
             </View>
-  
+
             <Animated.View style={[styles.section, styles.middle, this.fadeIn(700, -20)]}>
               <TextInput
                 placeholder="Email"
@@ -194,7 +195,7 @@ export default class AuthScreen extends React.Component {
                     this.setFormData(this.props.password, this.props.email);
                   }}
                 />
-  
+
                 {!this.state.isKeyboardVisible && (
                   <TouchableOpacity
                     onPress={() => {
@@ -234,6 +235,7 @@ export default class AuthScreen extends React.Component {
                 {!this.state.isKeyboardVisible && (
                   <TouchableOpacity
                     onPress={() => {
+                      console.log('hey');
                       this.dropDownRef.focus();
                     }}
                     style={{ paddingTop: 30, flexDirection: 'row' }}
@@ -256,7 +258,7 @@ export default class AuthScreen extends React.Component {
           </View>
         </View>
       );
-    }else{
+    } else {
       return null;
     }
   }

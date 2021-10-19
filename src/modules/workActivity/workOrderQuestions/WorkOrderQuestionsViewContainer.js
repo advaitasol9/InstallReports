@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, AsyncStorage, AppState } from 'react-native';
 import { connect } from 'react-redux';
 import { compose, lifecycle, withHandlers, withState } from 'recompose';
 import { apiGet, apiGetJson } from '../../../core/api';
@@ -39,42 +39,129 @@ export default compose(
   withState('isUpdateLoading', 'setIsUpdateLoading', false),
   withState('isSubmitLoading', 'setIsSubmitLoading', false),
   withState('isSubmitBtnDisabled', 'setIsSubmitBtnDisabled', false),
+  withState('woAnswersDraftSaved', 'setWOAnswersDraftSaved', false),
+  withState('isFormUpdated', 'setIsFormUpdated', false),
   withHandlers({
-    validateAnswers: props => () => {
+    validateAnswers: props => calledFromInitWo => {
       const installerQuestions = props.activityData.installer_questions_answers;
       if (!installerQuestions?.length) {
+        console.log('a');
         return;
+      }
+      if (!calledFromInitWo) {
+        props.setIsFormUpdated(true);
       }
 
       for (let i = 0; i < installerQuestions.length; i++) {
         const question = installerQuestions[i];
         if (!question.required) {
+          console.log(question.order, 'b');
           continue;
         }
 
         if (question.type == 'signature' && !props.signature.length && !question.answers) {
+          console.log(question.order, 'c');
+
           props.setIsSubmitBtnDisabled(true);
           return;
         }
         const noNewPhotos = !props.photos.find(p => p.order == question.order);
         const noExistingPhotos = !props.activityData.installer_questions_photos.find(p => p.question_order_id == question.order)?.data?.length;
         if (question.allow_photos && noNewPhotos && noExistingPhotos) {
+          console.log(question.order, 'd');
+
           props.setIsSubmitBtnDisabled(true);
           return;
         }
 
         if (question.type == 'photo' && noNewPhotos && noExistingPhotos) {
+          console.log(question.order, 'e');
+
           props.setIsSubmitBtnDisabled(true);
           return;
         }
 
         if (['checklist', 'freeform', 'dropdown'].includes(question.type) && !question.answers?.length) {
+          console.log(question.order, 'f');
+
           props.setIsSubmitBtnDisabled(true);
           return;
         }
       }
+      console.log('g');
 
       props.setIsSubmitBtnDisabled(false);
+    },
+    clearWorkOrderAnswersDraft: props => async () => {
+      const workOrderAnswersDraft = JSON.stringify({
+        installer_questions_answers: null,
+        questionsPhotos: null,
+        questionsPhotosToDelete: null
+      });
+      console.log('workorder on Blur', workOrderAnswersDraft);
+      try {
+        const existingWorkOrderDraft = await AsyncStorage.getItem(JSON.stringify(props.activityId));
+        if (existingWorkOrderDraft) {
+          AsyncStorage.mergeItem(JSON.stringify(props.activityId), workOrderAnswersDraft, err => {
+            console.log('written to storage successfully');
+            if (!err) {
+              console.log('photos cleared');
+              props.addPhoto([]);
+              props.setWOAnswersDraftSaved(true);
+              props.setIsFormUpdated(false);
+            }
+          });
+        } else {
+          AsyncStorage.setItem(JSON.stringify(props.activityId), workOrderAnswersDraft, err => {
+            console.log('written to storage successfully');
+            if (!err) {
+              console.log('photos cleared');
+              props.addPhoto([]);
+              props.setWOAnswersDraftSaved(true);
+              props.setIsFormUpdated(false);
+            }
+          });
+        }
+      } catch (error) {
+        console.log('error while saving installer answers draft', error);
+      }
+    },
+    saveWorkOrderAnswersDraft: props => async () => {
+      if (!props.isFormUpdated) {
+        return;
+      }
+      const workOrderAnswersDraft = JSON.stringify({
+        installer_questions_answers: props.activityData.installer_questions_answers,
+        questionsPhotos: props.photos,
+        questionsPhotosToDelete: props.photosToDelete
+      });
+      console.log('workorder on Blur', workOrderAnswersDraft);
+      try {
+        const existingWorkOrderDraft = await AsyncStorage.getItem(JSON.stringify(props.activityId));
+        if (existingWorkOrderDraft) {
+          AsyncStorage.mergeItem(JSON.stringify(props.activityId), workOrderAnswersDraft, err => {
+            console.log('written to storage successfully');
+            if (!err) {
+              console.log('photos cleared');
+              props.addPhoto([]);
+              props.setWOAnswersDraftSaved(true);
+              props.setIsFormUpdated(false);
+            }
+          });
+        } else {
+          AsyncStorage.setItem(JSON.stringify(props.activityId), workOrderAnswersDraft, err => {
+            console.log('written to storage successfully');
+            if (!err) {
+              console.log('photos cleared');
+              props.addPhoto([]);
+              props.setWOAnswersDraftSaved(true);
+              props.setIsFormUpdated(false);
+            }
+          });
+        }
+      } catch (error) {
+        console.log('error while saving manager asnwers draft', error);
+      }
     }
   }),
   withHandlers({
@@ -122,6 +209,7 @@ export default compose(
 
         props.setIsSubmitLoading(false);
         props.setSignature([]);
+        props.clearWorkOrderAnswersDraft();
         Alert.alert('Success', 'Your answer(s) have been received.', [{ text: 'Ok' }]);
       } catch (e) {
         console.log(e);
@@ -170,12 +258,66 @@ export default compose(
       let workOrder;
       let preInstallCompleted = false;
 
+      const workOrderAnswersDraft = await AsyncStorage.getItem(JSON.stringify(props.activityId), err => {
+        console.log('error while fetching draft ', err);
+      });
+      console.log('current wooorkorder', workOrderAnswersDraft);
+
       if (props.connectionStatus) {
         const response = await apiGetJson(`activities/${props.activityId}?with=["items"]`, props.token);
         workOrder = response.data;
       } else {
         workOrder = props.offlineWorkOrders[props.activityId];
       }
+
+      if (workOrderAnswersDraft !== null) {
+        console.log('pass');
+        const workOrderObj = JSON.parse(workOrderAnswersDraft);
+        if (workOrderObj?.installer_questions_answers) {
+          if (workOrderObj?.questionsPhotosToDelete?.length > 0) {
+            const answers = workOrderObj.installer_questions_answers.map(question => {
+              if (question.type == 'photo') {
+                workOrderObj.questionsPhotosToDelete.forEach(photo => {
+                  const index = question.answers.indexOf(photo);
+                  if (index != -1) {
+                    question.answers.splice(index, 1);
+                  }
+                });
+              } else if (question.allow_photos) {
+                workOrderObj.questionsPhotosToDelete.forEach(photo => {
+                  const index = question.photo.indexOf(photo);
+                  if (index != -1) {
+                    question.photo.splice(index, 1);
+                  }
+                });
+              }
+              return question;
+            });
+            props.setPhotosToDelete([]);
+            workOrder.installer_questions_answers = JSON.stringify(answers);
+          } else {
+            workOrder.installer_questions_answers = JSON.stringify(workOrderObj.installer_questions_answers);
+          }
+        }
+        if (workOrderObj?.questionsPhotos) {
+          if (props.photos.length != 0) {
+            console.log('photos present');
+            const tempPhotos = [];
+            workOrderObj.questionsPhotos.forEach(photo => {
+              const alreadyPresent = props.photos.find(propPhoto => propPhoto.uri === photo.uri) !== undefined ? true : false;
+              if (!alreadyPresent) {
+                tempPhotos.push(photo);
+              }
+            });
+            props.addPhoto([...props.photos, ...tempPhotos]);
+          } else {
+            console.log('no photos');
+            props.addPhoto(workOrderObj.questionsPhotos);
+          }
+        }
+      }
+
+      console.log('after workorder', workOrder);
 
       if (!workOrder) {
         props.setActivityData(workOrder);
@@ -187,6 +329,8 @@ export default compose(
       }
 
       let installerQuestions = JSON.parse(workOrder.installer_questions_answers) ?? [];
+
+      console.log('installerQuestion', installerQuestions);
 
       let installerPhotoIds = [];
       let installerAnswersPhotos = [];
@@ -293,6 +437,7 @@ export default compose(
       });
 
       if (props.connectionStatus && installerPhotoIds.length) {
+        console.log('installerPhotoIds', installerPhotoIds);
         const res = await apiGet(`files?search={"id":[` + installerPhotoIds + `]}`, props.token);
         if (res.data) {
           installerAnswersPhotos.map(questions => {
@@ -326,19 +471,38 @@ export default compose(
         installer_questions_photos: installerAnswersPhotos
       });
 
-      props.validateAnswers();
+      props.validateAnswers(true);
       props.setIsLoading(false);
     }
   }),
   lifecycle({
     async componentWillMount() {
       this._unsubscribe = this.props.navigation.addListener('didFocus', async e => {
-        this.props.addPhoto([]);
+        // this.props.addPhoto([]);
         await this.props.initWOQuestions();
+      });
+      this._blurUnsub = this.props.navigation.addListener('willBlur', async e => {
+        this.props.saveWorkOrderAnswersDraft();
+      });
+    },
+    componentDidMount() {
+      console.log('activityId', this.props.activityId);
+      this._appStateListener = AppState.addEventListener('change', nextState => {
+        if (nextState !== 'active') {
+          this.props.saveWorkOrderAnswersDraft();
+        } else if (nextState === 'active') {
+          this.props.initWOQuestions();
+        }
       });
     },
     componentWillUnmount() {
+      this.props.clearPhotos();
+      if (!this.props.workOrderAnswersDraftSaved) {
+        this.props.saveWorkOrderAnswersDraft();
+      }
       this._unsubscribe.remove();
+      this._blurUnsub.remove();
+      // this._appStateListener.remove();
     }
   })
 )(WorkOrderQuestionsView);

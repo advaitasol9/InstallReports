@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, View, Text } from 'react-native';
 import { ActivityInfoSection, ActivityStatus, ActivityTitle, Button, Header, QuestionsList } from '../../../components';
 import NoOfflineWOMessage from '../../../components/NoOfflineWOMessage';
 import { colors } from '../../../styles';
@@ -29,6 +29,7 @@ export default class WorkOrderQuestionsView extends Component {
           <ActivityStatus status={this.props.activityData.status} />
           <View style={{ width: '100%', height: 24, backgroundColor: colors.white }} />
           <ActivityTitle title="Installer Questions" />
+          {/* <Text onPress={this.props.clearWorkOrderAnswersDraft}>Clear Unsaved Changes</Text> */}
           <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
             <View style={styles.scrollContainer}>
               <QuestionsList
@@ -44,7 +45,7 @@ export default class WorkOrderQuestionsView extends Component {
                 setSignature={this.props.setSignature}
               />
               <View style={{ marginTop: 24 }}>
-                <Button
+                {/* <Button
                   textColor={colors.white}
                   textStyle={{ fontSize: 20 }}
                   caption="Update"
@@ -53,7 +54,7 @@ export default class WorkOrderQuestionsView extends Component {
                   onPress={async () => {
                     this.props.updateQuestionAnswers();
                   }}
-                />
+                /> */}
                 <Button
                   style={{ marginTop: 15 }}
                   onPress={() => this.props.submitQuestionAnswers()}

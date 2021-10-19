@@ -17,7 +17,7 @@ import {
   View
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
-import IO from 'react-native-vector-icons/Ionicons';
+import IO from 'react-native-vector-icons/FontAwesome';
 import { Button, Header } from '../../../../components';
 import { colors } from '../../../../styles';
 
@@ -108,8 +108,8 @@ export default class DetailPartialView extends Component {
               this.props.addPhoto(photosCopy);
             }}
           >
-            <View style={styles.whiteBackground} />
-            <IO style={styles.delIcon} name="md-close-circle" />
+            {/* <View style={styles.whiteBackground} /> */}
+            <IO name="times-circle" color={colors.red} size={40} />
           </TouchableOpacity>
           <Image source={{ uri: photo }} style={styles.photoBlock} />
         </View>
@@ -154,9 +154,11 @@ export default class DetailPartialView extends Component {
                         onPress: () => {
                           ImagePicker.launchImageLibrary(options, response => {
                             const { photos } = this.props;
-                            photos.push(response.uri);
-                            this.props.addPhoto(photos);
-                            this.props.setNumOfChanges(this.props.numOfChanges);
+                            if (!response.didCancel && !response.error) {
+                              photos.push(response.uri);
+                              this.props.addPhoto(photos);
+                              this.props.setNumOfChanges(this.props.numOfChanges);
+                            }
                           });
                         }
                       },

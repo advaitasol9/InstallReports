@@ -1,6 +1,6 @@
 import Geolocation from '@react-native-community/geolocation';
 import React, { Component } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, PermissionsAndroid, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Text, PermissionsAndroid, Platform, Pressable, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { NavigationEvents } from 'react-navigation';
 import { ActivityInfoSection, ActivityStatus, ActivityTitle, Button, Header, IncompleteModal, ManagerModal, QuestionsList } from '../../../components';
 import { colors } from '../../../styles';
@@ -47,52 +47,81 @@ export default class WorkOrderManagerView extends Component {
 
   render() {
     if (this.props.isLoading === false) {
-      return (
-        <KeyboardAvoidingView behavior={keyboardBehavior} style={styles.container}>
-          <StatusBar backgroundColor={colors.lightGray} />
-          <NavigationEvents onWillFocus={() => this.props.initWorkOrder()} onWillBlur={() => this.props.setIsIncompleteOpen(false)} />
-          <Header navigation={this.props.navigation} sideBar />
-          <ScrollView style={{ width: '100%' }}>
-            <ActivityInfoSection navigation={this.props.navigation} activityData={this.props.activityData} />
-            <ActivityStatus status={this.props.activityData.status} />
-            <View
-              style={{
-                width: '100%',
-                height: 24,
-                backgroundColor: colors.white
+      if (this.props.errorWhileInit) {
+        return (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 24, color: '#797979' }}>Something went wrong.</Text>
+
+            <Text
+              style={{ color: 'blue', textDecorationLine: 'underline', fontSize: 18 }}
+              onPress={() => {
+                this.props.setErrorWhileInit(false);
+                this.props.setIsloading(true);
+                this.props.initWorkOrder();
               }}
-            />
-            <ActivityTitle title="Manager on Duty Feedback" />
-            <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
-              <View style={[styles.scrollContainer, { borderBottomWidth: 0 }]}>
-                <QuestionsList
-                  questions={this.props.activityData.manager_questions_answers}
-                  questions_photos={this.props.activityData.installer_questions_photos}
-                  photos={this.props.photos}
-                  addPhoto={this.props.addPhoto}
-                  screen="Manager"
-                  setUpdate={this.props.setUpdate}
-                  update={this.props.update}
-                  updateAnswers={() => this.props.validateAnswers()}
-                  setSignature={this.props.setSignature}
-                />
-                <Button
-                  bgColor={colors.green}
-                  onPress={() => this.props.onSubmit()}
-                  textColor={colors.white}
-                  textStyle={{ fontSize: 20 }}
-                  isLoading={this.props.submitButtonLoading}
-                  caption="Submit"
-                  bgColor={this.props.answersValid || this.props.submitButtonLoading ? '#b1cec1' : colors.green}
-                  disabled={this.props.answersValid || this.props.submitButtonLoading}
-                />
+            >
+              Try again
+            </Text>
+          </View>
+        );
+      } else if (this.props.isIncompleteOpen) {
+        return (
+          <IncompleteModal
+            close={() => {
+              this.props.setDidUserCloseModal(true);
+              this.props.setIsIncompleteOpen(false);
+            }}
+          />
+        );
+      } else if (this.props.didUserCloseModal) {
+        return null;
+      } else {
+        return (
+          <KeyboardAvoidingView behavior={keyboardBehavior} style={styles.container}>
+            <StatusBar backgroundColor={colors.lightGray} />
+            <NavigationEvents onWillFocus={() => this.props.initWorkOrder()} onWillBlur={() => this.props.setIsIncompleteOpen(false)} />
+            <Header navigation={this.props.navigation} sideBar />
+            <ScrollView style={{ width: '100%' }}>
+              <ActivityInfoSection navigation={this.props.navigation} activityData={this.props.activityData} />
+              <ActivityStatus status={this.props.activityData.status} />
+              <View
+                style={{
+                  width: '100%',
+                  height: 24,
+                  backgroundColor: colors.white
+                }}
+              />
+              <ActivityTitle title="Manager on Duty Feedback" />
+              <View style={{ backgroundColor: colors.lightGray, width: '100%' }}>
+                <View style={[styles.scrollContainer, { borderBottomWidth: 0 }]}>
+                  <QuestionsList
+                    questions={this.props.activityData.manager_questions_answers}
+                    questions_photos={this.props.activityData.installer_questions_photos}
+                    photos={this.props.photos}
+                    addPhoto={this.props.addPhoto}
+                    screen="Manager"
+                    setUpdate={this.props.setUpdate}
+                    update={this.props.update}
+                    updateAnswers={() => this.props.validateAnswers()}
+                    setSignature={this.props.setSignature}
+                  />
+                  <Button
+                    bgColor={colors.green}
+                    onPress={() => this.props.onSubmit()}
+                    textColor={colors.white}
+                    textStyle={{ fontSize: 20 }}
+                    isLoading={this.props.submitButtonLoading}
+                    caption="Submit"
+                    bgColor={this.props.answersValid || this.props.submitButtonLoading ? '#b1cec1' : colors.green}
+                    disabled={this.props.answersValid || this.props.submitButtonLoading}
+                  />
+                </View>
               </View>
-            </View>
-          </ScrollView>
-          <ManagerModal />
-          {this.props.isIncompleteOpen && <IncompleteModal close={() => this.props.setIsIncompleteOpen(false)} />}
-        </KeyboardAvoidingView>
-      );
+            </ScrollView>
+            <ManagerModal />
+          </KeyboardAvoidingView>
+        );
+      }
     } else {
       return (
         <View style={styles.backgroundActivity}>

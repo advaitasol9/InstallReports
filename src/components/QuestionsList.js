@@ -1,11 +1,10 @@
-
 import React, { createRef } from 'react';
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import { Dropdown } from 'react-native-material-dropdown';
-import IO from 'react-native-vector-icons/Ionicons';
+import IO from 'react-native-vector-icons/FontAwesome';
 import { withNavigation } from 'react-navigation';
-import { compose, lifecycle } from 'recompose';
+import { compose, lifecycle, withState } from 'recompose';
 import { colors } from '../styles';
 import Button from './Button';
 import CheckBox from './CheckBox';
@@ -19,7 +18,7 @@ const options = {
   quality: 0.5,
   storageOptions: {
     skipBackup: true,
-    path: 'Install Reports'
+    path: 'images'
   }
 };
 
@@ -44,7 +43,7 @@ const QuestionsList = props => {
             }}
           >
             <View style={styles.whiteBackground} />
-            <IO style={styles.delIcon} name="md-close-circle" />
+            <IO name="times-circle" color={colors.red} size={40} />
           </TouchableOpacity>
           <Image source={{ uri: photo.uri }} style={styles.photoBlock} />
         </View>
@@ -64,7 +63,7 @@ const QuestionsList = props => {
           }}
         >
           <View style={styles.whiteBackground} />
-          <IO style={styles.delIcon} name="md-close-circle" />
+          <IO name="times-circle" color={colors.red} size={40} />
         </TouchableOpacity>
         <Image source={{ uri: photo.url }} style={styles.photoBlock} />
       </View>
@@ -86,7 +85,8 @@ const QuestionsList = props => {
                 onPress: () => {
                   ImagePicker.launchImageLibrary(options, response => {
                     const { photos } = props;
-                    if (!response.didCancel) {
+                    console.log('launch image library response', response);
+                    if (!response.didCancel && !response.error) {
                       photos.push({
                         uri: response.uri,
                         order
@@ -101,41 +101,42 @@ const QuestionsList = props => {
               {
                 text: 'Take a photo',
                 onPress: () => {
-                  ImagePicker.launchCamera(options, response => {
-                    const { photos } = props;
-                    if (!response.didCancel) {
-                      photos.push({
-                        uri: response.uri,
-                        order
-                      });
-                      props.setUpdate(!props.update);
-                      props.addPhoto(photos);
-
-
-                      //save to cameraRoll
-                      let permission = false;
-                      if (Platform.OS == 'android') {
-                        permission = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
-                      }
-
-                       if (Platform.OS !== 'android' || permission) {
-                          try{
-                              
-                              CameraRoll.save(response.uri, { album: 'Install Reports' }).then(()=>{
-                                  console.log('photo saved to album');
-                              }).catch((e)=>{
-                                  console.log(e);
-                              });
-                          }
-                          catch(e){
-                              console.log(e);
-                          }
-                       }
-
-
-                      props.updateAnswers();
-                    }
+                  props.navigation.navigate('Camera', {
+                    photos: props.photos,
+                    addPhoto: arr => props.addPhoto(arr),
+                    screen: props.screen,
+                    screenData: {},
+                    order,
+                    update: props.update,
+                    setUpdate: props.setUpdate,
+                    updateAnswers: props.updateAnswers
                   });
+                  // ImagePicker.launchCamera(options, response => {
+                  //   const { photos } = props;
+                  //   if (!response.didCancel) {
+                  //     photos.push({
+                  //       uri: response.uri,
+                  //       order
+                  //     });
+                  //     props.setUpdate(!props.update);
+                  //     props.addPhoto(photos);
+                  //     //save to cameraRoll
+                  //     let permission = false;
+                  //     if (Platform.OS == 'android') {
+                  //       permission = PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+                  //     }
+                  //     if (Platform.OS !== 'android' || permission) {
+                  //       // CameraRoll.save(response.uri, { album: 'Install Reports' })
+                  //       //   .then(() => {
+                  //       //     console.log('photo saved to album');
+                  //       //   })
+                  //       //   .catch(e => {
+                  //       //     console.log(e);
+                  //       //   });
+                  //     }
+                  //     props.updateAnswers();
+                  //   }
+                  // });
                 }
               },
               {
@@ -244,10 +245,10 @@ const QuestionsList = props => {
       </View>
     );
   };
-  
-  _onSaveEvent= async (result) => {
-      console.log(result);
-     try {
+
+  _onSaveEvent = async result => {
+    console.log(result);
+    try {
       if (result.pathName == null) {
         const images = await CameraRoll.getPhotos({ first: 1 });
         if (images.length > 0) {
@@ -259,21 +260,28 @@ const QuestionsList = props => {
       } else {
         imageUri = result.pathName;
       }
+      props.setIsSignatureSaved(true);
+      props.setSignature([imageUri], props.updateAnswers);
     } catch (e) {
-      console.log(e.message);
+      console.log('error while saving sign', e.message);
     }
-    setTimeout(() => {
-      props.setSignature([imageUri]);
-      props.updateAnswers();
-    }, 1000);
-  }
-  
-  _onDragEvent= async () => {
-    setTimeout(() => {
-      props.setSignature([]);
-      props.updateAnswers();
-    }, 1000);
-  }
+    // setTimeout(() => {
+    //   props.setSignature([imageUri], props.updateAnswers);
+    // }, 1000);
+  };
+
+  _onDragEvent = async () => {
+    props.setSignature([], props.updateAnswers);
+    console.log('dragged');
+    props.setIsSignatureSaved(false);
+  };
+
+  const resetImage = () => {
+    props.setSignature([], props.updateAnswers);
+    sign.current.resetImage();
+    console.log('resetted');
+    props.setIsSignatureSaved(false);
+  };
 
   const renderSignature = (item, images) => {
     const signature = [];
@@ -282,21 +290,45 @@ const QuestionsList = props => {
         <Text style={{ marginTop: 12, paddingBottom: 12 }}>
           {item.order}. {item.text}
         </Text>
+        <View style={[styles.row, { marginBottom: 5 }]}>
+          <Button
+            style={{ marginRight: 15, width: 90 }}
+            onPress={() => {
+              sign.current.saveImage();
+            }}
+            textColor={colors.white}
+            textStyle={{ fontSize: 20 }}
+            caption={props.isSignatureSaved ? 'Saved' : 'Save'}
+            bgColor={props.isSignatureSaved ? '#b1cec1' : colors.green}
+            disabled={props.isSignatureSaved}
+          />
+          <Button
+            style={{ width: 90 }}
+            onPress={() => {
+              resetImage();
+            }}
+            textColor={colors.white}
+            textStyle={{ fontSize: 20 }}
+            caption="Reset"
+            bgColor={colors.green}
+          />
+        </View>
 
+        {/* {!props.isSignatureSaved && <Text style={{ color: 'red' }}>The following changes are unsaved.</Text>} */}
         <SignatureCapture
-          style={[{flex:1},styles.signature]}
+          style={[{ flex: 1 }, styles.signature]}
           ref={sign}
           onSaveEvent={this._onSaveEvent}
           onDragEvent={this._onDragEvent}
           saveImageFileInExtStorage={true}
-          showNativeButtons={true}
+          showNativeButtons={false}
           showTitleLabel={false}
           strokeColor="#000000"
           minStrokeWidth={4}
           maxStrokeWidth={4}
-          viewMode={"portrait"}/>
-        {
-        /* <RNSketchCanvas
+          viewMode={'portrait'}
+        />
+        {/* <RNSketchCanvas
           ref={ref => (this.canvas = ref)}
           containerStyle={[
             {
@@ -408,6 +440,7 @@ zebraStyle = function(options) {
 
 export default compose(
   withNavigation,
+  withState('isSignatureSaved', 'setIsSignatureSaved', false),
   lifecycle({
     componentWillMount() {}
   })
@@ -415,15 +448,18 @@ export default compose(
 
 const styles = StyleSheet.create({
   signature: {
-    height:200,
-      flex: 1,
-      borderColor: '#000033',
-      borderWidth: 1,
+    height: 200,
+    flex: 1,
+    borderColor: '#000033',
+    borderWidth: 1
   },
   buttonStyle: {
-      flex: 1, justifyContent: "center", alignItems: "center", height: 50,
-      backgroundColor: "#eeeeee",
-      margin: 10
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    backgroundColor: '#eeeeee',
+    margin: 10
   },
   inputStyle: {
     backgroundColor: colors.white,
@@ -473,5 +509,11 @@ const styles = StyleSheet.create({
   delIcon: {
     color: colors.red,
     fontSize: 48
+  },
+  row: {
+    flexDirection: 'row',
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center'
   }
 });
